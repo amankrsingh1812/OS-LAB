@@ -12,6 +12,38 @@ asm ("incl %0":"+r"(x));
 - `%0` corresponds to the register allocated to x.
 
 ---
+### Exercise 2: GDB 
+
+A few starting instructions of `BIOS` are:
+
+```assembly
+0xffff0:   ljmp   $0x3630,$0xf000e05b
+0xfe05b:   cmpw   $0xffc8,%cs:(%esi)
+0xfe060:   jo     0xfe062
+0xfe062:   jne    0xd241d416
+0xfe068:   mov    %edx,%ss
+0xfe06a:   mov    $0x7000,%sp
+0xfe06e:   add    %al,(%eax)
+0xfe070:   mov    $0x2d4e,%dx
+0xfe074:   verw   %cx
+0xfe077:   xchg   %ebx,(%esi)
+0xfe079:   push   %bp
+0xfe07b:   push   %di
+0xfe07d:   push   %si
+0xfe07f:   push   %bx
+0xfe081:   sub    $0x70,%sp
+0xfe085:   mov    %ax,%di
+0xfe088:   mov    0x4(%bx,%si),%si
+0xfe08d:   mov    %cs:0x2c(%bp),%bl
+0xfe093:   icebp  
+0xfe094:   ljmp   *(%esi)
+0xfe096:   mov    0x2d(%bp),%al
+0xfe09b:   icebp 
+```
+
+The `BIOS` first initializes all the PCI bus and all other peripheral devices. Then it loads the `bootloader` from the `hardisk `into memory. Finally with a jump statement control goes to the `bootloader`. 
+
+---
 ### Exercise 3: Loading Kernel from Bootloader
 
 **Trace**: Refer to file <FILE>
@@ -84,6 +116,48 @@ Each section has the following information -
 - `Algn` - The value to which the section is aligned in memory and in the file.
 - `CONTENTS, ALLOC, LOAD, READONLY, DATA, CODE` - Flags which gives additional information regarding the section. Eg. Is it READONLY, should it be LOADED etc. 
 
+
+---
+### Exercise 5: Bootloader 's Link address  
+
+If we get wrong `bootloader's` link address, then the 1st instruction that would break is
+
+```assembly
+ljmp  $(SEG_KCODE<<3), $start32
+```
+
+With correct  `bootloader's` link address the output was:
+
+```assembly
+[   0:7c2c] => 0x7c2c:	ljmp   $0xb866,$0x87c31
+The target architecture is assumed to be i386
+=> 0x7c31:	mov    $0x10,%ax
+=> 0x7c35:	mov    %eax,%ds
+=> 0x7c37:	mov    %eax,%es
+```
+
+The output when `bootloader's` link address is changed to 0x7C04:
+
+```assembly
+[   0:7c2c] => 0x7c2c:	ljmp   $0xb866,$0x87c35 
+[f000:e05b]    0xfe05b:	cmpw   $0xffc8,%cs:(%esi)
+[f000:e062]    0xfe062:	jne    0xd241d416
+[f000:d414]    0xfd414:	cli    
+
+```
+
+The `ljmp` instruction breaks because in the `BIOS` the address 0x7C00 is hard coded, so `BIOS` always loads `bootloader` starting from 0x7C00. But the `linker` converts the code into binary form and assigns addresses in place of labels taking `bootloader's `link address(0x7C04) as the starting address of the `bootloader` in the memory. So the address of the label `$start32` in the `ljmp` instruction doesn't contain the correct instruction and this causes some error. Hence the `BIOS` restarts (execution reaches starting instruction of `BIOS`). This process then repeats and in turn leads to an infinite loop.  
+
+The file headers of `kernel` are
+
+```
+kernel:     file format elf32-i386
+architecture: i386, flags 0x00000112:
+EXEC_P, HAS_SYMS, D_PAGED
+start address 0x0010000c
+```
+
+This shows that entry point of `kernel` is 0x0010000c.
 
 ---
 ### Exercise 7: Adding System Call
