@@ -160,6 +160,29 @@ start address 0x0010000c
 This shows that entry point of `kernel` is 0x0010000c.
 
 ---
+### Exercise 6:
+
+After entering the bootloader (at `0x7c00`):
+```
+(gdb) x/8x 0x00100000
+0x100000:	0x00000000	0x00000000	0x00000000	0x00000000
+0x100010:	0x00000000	0x00000000	0x00000000	0x00000000
+```
+After entering the kernel (at `0x10000c`):
+```
+(gdb) x/8x 0x00100000
+0x100000:	0x1badb002	0x00000000	0xe4524ffe	0x83e0200f
+0x100010:	0x220f10c8	0x9000b8e0	0x220f0010	0xc0200fd8
+```
+The code for kernel is stored from memory location `0x00100000`, which is loaded from the disk by the bootloader.
+
+At the point the BIOS enters the bootloader, this loading is not done, hence the main memory does not contain the kernel code. Moreover, it is filled with zeroes because upto this point the system runs in the 20-bit real mode and any memory location from this address onwards is not touched. 
+
+At the point the bootloader enters the kernel, the bootloader has already loaded the kernel and there are instructions from that memory location.
+
+The second breakpoint is the entry point of the kernel. The first intructions starting from this location are responsible for turning on paging (which wasn't enabled upto this point).
+
+---
 ### Exercise 7: Adding System Call
 
 For creating a xsystem call we need to change 6 files:- user.h,  syscall.h, syscall.c, usys.S, defs.h, sysproc.c
