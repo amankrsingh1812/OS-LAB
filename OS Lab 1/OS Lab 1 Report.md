@@ -192,33 +192,33 @@ For creating a xsystem call we need to change 6 files:- [user.h](System Call/use
 
 ```C
 // user.h 
-int wolfie(void* buf, uint size);		// line 26
+int wolfie(void* buf, uint size);           // line 26
 ```
 
 ```C
 // syscall.h 
-#define SYS_wolfie 22								// line 23
+#define SYS_wolfie 22                       // line 23
 ```
 
 ```C
 // syscall.c
-extern int sys_wolfie(void);				// line 106
-[SYS_wolfie]  sys_wolfie,						// line 130
+extern int sys_wolfie(void);                // line 106
+[SYS_wolfie]  sys_wolfie,                   // line 130
 ```
 
 ```C
 // usys.S 
-SYSCALL(wolfie)											// line 32
+SYSCALL(wolfie)                             // line 32
 ```
 
 ```C
 // defs.h 
-int wolfie(void*, uint);						// line 123
+int wolfie(void*, uint);                    // line 123
 ```
 
 ```C
 // sysproc.c
-int sys_wolfie(){										// line 94
+int sys_wolfie(){                           // line 94
 	char* buf;
 	uint size;
 	if(argptr(0, (void*)&buf, sizeof(buf)) < 0) return -1;
@@ -292,11 +292,11 @@ UPROGS=\
 	_usertests\
 	_wc\
 	_zombie\
-	_wolfietest\																																# line 184
+	_wolfietest\                                                               # line 184
 	
 XTRA=\
 	mkfs.c ulib.c user.h cat.c echo.c forktest.c grep.c kill.c\
-	ln.c ls.c mkdir.c rm.c stressfs.c usertests.c wc.c zombie.c wolfietest.c\  	# line 251
+	ln.c ls.c mkdir.c rm.c stressfs.c usertests.c wc.c zombie.c wolfietest.c\  # line 251
 	
 
 ```
