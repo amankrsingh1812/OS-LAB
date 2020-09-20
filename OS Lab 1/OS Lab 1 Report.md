@@ -46,7 +46,7 @@ The `BIOS` first initializes all the PCI bus and all other peripheral devices. T
 ---
 ### Exercise 3: Loading Kernel from Bootloader
 
-**Trace**: Refer to file <FILE>
+**Trace**: Refer to file [Bootloader Trace](./Bootloader\ Trace.md)
 
 
 
@@ -58,6 +58,12 @@ The `BIOS` first initializes all the PCI bus and all other peripheral devices. T
 0x7c25: or     $0x1,%ax
 0x7c29: mov    %eax,%cr0
 0x7c2c: ljmp   $(SEG_KCODE<<3), $start32    # ljmp $0xb866,$0x87c31
+```
+
+After this point processor starts executing 32 bit code. First instructions it executes in 32 bit is:-
+
+```assembly
+0x7c31: mov    $0x10,%ax
 ```
 
 **(b)**  The last instruction that bootloader executed is
