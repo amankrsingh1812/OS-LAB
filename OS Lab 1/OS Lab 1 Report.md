@@ -188,7 +188,7 @@ The second breakpoint is the entry point of the kernel. The first intructions st
 ---
 ### Exercise 7: Adding System Call
 
-For creating a xsystem call we need to change 6 files:- user.h,  syscall.h, syscall.c, usys.S, defs.h, sysproc.c
+For creating a xsystem call we need to change 6 files:- [user.h](System Call/user.h),  [syscall.h](System Call/syscall.h), [syscall.c](System Call/syscall.c), [usys.S](System Call/usys.S), [defs.h](System Call/defs.h), [sysproc.c](System Call/sysproc.c)
 
 ```C
 // user.h 
@@ -256,7 +256,7 @@ int sys_wolfie(){										// line 94
 ---
 ### Exercise 8: User Level Application
 
-We created `wolfietest.c` in which created a buffer and used system call to fill that buffer with wolf ASCII image. Then we printed this buffer to console using `printf`. 1st parameter in `printf` is file descriptor which is 1 for console out. At the end we used `exit` system call to exit from this program.
+We created [wolfietest.c](System Call/wolfietest.c) in which created a buffer and used system call to fill that buffer with wolf ASCII image. Then we printed this buffer to console using `printf`. 1st parameter in `printf` is file descriptor which is 1 for console out. At the end we used `exit` system call to exit from this program.
 
 ```C
 // wolfietest.c
@@ -272,7 +272,7 @@ int main(int argc, char *argv[]){
 }
 ```
 
-In Makefile we need to add `_wolfietest\` to `UPROGS` and `wolfietest.c` to `XTRA	`.
+In [Makefile](System Call/Makefile) we need to add `_wolfietest\` to `UPROGS` and `wolfietest.c` to `XTRA	`.
 
 ```makefile
 // Makefile
@@ -300,4 +300,8 @@ XTRA=\
 	
 
 ```
+
+**Output**
+
+![](wolfietest.png)
 
