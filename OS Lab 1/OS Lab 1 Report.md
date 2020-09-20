@@ -46,7 +46,7 @@ The `BIOS` first initializes all the PCI bus and all other peripheral devices. T
 ---
 ### Exercise 3: Loading Kernel from Bootloader
 
-**Trace**: Refer to file [Bootloader Trace](./Bootloader\ Trace.md)
+**Trace**: Refer to file [Bootloader Trace](Bootloader Trace.md)
 
 
 
