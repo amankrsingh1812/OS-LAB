@@ -1,6 +1,6 @@
 ### Exercise 1: Inline Assembly
 
-Refer to file [ex1.c](ex1.c)
+Refer to file [ex1.c](./ex1.c)
 
 The following inline assembly code will increment the value of x by 1.
 
@@ -45,7 +45,7 @@ The `BIOS` first initializes all the PCI bus and all other peripheral devices. T
 
 ---
 ### Exercise 3: Loading Kernel from Bootloader
-**Trace**: Refer to file [Bootloader Trace](Bootloader Trace.md)
+**Trace**: Refer to file [Bootloader Trace.pdf](Bootloader Trace.pdf)
 
 **(a)**  Following instructions change the addressing to 32 bit protected mode.
 
