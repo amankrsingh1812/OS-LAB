@@ -44,7 +44,11 @@ A few starting instructions of `BIOS` are:
 The `BIOS` first initializes all the PCI bus and all other peripheral devices. Then it loads the `bootloader` from the `hardisk `into memory. Finally with a jump statement control goes to the `bootloader`. 
 
 ---
+
+<div style="page-break-after: always;"></div>
+
 ### Exercise 3: Loading Kernel from Bootloader
+
 **Trace**: Refer to file [Bootloader Trace.pdf](Bootloader Trace.pdf)
 
 **(a)**  Following instructions change the addressing to 32 bit protected mode.
@@ -97,11 +101,16 @@ for(; ph < eph; ph++){
 ```
 
 ---
+<div style="page-break-after: always;"></div>
 ### Exercise 4: 
 
-Refer the output of &nbsp; `objdump -h kernel` - [objdump_kernel.png](objdump_kernel.png) 
+> **objdump -h kernel**
+> ![objdump kernel](objdumpKernel.png) 
+> 
+>  **objdump -h bootblock.o**
+> ![objdump_bootblock.png](objdumpBootblock.png) 
 
-Refer the output of &nbsp;`objdump -h bootblock.o` - [objdump_bootblock.png](objdump_bootblock.png) 
+<div style="page-break-after: always;"></div>
 
 `objdump -h` &nbsp; displays the header of an executable file. In this case it displays the contents of program section headers of the ELF Binaries.
 
@@ -121,7 +130,7 @@ Each section has the following information -
 
 
 ---
-### Exercise 5: Bootloader 's Link address  
+### Exercise 5: Bootloader's Link address  
 
 If we get wrong `bootloader's` link address, then the 1st instruction that would break is
 
@@ -186,6 +195,7 @@ At the point the bootloader enters the kernel, the bootloader has already loaded
 The second breakpoint is the entry point of the kernel. The first intructions starting from this location are responsible for turning on paging (which wasn't enabled upto this point).
 
 ---
+<div style="page-break-after: always;"></div>
 ### Exercise 7: Adding System Call
 
 For creating a system call, we need to change 6 files:- [user.h](System Call/user.h),  [syscall.h](System Call/syscall.h), [syscall.c](System Call/syscall.c), [usys.S](System Call/usys.S), [defs.h](System Call/defs.h), [sysproc.c](System Call/sysproc.c)
@@ -238,9 +248,8 @@ int sys_wolfie(){                           // line 94
 "  ________|   _/_  | |    \n"
 "<__________\\______)\\__)   \n"
 "                          \n";
-    					  
-    static uint wolf_len = sizeof(wolf);
   
+    static uint wolf_len = sizeof(wolf);
     if(size < wolf_len) return -1;
     
     int i = 0;
