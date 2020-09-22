@@ -102,7 +102,8 @@ for(; ph < eph; ph++){
 
 ---
 <div style="page-break-after: always;"></div>
-### Exercise 4: 
+
+### Exercise 4: Objdump
 
 > **objdump -h kernel**
 > ![objdump kernel](objdumpKernel.png) 
@@ -130,7 +131,7 @@ Each section has the following information -
 
 
 ---
-### Exercise 5: Bootloader's Link address  
+### Exercise 5: Bootloader's Link address
 
 If we get wrong `bootloader's` link address, then the 1st instruction that would break is
 
@@ -172,7 +173,7 @@ start address 0x0010000c
 This shows that entry point of `kernel` is 0x0010000c.
 
 ---
-### Exercise 6:
+### Exercise 6: Inspecting Kernel Loading
 
 After entering the bootloader (at `0x7c00`):
 ```
@@ -196,6 +197,7 @@ The second breakpoint is the entry point of the kernel. The first intructions st
 
 ---
 <div style="page-break-after: always;"></div>
+
 ### Exercise 7: Adding System Call
 
 For creating a system call, we need to change 6 files:- [user.h](System Call/user.h),  [syscall.h](System Call/syscall.h), [syscall.c](System Call/syscall.c), [usys.S](System Call/usys.S), [defs.h](System Call/defs.h), [sysproc.c](System Call/sysproc.c)
@@ -310,7 +312,6 @@ XTRA=\
 
 ```
 
-**Output**
-
-![](wolfietest.png)
+> **Output**
+> ![](wolfietest.png)
 
