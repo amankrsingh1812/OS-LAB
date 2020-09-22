@@ -113,7 +113,7 @@ The important program sections in an ELF Binary -
 
 Each section has the following information -
 - `LMA(Load memory address)` - The address at which the section is actually loaded in the memory.
-- `VMA(Virtaul memory address)` - The address at which the binary assumes the section will be loaded.
+- `VMA(Virtual memory address)` - The address at which the binary assumes the section will be loaded.
 - `Size` - The size of the section.
 - `Offset` - The offset from the beginning of the harddrive where the section is located at.
 - `Algn` - The value to which the section is aligned in memory and in the file.
