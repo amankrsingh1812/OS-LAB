@@ -11,7 +11,76 @@
 struct {
   struct spinlock lock;
   struct proc proc[NPROC];
+  struct proc* priorityQueueArray[NPROC];
+  int pqsize;
 } ptable;
+
+// Priority Queue Helper Functions 
+// Should be called only after acquiring ptable lock
+
+int compProc(struct proc* proc1,struct proc* proc2){
+  if(proc1->burstTime == proc2->burstTime)
+    return (proc1->pid < proc2->pid);
+  return proc1->burstTime < proc2->burstTime;
+}
+
+void swap(int i,int j){
+  struct proc* temp = ptable.priorityQueueArray[i];
+  ptable.priorityQueueArray[i] = ptable.priorityQueueArray[j];
+  ptable.priorityQueueArray[j] = temp;
+  return;
+}
+
+void priorityQueueHeapify(int curIndex){
+  int leftChild = 2*curIndex+1;
+  int rightChild = 2*curIndex+2;
+  int nextIndex = curIndex;
+
+  if(leftChild < ptable.pqsize && compProc(ptable.priorityQueueArray[leftChild],ptable.priorityQueueArray[nextIndex]))
+    nextIndex=leftChild;
+  
+  if(rightChild < ptable.pqsize && compProc(ptable.priorityQueueArray[rightChild],ptable.priorityQueueArray[nextIndex]))
+    nextIndex=rightChild;
+
+  if(nextIndex != curIndex){
+    swap(nextIndex,curIndex);
+    priorityQueueHeapify(nextIndex);
+  }
+  return;
+}
+
+struct proc* priorityQueueExtractMin(){
+  if(ptable.pqsize == 0)
+    return 0;
+
+  struct proc* minElt = ptable.priorityQueueArray[0];
+  ptable.priorityQueueArray[0] = ptable.priorityQueueArray[ptable.pqsize - 1];
+  ptable.pqsize--;
+  priorityQueueHeapify(0);
+
+  return minElt;
+}
+
+void priorityQueueInsert(struct proc* proc){
+  int curIndex = ptable.pqsize++;
+  ptable.priorityQueueArray[curIndex] = proc;
+
+  while(curIndex > 0){
+    int parentIndex = (curIndex-1)/2;
+    if(compProc(ptable.priorityQueueArray[parentIndex],ptable.priorityQueueArray[curIndex]))
+      break;
+    swap(curIndex,parentIndex);
+    curIndex = parentIndex;
+  }
+
+  return;
+}
+
+void makeProcRunnable(struct proc* proc){
+  proc->state = RUNNABLE;
+  priorityQueueInsert(proc);
+}
+// Priority Queue Implementation ends
 
 static struct proc *initproc;
 
@@ -153,7 +222,10 @@ userinit(void)
   // because the assignment might not be atomic.
   acquire(&ptable.lock);
 
-  p->state = RUNNABLE;
+  ptable.pqsize = 0;
+  makeProcRunnable(p);
+  // p->state = RUNNABLE;
+  // priorityQueueInsert(p);
 
   release(&ptable.lock);
 }
@@ -219,7 +291,9 @@ fork(void)
 
   acquire(&ptable.lock);
 
-  np->state = RUNNABLE;
+  makeProcRunnable(np);
+  // np->state = RUNNABLE;
+  // priorityQueueInsert(np);
 
   release(&ptable.lock);
 
@@ -368,7 +442,8 @@ scheduler(void)
 void
 scheduler(void)
 {
-  struct proc *p,*reqp=0;
+  struct proc *reqp=0;
+  // struct proc *p;
   struct cpu *c = mycpu();
   c->proc = 0;
   
@@ -380,18 +455,19 @@ scheduler(void)
 
     // Loop over process table looking for process to run.
     acquire(&ptable.lock);
-    for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
-      if(p->state != RUNNABLE)
-        continue;
-      if(reqp==0)
-        reqp=p;
-      if(reqp->burstTime>p->burstTime)
-        reqp=p;
-      // Switch to chosen process.  It is the process's job
-      // to release ptable.lock and then reacquire it
-      // before jumping back to us.
+    // for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
+    //   if(p->state != RUNNABLE)
+    //     continue;
+    //   if(reqp==0)
+    //     reqp=p;
+    //   if(reqp->burstTime>p->burstTime)
+    //     reqp=p;
+    //   // Switch to chosen process.  It is the process's job
+    //   // to release ptable.lock and then reacquire it
+    //   // before jumping back to us.
 
-    }
+    // }
+    reqp = priorityQueueExtractMin();
 
     if(reqp==0) {
       release(&ptable.lock);
@@ -446,7 +522,9 @@ void
 yield(void)
 {
   acquire(&ptable.lock);  //DOC: yieldlock
-  myproc()->state = RUNNABLE;
+  makeProcRunnable(myproc());
+  // myproc()->state = RUNNABLE;
+  // priorityQueueInsert(myproc());
   sched();
   release(&ptable.lock);
 }
@@ -520,8 +598,11 @@ wakeup1(void *chan)
   struct proc *p;
 
   for(p = ptable.proc; p < &ptable.proc[NPROC]; p++)
-    if(p->state == SLEEPING && p->chan == chan)
-      p->state = RUNNABLE;
+    if(p->state == SLEEPING && p->chan == chan){
+      makeProcRunnable(p);
+      // p->state = RUNNABLE;
+      // priorityQueueInsert(p);
+    }
 }
 
 // Wake up all processes sleeping on chan.
@@ -546,8 +627,11 @@ kill(int pid)
     if(p->pid == pid){
       p->killed = 1;
       // Wake process from sleep if necessary.
-      if(p->state == SLEEPING)
-        p->state = RUNNABLE;
+      if(p->state == SLEEPING){
+        makeProcRunnable(p);
+        // p->state = RUNNABLE;
+        // priorityQueueInsert(p);
+      }
       release(&ptable.lock);
       return 0;
     }
