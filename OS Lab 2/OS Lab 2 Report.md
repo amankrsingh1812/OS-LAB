@@ -188,5 +188,6 @@ int main(int argc, char *argv[]){
 }
 ```
 
+![Syscall screenshot](partA1+2_ss.png "Syscall screenshot")
 
 ---
