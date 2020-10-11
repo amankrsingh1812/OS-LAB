@@ -3,19 +3,19 @@
 Refer the patch files in [Patch/PartA/](./Patch/PartA/)
 
 For creating the system calls, we needed to change these files:- 
-* `user.h - ` The function prototypes of our system calls (for user-space) were added in this file  
-* `defs.h - ` The function prototypes of our system calls (for kernel-space) were added in this file  
-* `syscall.h - ` The mapping from system call names to system call numbers were added in this file
-* `syscall.c - ` The mapping from system call numbers to system call functions were added in this file
-* `usys.S - ` The system call names were added in this file
-* `sysproc.c - ` The definition of system calls were added in this file and the file `processInfo.h` was included 
-* `proc.c - ` Since the struct `ptable` and other utility functions for process management were in this file, the main code for system calls was added in this file
-* `proc.h - ` 2 extra fields were added in the struct `proc` to keep store the number of context switches and burst time of the process 
+* `user.h `- The function prototypes of our system calls (for user-space) were added in this file  
+* `defs.h `- The function prototypes of our system calls (for kernel-space) were added in this file  
+* `syscall.h `- The mapping from system call names to system call numbers were added in this file
+* `syscall.c `- The mapping from system call numbers to system call functions were added in this file
+* `usys.S `- The system call names were added in this file
+* `sysproc.c `- The definition of system calls were added in this file and the file `processInfo.h` was included 
+* `proc.c `- Since the struct `ptable` and other utility functions for process management were in this file, the main code for system calls was added in this file
+* `proc.h `- 2 extra fields were added in the struct `proc` to keep store the number of context switches and burst time of the process 
 
 
 
 ### Syscall getNumProc 
-The main code for this syscall can be found in the file `proc.c`. We have looped through all the slots of the `proc` array of the `ptable` and incremented the counter when we found a proc slot with a state other than UNUSED. 
+The main code for this syscall can be found in the file `proc.c`. We have looped through all the slots of the `ptable's proc array` of the  and incremented the counter when we found a proc slot with a state other than UNUSED. Before iterating through the `proc` array we acquired the lock and released it after it. This is done to ensure that another process doesn't modify the ptable while we are iterating through it.  
 ```C
 // proc.c
 int                                         // line 540                     
@@ -36,7 +36,7 @@ getNumProc(void)
 
 
 ### Syscall getMaxPid
-The main code for this syscall can be found in the file `proc.c`. We have looped through all the slots of the `proc` array of the `ptable` and found the maximum of all the process with a state other than UNUSED. 
+The main code for this syscall can be found in the file `proc.c`. We have looped through all the slots of the `proc` array of the `ptable` and found the maximum of all the process with a state other than UNUSED. Before iterating through the `proc` array we acquired the lock and released it after it. This is done to ensure that another process doesn't modify the ptable while we are iterating through it.  
 ```C
 // proc.c
 int                                         // line 556               
@@ -73,7 +73,7 @@ We have incremented the `numcs` field of a process everytime the scheduler sched
 p->numcs++;                                   // line 94             
 ```
 
-The main code for this syscall can be found in the function file `proc.c`. We have linearly searched for the PID in the `proc` array of the `ptable` and copied the required information into the struct `processInfo`. It returns 0 if PID is found and -1 otherwise.
+The main code for this syscall can be found in the function file `proc.c`. We have linearly searched for the PID in the `proc` array of the `ptable` and copied the required information into the struct `processInfo`. It returns 0 if PID is found and -1 otherwise. Before iterating through the `proc` array we acquired the lock and released it after it. This is done to ensure that another process doesn't modify the ptable while we are iterating through it.  
 
 ```C
 // proc.c
@@ -108,7 +108,7 @@ For testing our system calls, we created 3 user-level applications -
 
 For creating the user-level application, we need to make some changes in the `MakeFile` and create the `c` files for the user-level application.
 
-In [Makefile](System Call/Makefile) we need to add our user-level applications to `UPROGS` and `EXTRA	`.
+In [Makefile](Patch/PartA/Makefile) we need to add our user-level applications to `UPROGS` and `EXTRA	`.
 
 ```makefile
 // Makefile
@@ -140,7 +140,7 @@ EXTRA=\
 ```
 
 ### numProcTest 
-We created [numProcTest.c](System Call/wolfietest.c) in which we simply printed the output of the system call `getNumProc()` to the console using `printf`. 1st parameter in `printf` is file descriptor which is 1 for console out. At the end we used `exit` system call to exit from this program.
+We created [numProcTest.c](Patch/PartA/wolfietest.c) in which we simply printed the output of the system call `getNumProc` to the console using `printf`. 1st parameter in `printf` is file descriptor which is 1 for console out. At the end we used `exit` system call to exit from this program.
 
 ```C
 // numProcTest.c
@@ -155,7 +155,7 @@ int main(int argc, char *argv[]){
 
 
 ### maxPidTest 
-We created [maxPidTest.c](System Call/wolfietest.c) in which we simply printed the output of the system call `getMaxPid()` to the console using `printf`. At the end we used `exit` system call to exit from this program.
+We created [maxPidTest.c](./Patch/PartA/wolfietest.c) in which we simply printed the output of the system call `getMaxPid` to the console using `printf`. At the end we used `exit` system call to exit from this program.
 
 ```C
 // maxPidTest.c
@@ -169,7 +169,7 @@ int main(int argc, char *argv[]){
 ```
 
 ### procInfoTest 
-We created [procInfoTest.c](System Call/wolfietest.c) in which we use the syscall getMaxPid to get the Max PID, use `getProcInfo()` to get Info about the process with that PID and then print the values of the fields of the struct `processInfo` to the console using `printf`. We included `processInfo.h` because we are using the struct `processInfo`. At the end we used `exit` system call to exit from this program.
+We created [procInfoTest.c](Patch/PartA/wolfietest.c) in which we use the syscall getMaxPid to get the Max PID, then use the system call `getProcInfo` to get Info about the process with that PID and then print the values of the fields of the struct `processInfo` to the console using `printf`. We included `processInfo.h` as we are using the struct `processInfo`. At the end we used `exit` system call to exit from this program.
 
 ```C
 // procInfoTest.c
