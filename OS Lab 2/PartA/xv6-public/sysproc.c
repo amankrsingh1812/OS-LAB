@@ -134,8 +134,7 @@ sys_get_burst_time(void)
 int
 sys_set_burst_time(void)
 {
-  int n;
-  if (argptr(0,(void*)&n, sizeof(n))<0)
-    return -1;
-  return set_burst_time(n);
+  int btime;
+  if(argint(0, &btime) < 0) return -1;
+  return set_burst_time(btime);
 }

@@ -609,12 +609,12 @@ get_burst_time()
 // Sets the burst time for the currently running process
 // [ Called from the target process ]
 int
-set_burst_time(int n)
+set_burst_time(int btime)
 {
   // Burst Time should be a positive integer
-  if (n < 1)
+  if (btime < 1)
     return -1;
 
-  myproc()->burstTime = n;
+  myproc()->burstTime = btime;
   return 0;
 }
