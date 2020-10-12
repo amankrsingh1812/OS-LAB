@@ -75,7 +75,7 @@ int main(int argc, char *argv[])
         printf(1, exitInfoGatherer[j]);
     }
   }
-  printf(1, "\n****** Summary ends, completing parent *******\n");
+  printf(1, "\n****** Summary ends, completing parent *******\n\n");
 
   getProcInfo();
 	exit();

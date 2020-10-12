@@ -621,3 +621,105 @@ scheduler(void)
 For each iteration of outer `for` loop, the pointer to the process with  minimum burst time is extracted out of the Priority Queue (since Priority is based upon burst time of processes, so the required process will be the min element of Priority Queue, hence function `priorityQueueExtractMin()` will return the same ). If no runnable process exists then the NULL pointer is returned and this corner case is handled separately in `if` block above. If the Ready Queue is non empty then the context is switched to the required process. 
 
 ### Testing 
+
+The test file `test_scheduler.c` contains the following functions:
+
+1. `looper()`: This function simply runs the inner loop `loopfac` number of times. Every time, the inner loop runs with an empty body for 10^8 iteractions.
+```c
+// Loop "loopfac" number of times         line 4
+void looper(int bt, int loopfac) {
+  set_burst_time(bt);        
+
+  if (loopfac>5) 
+    loopfac = 5;
+
+  for (volatile int l=0; l<loopfac; l++)
+    for (volatile int i=0; i<100000000; i++)
+      ;
+
+  getProcInfo();
+  exit();
+}
+```
+2. `userIO()`: This function simply takes the reader input from STDIN and prints it back on STDOUT. It is a means to include an IO bound process, which waits for user input while the other processes can run.
+```c
+// User IO                                 line 19
+void userIO(int bt)
+{
+  set_burst_time(bt);
+
+  char buf[256];
+  printf(1, "Enter for user IO:\n");
+  int amt = read(0, buf, 256);
+  buf[amt] = 0;
+  printf(1, "So you entered: %s", buf);
+
+  getProcInfo(); 
+  exit();
+}
+```
+3. `fileIO()`: This function simply reads 1500 bytes from the README file from the xv6 file system and prints it on STDOUT. It is a means to include a file-IO bound process, which reads content while the other processes are RUNNABLE.
+```c
+// File IO                                  line 34
+void fileIO(int bt)
+{
+  set_burst_time(bt);
+
+  int fd = open("README", 0);
+  char buf[1500];
+  read(fd, buf, 1500);
+  buf[1499] = 0;
+  printf(1, "1500 Words of README: \n%s\n---------\n", buf);
+
+  getProcInfo(); 
+  exit();
+}
+```
+
+The driver code is mainly responsible for calling the above functions to perform different tasks, while passing the required parameters like the burst time to be set and `loopfac` in case of CPU bound loop based processes. The code then uses the PIDs to determine and print a summary of the order in which the processes completed their execution.
+```c
+int main(int argc, char *argv[])                // line 50
+{
+  int pid[5];
+  int rpid[5];
+  char exitInfoGatherer[5][70];
+
+  if ( !(pid[0] = fork()) )  looper(6,2);
+  if ( !(pid[1] = fork()) )  userIO(1);
+  if ( !(pid[2] = fork()) )  looper(10,4);
+  if ( !(pid[3] = fork()) )  fileIO(3);
+  if ( !(pid[4] = fork()) )  looper(8,1);  
+
+  for (int i=0; i<5; i++)
+    rpid[i] = wait();
+
+  strcpy(exitInfoGatherer[0], "BurstTime: 6  - Empty loop running 2e8 times\n");
+  strcpy(exitInfoGatherer[1], "BurstTime: 1  - Taking user IO and printing it\n");
+  strcpy(exitInfoGatherer[2], "BurstTime: 10 - Empty loop running 4e8 times\n");
+  strcpy(exitInfoGatherer[3], "BurstTime: 3  - Reading from file and printing it\n");
+  strcpy(exitInfoGatherer[4], "BurstTime: 8  - Empty loop running 1e8 times\n");
+
+  printf(1, "\n******** CHILDREN EXIT ORDER SUMMARY ********\n");
+  for (int i=0; i<5; i++) {
+    for (int j=0; j<5; j++) {
+      if (rpid[i] == pid[j])
+        printf(1, exitInfoGatherer[j]);
+    }
+  }
+  printf(1, "\n****** Summary ends, completing parent *******\n\n");
+
+  getProcInfo();
+	exit();
+}
+```
+Five processes are being forked, and their PIDs are being saved for later use (for printing the final order of execution):
+1. A loop which runs 10^8 loop 2 times, and burst time set to 6.
+2. A process for user IO, with burst time set to 1.
+3. A loop which runs 10^8 loop 4 times, and burst time set to 10.
+4. A process for user IO, with burst time set to 3.
+5. A loop which runs 10^8 loop 1 time, and burst time set to 8.
+
+When `test_scheduler.c` is run, various important observations are made:
+- The driver code runs whenever it is not in the SLEEP state (it has not called `wait()`). This is because by default the burst time is initialised to 0 for all processes, so that system process get scheduled first as SJF here works on burst time.
+- Each child process is preempted once in the beginning, as after setting the burst time, we are calling `yield()`.
+- The order in which the child processes finish executing is partly dependent on user input. There is a child which reads user input (the second prodess forked) and prints it. It first performs some printing, then waits for the user to input something. This waiting time determines how long it won't be runnable. Since it has the shortest burst time, as soon as the user input has been read, the next process that will be scheduled is this process. Hence a fast user input means this processes finishes quickly, otherwise it may even finish in the end. However, it is impossible for it to finish first, as there are pure CPU bound processes which once scheduled, will complete all the instructions without sleeping/waiting.
