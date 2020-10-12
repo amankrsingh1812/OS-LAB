@@ -118,3 +118,24 @@ sys_getProcInfo(void)
   if(argptr(1, (void*)&pi, sizeof(pi)) < 0) return -1;
   return getProcInfo(pid, pi);
 }
+
+
+// Returns the burst time for the currently running process
+// [ Called from the target process ]
+int
+sys_get_burst_time(void)
+{
+  return get_burst_time();
+}
+
+
+// Sets the burst time for the currently running process
+// [ Called from the target process ]
+int
+sys_set_burst_time(void)
+{
+  int n;
+  if (argptr(0,(void*)&n, sizeof(n))<0)
+    return -1;
+  return set_burst_time(n);
+}

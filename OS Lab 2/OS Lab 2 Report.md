@@ -18,7 +18,7 @@ For creating the system calls, we needed to change these files:-
 The main code for this syscall can be found in the file `proc.c`. We have looped through all the slots of the `ptable's proc array` of the  and incremented the counter when we found a proc slot with a state other than UNUSED. Before iterating through the `proc` array we acquired the lock and released it after it. This is done to ensure that another process doesn't modify the ptable while we are iterating through it.  
 ```C
 // proc.c
-int                                         // line 540                     
+int                                         // line 546                     
 getNumProc(void)
 {
 	int c = 0;
@@ -39,7 +39,7 @@ getNumProc(void)
 The main code for this syscall can be found in the file `proc.c`. We have looped through all the slots of the `proc` array of the `ptable` and found the maximum of all the process with a state other than UNUSED. Before iterating through the `proc` array we acquired the lock and released it after it. This is done to ensure that another process doesn't modify the ptable while we are iterating through it.  
 ```C
 // proc.c
-int                                         // line 556               
+int                                         // line 563               
 getMaxPid(void)
 {
 	int maxPID = -1;
@@ -65,19 +65,19 @@ int numcs;                                    // line 52
 We have initialized the `numcs` field of a process to 0 in the function `allocproc()`. 
 ```C
 // proc.c
-p->numcs = 0;                                 // line 94             
+p->numcs = 0;                                 // line 95             
 ```
 We have incremented the `numcs` field of a process everytime the scheduler schedules that process.  
 ```C
 // proc.c
-p->numcs++;                                   // line 94             
+p->numcs++;                                   // line 351             
 ```
 
 The main code for this syscall can be found in the function file `proc.c`. We have linearly searched for the PID in the `proc` array of the `ptable` and copied the required information into the struct `processInfo`. It returns 0 if PID is found and -1 otherwise. Before iterating through the `proc` array we acquired the lock and released it after it. This is done to ensure that another process doesn't modify the ptable while we are iterating through it.  
 
 ```C
 // proc.c
-int                                         // line 573             
+int                                         // line 580             
 getProcInfo(int pid, struct processInfo* pi)
 {
   struct proc *p = 0;
@@ -99,12 +99,59 @@ getProcInfo(int pid, struct processInfo* pi)
 ```
 
 
+### Syscall get_burst_time
+
+We added another an extra field `burstTime` in the struct `proc` to keep track of the burst time of the process
+
+```C
+// proc.h
+int burstTime;                                // line 52             
+```
+We have initialized the `burstTime` field of a process to 0 in the function `allocproc()`. 
+```C
+// proc.c
+p->burstTime = 0;                             // line 96             
+```
+
+The main code for this syscall can be found in the file `proc.c`. We simply use the pointer to the currently running process which is returned by myproc(), with which we read the burstTime propertly of the process.
+```C
+// proc.c
+int											  // line 602
+get_burst_time()
+{
+  return myproc()->burstTime;
+}
+```
+---
+
+
+
+### Syscall set_burst_time
+The main code for this syscall can be found in the file `proc.c`. We first confirm that the burst time being set is positive (othewise return error status) then use the pointer to the currently running process which is returned by myproc(), with which we set the `burstTime` field of the process.
+```C
+// proc.c
+int											  // line 611
+set_burst_time(int n)
+{
+  // Burst Time should be a positive integer
+  if (n < 1)
+    return -1;
+
+  myproc()->burstTime = n;
+  return 0;
+}
+```
+---
+
+
+
 ---
 ## User-level Application for our System Calls
-For testing our system calls, we created 3 user-level applications -
+For testing our system calls, we created 4 user-level applications -
 * `numProcTest` for testing `getNumProc()`  
 * `maxPidTest` for testing `getMaxPid()`  
-* `procInfoTest` for testing `getProcInfo()`  
+* `procInfoTest` for testing `getProcInfo()`
+* `get_set_burst_time` for testing both `get_burst_time()` and `set_burst_time()` 
 
 For creating the user-level application, we need to make some changes in the `MakeFile` and create the `c` files for the user-level application.
 
@@ -128,14 +175,15 @@ UPROGS=\
 	_usertests\
 	_wc\
 	_zombie\
-	_numProcTest\                                                                # line 184
+	_numProcTest\                                                                                   	# line 184
 	_maxPidTest\
-	_procInfoTest\                                                              
+	_procInfoTest\     
+  	_get_set_burst_time\                                                         
 	
 EXTRA=\
 	mkfs.c ulib.c user.h cat.c echo.c forktest.c grep.c kill.c\
 	ln.c ls.c mkdir.c rm.c stressfs.c usertests.c wc.c zombie.c\
-	printf.c umalloc.c numProcTest.c maxPidTest.c procInfoTest.c\          		# line 256
+	printf.c umalloc.c numProcTest.c maxPidTest.c procInfoTest.c get_set_burst_time.c\          		# line 257
 	
 ```
 
@@ -188,6 +236,54 @@ int main(int argc, char *argv[]){
 }
 ```
 
+### get_set_burst_time
+We created [get_set_burst_time.c](./Patch/PartA/get_set_burst_time.c) in which we first print the current burst time for this process (whose default value is 0), using the system call `get_burst_time`. Then we take user input for the new burst time to be set and after some validation use this input to set the new burst time using the system call `set_burst_time`, while passing the new value. Finally, we again use `get_burst_time` to demostrate that the burst time has indeed been set correctly.
+
+```C
+// get_set_burst_time.c
+#include "types.h"
+#include "user.h"
+
+int getBurstTimeInput() {
+    printf(1, "Please enter a new burst time [expected range 1-20]: ");
+    
+    char buf[18];
+    int amt = read(0, buf, 18);
+    
+    if (amt > 5) 
+        return -1;
+    
+    buf[amt] = 0;
+    for (int i=0; buf[i]&&buf[i]!='\n'; i++)
+        if (buf[i]<'0' || buf[i]>'9')
+            return -1;
+
+    int bTime = 0;
+    for (int i=0; buf[i]&&buf[i]!='\n'; i++)
+        bTime = bTime*10 + (int)(buf[i]-'0');
+
+    return bTime;
+}
+
+int main(int argc, char *argv[]){
+    // Show original burst time
+    printf(1, "Original burst time of this process: %d\n", get_burst_time());
+    
+    // Read and set new burst time
+    int bTime = getBurstTimeInput();
+    if (bTime < 0) {
+        printf(1, "[-] Invalid burst time set. Aborting!!\n");
+        exit();
+    }
+    set_burst_time(bTime);
+    
+    // Print new burst time
+    printf(1, "New burst time of this process: %d\n", get_burst_time());
+    exit();
+}
+```
+
 ![Syscall screenshot](partA1+2_ss.png "Syscall screenshot")
+![Syscall screenshot](partA3_ss.png "Syscall screenshot")
 
 ---

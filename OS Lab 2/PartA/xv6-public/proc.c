@@ -91,7 +91,9 @@ found:
   p->pid = nextpid++;
 
   // Initialise number of context switches with 0
+  // and burst time with 0
   p->numcs = 0;
+  p->burstTime = 0;
 
   release(&ptable.lock);
 
@@ -554,6 +556,7 @@ getNumProc(void)
   return c;
 }
 
+
 // Returns the maximum PID amongst the PIDs of all currently active 
 // (i.e., occupying a slot in the process table) processes in the system
 int 
@@ -569,6 +572,7 @@ getMaxPid(void)
   release(&ptable.lock);
   return maxPID;
 }
+
 
 // Stores process's info of the process with the given pid in the 
 // processInfo structure
@@ -590,4 +594,27 @@ getProcInfo(int pid, struct processInfo* pi)
   release(&ptable.lock);
   if(found) return 0;
   return -1;
+}
+
+
+// Returns the burst time for the currently running process
+// [ Called from the target process ]
+int
+get_burst_time()
+{
+  return myproc()->burstTime;
+}
+
+
+// Sets the burst time for the currently running process
+// [ Called from the target process ]
+int
+set_burst_time(int n)
+{
+  // Burst Time should be a positive integer
+  if (n < 1)
+    return -1;
+
+  myproc()->burstTime = n;
+  return 0;
 }

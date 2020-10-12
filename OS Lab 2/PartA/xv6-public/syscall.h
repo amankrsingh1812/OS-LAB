@@ -23,3 +23,5 @@
 #define SYS_getNumProc  22
 #define SYS_getMaxPid  23
 #define SYS_getProcInfo  24
+#define SYS_get_burst_time 25
+#define SYS_set_burst_time 26

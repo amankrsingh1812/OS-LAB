@@ -124,6 +124,8 @@ void            yield(void);
 int             getNumProc(void);
 int             getMaxPid(void);
 int             getProcInfo(int, struct processInfo*);
+int             get_burst_time(void);
+int             set_burst_time(int);
 
 // swtch.S
 void            swtch(struct context**, struct context*);

@@ -27,6 +27,8 @@ int uptime(void);
 int getNumProc(void);
 int getMaxPid(void);
 int getProcInfo(int, struct processInfo*);
+int get_burst_time(void);
+int set_burst_time(int);
 
 // ulib.c
 int stat(const char*, struct stat*);

@@ -32,4 +32,5 @@ SYSCALL(uptime)
 SYSCALL(getNumProc)
 SYSCALL(getMaxPid)
 SYSCALL(getProcInfo)
-
+SYSCALL(get_burst_time)
+SYSCALL(set_burst_time)
