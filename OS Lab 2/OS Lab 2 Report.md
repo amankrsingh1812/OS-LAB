@@ -64,8 +64,6 @@ int burstTime;
 * `sysproc.c `- The definition of system calls were added in this file and the file `processInfo.h` was included
 * `proc.c `- Since the struct `ptable` and other utility functions for process management were in this file, the main code for system calls was added in this file
 
-
-
 ### Syscall getNumProc 
 
 Function `sys_getNumProc(void)` was defined, which calls the function `getNumProc()` defined in `proc.c` and returns the value returned by it.
@@ -389,9 +387,237 @@ int main(int argc, char *argv[]){
 }
 ```
 
-<!-- ![Syscall screenshot](partA1+2_ss.png "Syscall screenshot")
-![Syscall screenshot](partA3_ss.png "Syscall screenshot") -->
-
 ![Syscall screenshot](partA_ss.png "Syscall screenshot")
 
 ---
+
+## Part B_1:  
+
+Refer the patch files in [Patch/PartB1/](./Patch/PartB1/)
+
+### Scheduler Implementation
+
+This part require the default number of CPUs to simulate to be changed to 1. It was achieved by changing the constant `NCPU` to 1 in `param.h`
+
+```c
+//param.h
+#define NCPU          1  // maximum number of CPUs 				#line3
+```
+
+The default scheduler of `xv6` was is an unweighted round robin scheduler which preempts the current process after running it for certain fixed time (indicated by an interrupt from hardware timer). But the required scheduler needs to be shortest job first scheduler, so it was required to disable this preemption. It was achieved by commenting the following code from the file `traps.c`
+
+```c
+// Force process to give up CPU on clock tick.
+// If interrupts were on while locks held, would need to check nlock.
+//if(myproc() && myproc()->state == RUNNING &&
+//   tf->trapno == T_IRQ0+IRQ_TIMER)
+//  yield();
+```
+
+Since the burst time of a process was set by the process itself, so after setting up burst time the context needs to be switched back to the scheduler. To achieve this `yield()` (in this function the currently running process is made to yield CPU) was called just before `return` statement of `set_burst_time()` in `proc.c`
+
+```c
+int
+set_burst_time(int n)
+{
+  myproc()->burstTime = n;
+  yield();
+  return 0;
+}
+```
+
+For implementing shortest job first scheduling the Ready Queue was implemented as a Priority Queue(min heap) so that finding the job with shortest burst time and inserting a new job into the list could be done in `O(log(numberOfProcess))`. 
+
+In `proc.c` two new variables were added to `ptable` structure 
+
+```c
+struct {
+  struct spinlock lock;
+  struct proc proc[NPROC];
+  struct proc* priorityQueueArray[NPROC];             
+  int pqsize;                                         //size of Priority Queue
+} ptable;
+```
+
+The functions for Priority Queue were implemented as:
+
+```c
+//proc.c
+
+// Priority Queue Functions 
+// Should be called only after acquiring ptable lock
+// Ready Queue is implemented as a Priority Queue So as to find process with minimum burst time in O(log(n))
+
+//Compare Function for processes 
+//Compare based on burst time
+int compProc(struct proc* proc1,struct proc* proc2){
+  if(proc1->burstTime == proc2->burstTime)
+    return (proc1->pid < proc2->pid);
+  return proc1->burstTime < proc2->burstTime;
+}
+
+//helper function to swap two processes present in ptable
+void swap(int i,int j){
+  struct proc* temp = ptable.priorityQueueArray[i];
+  ptable.priorityQueueArray[i] = ptable.priorityQueueArray[j];
+  ptable.priorityQueueArray[j] = temp;
+  return;
+}
+
+void priorityQueueHeapify(int curIndex){
+  int leftChild = 2*curIndex+1;
+  int rightChild = 2*curIndex+2;
+  int nextIndex = curIndex;
+
+  if(leftChild < ptable.pqsize && compProc(ptable.priorityQueueArray[leftChild],ptable.priorityQueueArray[nextIndex]))
+    nextIndex=leftChild;
+  
+  if(rightChild < ptable.pqsize && compProc(ptable.priorityQueueArray[rightChild],ptable.priorityQueueArray[nextIndex]))
+    nextIndex=rightChild;
+
+  if(nextIndex != curIndex){
+    swap(nextIndex,curIndex);
+    priorityQueueHeapify(nextIndex);
+  }
+  return;
+}
+
+struct proc* priorityQueueExtractMin(){
+  if(ptable.pqsize == 0)
+    return 0;
+
+  struct proc* minElt = ptable.priorityQueueArray[0];
+  ptable.priorityQueueArray[0] = ptable.priorityQueueArray[ptable.pqsize - 1];
+  ptable.pqsize--;
+  priorityQueueHeapify(0);
+
+  return minElt;
+}
+
+void priorityQueueInsert(struct proc* proc){
+  int curIndex = ptable.pqsize++;
+  ptable.priorityQueueArray[curIndex] = proc;
+
+  while(curIndex > 0){
+    int parentIndex = (curIndex-1)/2;
+    if(compProc(ptable.priorityQueueArray[parentIndex],ptable.priorityQueueArray[curIndex]))
+      break;
+    swap(curIndex,parentIndex);
+    curIndex = parentIndex;
+  }
+
+  return;
+}
+
+//helper function called when a process is added to ready queue(priority queue)
+void makeProcRunnable(struct proc* proc){
+  proc->state = RUNNABLE;
+  priorityQueueInsert(proc);
+}
+```
+
+The function `makeProcRunnable()` was called at multiple locations inside `proc.c` whenever a new process was to be added to Ready Queue. Following are the functions where `makeProcRunnable()` was called:
+
+* `userinit()` - The first user was added to the Ready Queue here
+
+  ```c
+    acquire(&ptable.lock);             //line 228
+    ptable.pqsize = 0;
+    makeProcRunnable(p);
+    release(&ptable.lock);
+  ```
+
+* `fork()` -  The newly created runnable process was added to Ready Queue here
+
+  ```c
+    acquire(&ptable.lock);           //line 297
+    makeProcRunnable(np);
+    release(&ptable.lock);
+  ```
+
+*  `yield()` - In this function, the currently running process was made to yield CPU thereby making it runnable
+
+  ```c
+  // Give up the CPU for one scheduling round.
+  void
+  yield(void)
+  {
+    acquire(&ptable.lock);  //DOC: yieldlock
+    makeProcRunnable(myproc());
+    sched();
+    release(&ptable.lock);
+  }
+  ```
+
+* `wakeup1()` - All sleeping process were made runnable in this function
+
+  ```c
+  static void
+  wakeup1(void *chan)
+  {
+    struct proc *p;
+  
+    for(p = ptable.proc; p < &ptable.proc[NPROC]; p++)
+      if(p->state == SLEEPING && p->chan == chan){
+        makeProcRunnable(p);
+      }
+  }
+  ```
+
+* `kill()` - In order to kill a sleeping process its first made runnable
+
+  ```c
+  // line 575
+  
+  // Wake process from sleep if necessary.
+  if(p->state == SLEEPING){
+      makeProcRunnable(p);
+  }
+  ```
+
+The function `scheduler` in `proc.c` was changed as follows in order to implement shortest job first scheduling 
+
+```c
+void
+scheduler(void)
+{
+  struct proc *reqp=0;
+  // struct proc *p;
+  struct cpu *c = mycpu();
+  c->proc = 0;
+  
+  for(;;){
+    // Enable interrupts on this processor.
+    sti();
+
+    reqp = 0;    
+
+    //Choose a process from ready queue to run
+    acquire(&ptable.lock);
+    reqp = priorityQueueExtractMin();     // Find the process with minimum Burst Time using Priority Queue
+
+    if(reqp==0) {  // No process is curently runnable
+      release(&ptable.lock);
+      continue;
+    }
+
+    cprintf("####### SCHEDULING - pid: %d  burstTime: %d\n", reqp->pid, reqp->burstTime);
+    c->proc = reqp;
+    switchuvm(reqp);
+    reqp->state = RUNNING;
+    reqp->numcs++; // Number of Context Switch Increment
+    swtch(&(c->scheduler), reqp->context);
+    switchkvm();
+    // Process is done running for now.
+    // It should have changed its p->state before coming back.
+    c->proc = 0;
+
+    release(&ptable.lock);
+
+  }
+}
+```
+
+For each iteration of outer `for` loop, the pointer to the process with  minimum burst time is extracted out of the Priority Queue (since Priority is based upon burst time of processes, so the required process will be the min element of Priority Queue, hence function `priorityQueueExtractMin()` will return the same ). If no runnable process exists then the NULL pointer is returned and this corner case is handled separately in `if` block above. If the Ready Queue is non empty then the context is switched to the required process. 
+
+### Testing 

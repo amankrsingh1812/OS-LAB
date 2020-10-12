@@ -24,10 +24,9 @@ int getpid(void);
 char* sbrk(int);
 int sleep(int);
 int uptime(void);
-int wolfie(void *buf, uint size);
-int getProcNum(void);
+int getNumProc(void);
 int getMaxPid(void);
-int getProcInfo();
+int getProcInfo(int, struct processInfo*);
 int get_burst_time(void);
 int set_burst_time(int);
 

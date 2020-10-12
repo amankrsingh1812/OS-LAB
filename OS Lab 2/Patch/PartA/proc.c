@@ -11,83 +11,7 @@
 struct {
   struct spinlock lock;
   struct proc proc[NPROC];
-  struct proc* priorityQueueArray[NPROC];             
-  int pqsize;                                         //size of Priority Queue
 } ptable;
-
-// Priority Queue Functions 
-// Should be called only after acquiring ptable lock
-// Ready Queue is implemented as a Priority Queue So as to find process with minimum burst time in O(log(n))
-
-//Compare Function for processes 
-//Compare based on burst time
-int compProc(struct proc* proc1,struct proc* proc2){
-  if(proc1->burstTime == proc2->burstTime)
-    return (proc1->pid < proc2->pid);
-  return proc1->burstTime < proc2->burstTime;
-}
-
-//helper function to swap two processes present in ptable
-void swap(int i,int j){
-  struct proc* temp = ptable.priorityQueueArray[i];
-  ptable.priorityQueueArray[i] = ptable.priorityQueueArray[j];
-  ptable.priorityQueueArray[j] = temp;
-  return;
-}
-
-void priorityQueueHeapify(int curIndex){
-  int leftChild = 2*curIndex+1;
-  int rightChild = 2*curIndex+2;
-  int nextIndex = curIndex;
-
-  if(leftChild < ptable.pqsize && compProc(ptable.priorityQueueArray[leftChild],ptable.priorityQueueArray[nextIndex]))
-    nextIndex=leftChild;
-  
-  if(rightChild < ptable.pqsize && compProc(ptable.priorityQueueArray[rightChild],ptable.priorityQueueArray[nextIndex]))
-    nextIndex=rightChild;
-
-  if(nextIndex != curIndex){
-    swap(nextIndex,curIndex);
-    priorityQueueHeapify(nextIndex);
-  }
-  return;
-}
-
-//Return process with minimum burst time and removes it from the priority queue
-struct proc* priorityQueueExtractMin(){
-  if(ptable.pqsize == 0)
-    return 0;
-
-  struct proc* minElt = ptable.priorityQueueArray[0];
-  ptable.priorityQueueArray[0] = ptable.priorityQueueArray[ptable.pqsize - 1];
-  ptable.pqsize--;
-  priorityQueueHeapify(0);
-
-  return minElt;
-}
-
-//Adds new process into priority queue
-void priorityQueueInsert(struct proc* proc){
-  int curIndex = ptable.pqsize++;
-  ptable.priorityQueueArray[curIndex] = proc;
-
-  while(curIndex > 0){
-    int parentIndex = (curIndex-1)/2;
-    if(compProc(ptable.priorityQueueArray[parentIndex],ptable.priorityQueueArray[curIndex]))
-      break;
-    swap(curIndex,parentIndex);
-    curIndex = parentIndex;
-  }
-
-  return;
-}
-
-//helper function called when a process is added to ready queue(priority queue)
-void makeProcRunnable(struct proc* proc){
-  proc->state = RUNNABLE;
-  priorityQueueInsert(proc);
-}
-// Priority Queue Implementation ends
 
 static struct proc *initproc;
 
@@ -167,6 +91,7 @@ found:
   p->pid = nextpid++;
 
   // Initialise number of context switches with 0
+  // and burst time with 0
   p->numcs = 0;
   p->burstTime = 0;
 
@@ -229,8 +154,7 @@ userinit(void)
   // because the assignment might not be atomic.
   acquire(&ptable.lock);
 
-  ptable.pqsize = 0;
-  makeProcRunnable(p);
+  p->state = RUNNABLE;
 
   release(&ptable.lock);
 }
@@ -296,7 +220,7 @@ fork(void)
 
   acquire(&ptable.lock);
 
-  makeProcRunnable(np);
+  np->state = RUNNABLE;
 
   release(&ptable.lock);
 
@@ -312,8 +236,6 @@ exit(void)
   struct proc *curproc = myproc();
   struct proc *p;
   int fd;
-
-  cprintf("Exiting PID: %d\n", curproc->pid);
 
   if(curproc == initproc)
     panic("init exiting");
@@ -399,15 +321,14 @@ wait(void)
 // Per-CPU process scheduler.
 // Each CPU calls scheduler() after setting itself up.
 // Scheduler never returns.  It loops, doing:
-//  - choose a process to run using Priority Queue 
+//  - choose a process to run
 //  - swtch to start running that process
 //  - eventually that process transfers control
 //      via swtch back to the scheduler.
 void
 scheduler(void)
 {
-  struct proc *reqp=0;
-  // struct proc *p;
+  struct proc *p;
   struct cpu *c = mycpu();
   c->proc = 0;
   
@@ -415,28 +336,26 @@ scheduler(void)
     // Enable interrupts on this processor.
     sti();
 
-    reqp = 0;    
-
-    //Choose a process from ready queue to run
+    // Loop over process table looking for process to run.
     acquire(&ptable.lock);
-    reqp = priorityQueueExtractMin();     // Find the process with minimum Burst Time using Priority Queue
+    for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
+      if(p->state != RUNNABLE)
+        continue;
 
-    if(reqp==0) {  // No process is curently runnable
-      release(&ptable.lock);
-      continue;
+      // Switch to chosen process.  It is the process's job
+      // to release ptable.lock and then reacquire it
+      // before jumping back to us.
+      c->proc = p;
+      switchuvm(p);
+      p->state = RUNNING;
+      p->numcs++; // Number of Context Switch Increment
+      swtch(&(c->scheduler), p->context);
+      switchkvm();
+
+      // Process is done running for now.
+      // It should have changed its p->state before coming back.
+      c->proc = 0;
     }
-
-    cprintf("####### SCHEDULING - pid: %d  burstTime: %d\n", reqp->pid, reqp->burstTime);
-    c->proc = reqp;
-    switchuvm(reqp);
-    reqp->state = RUNNING;
-    reqp->numcs++; // Number of Context Switch Increment
-    swtch(&(c->scheduler), reqp->context);
-    switchkvm();
-    // Process is done running for now.
-    // It should have changed its p->state before coming back.
-    c->proc = 0;
-
     release(&ptable.lock);
 
   }
@@ -473,7 +392,7 @@ void
 yield(void)
 {
   acquire(&ptable.lock);  //DOC: yieldlock
-  makeProcRunnable(myproc());
+  myproc()->state = RUNNABLE;
   sched();
   release(&ptable.lock);
 }
@@ -547,9 +466,8 @@ wakeup1(void *chan)
   struct proc *p;
 
   for(p = ptable.proc; p < &ptable.proc[NPROC]; p++)
-    if(p->state == SLEEPING && p->chan == chan){
-      makeProcRunnable(p);
-    }
+    if(p->state == SLEEPING && p->chan == chan)
+      p->state = RUNNABLE;
 }
 
 // Wake up all processes sleeping on chan.
@@ -574,9 +492,8 @@ kill(int pid)
     if(p->pid == pid){
       p->killed = 1;
       // Wake process from sleep if necessary.
-      if(p->state == SLEEPING){
-        makeProcRunnable(p);
-      }
+      if(p->state == SLEEPING)
+        p->state = RUNNABLE;
       release(&ptable.lock);
       return 0;
     }
@@ -622,66 +539,82 @@ procdump(void)
   }
 }
 
+
+// Returns the total number of active processes in the system (either in 
+// embryo, running, runnable, sleeping, or zombie states)
 int 
-getProcNum(void)
+getNumProc(void)
 {
-	int used = 0;
-	struct proc *p;
-
+  int c = 0;
+  struct proc *p;
   acquire(&ptable.lock);
-
-  for(p = ptable.proc; p < &ptable.proc[NPROC]; p++)
+  for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
     if(p->state != UNUSED)
-      used++;
-
+      c++;
+  }
   release(&ptable.lock);
-	return used;
+  return c;
 }
 
+
+// Returns the maximum PID amongst the PIDs of all currently active 
+// (i.e., occupying a slot in the process table) processes in the system
 int 
 getMaxPid(void)
 {
-	int maxPid = 0;
-	struct proc *p;
-
+  int maxPID = -1;
+  struct proc *p;
   acquire(&ptable.lock);
-
-  for(p = ptable.proc; p < &ptable.proc[NPROC]; p++)
-    if(p->state != UNUSED)
-      maxPid = (maxPid < p->pid) ? p->pid : maxPid;
-
+  for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
+    if(p->state != UNUSED && p->pid > maxPID)
+      maxPID = p->pid;
+  }
   release(&ptable.lock);
-	return maxPid;
+  return maxPID;
 }
 
+
+// Stores process's info of the process with the given pid in the 
+// processInfo structure
 int 
-getProcInfo()
+getProcInfo(int pid, struct processInfo* pi)
 {
-  int ret = -1;
-  struct proc *p = myproc();
-  
+  struct proc *p = 0;
+  int found = 0;
   acquire(&ptable.lock);
-
-  cprintf(" PID: %d   NCS: %d    BurstTime: %d \n", p->pid, p->numcs, p->burstTime);
-  
-
+  for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
+    if(p->state != UNUSED && p->pid == pid){
+        pi->ppid = p->parent->pid;
+        pi->psize = p->sz;
+        pi->numberContextSwitches = p->numcs;
+        found = 1;
+        break;
+      }
+  }
   release(&ptable.lock);
-  return ret;
+  if(found) return 0;
+  return -1;
 }
 
+
+// Returns the burst time for the currently running process
+// [ Called from the target process ]
 int
 get_burst_time()
 {
-  struct proc *p = myproc();
-  return p->burstTime;
+  return myproc()->burstTime;
 }
 
+
+// Sets the burst time for the currently running process
+// [ Called from the target process ]
 int
-set_burst_time(int n)
+set_burst_time(int btime)
 {
-  myproc()->burstTime = n;
-  yield();
+  // Burst Time should be a positive integer
+  if (btime < 1)
+    return -1;
+
+  myproc()->burstTime = btime;
   return 0;
 }
-
-
