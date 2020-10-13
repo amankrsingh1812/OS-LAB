@@ -82,11 +82,6 @@ void priorityQueueInsert(struct proc* proc){
   return;
 }
 
-//helper function called when a process is added to ready queue(priority queue)
-void makeProcRunnable(struct proc* proc){
-  proc->state = RUNNABLE;
-  priorityQueueInsert(proc);
-}
 // Priority Queue Implementation ends
 
 static struct proc *initproc;
@@ -230,7 +225,8 @@ userinit(void)
   acquire(&ptable.lock);
 
   ptable.pqsize = 0;
-  makeProcRunnable(p);
+  p->state = RUNNABLE;
+  priorityQueueInsert(p);
 
   release(&ptable.lock);
 }
@@ -296,7 +292,8 @@ fork(void)
 
   acquire(&ptable.lock);
 
-  makeProcRunnable(np);
+  np->state = RUNNABLE;
+  priorityQueueInsert(np);
 
   release(&ptable.lock);
 
@@ -312,6 +309,8 @@ exit(void)
   struct proc *curproc = myproc();
   struct proc *p;
   int fd;
+
+  cprintf("Exiting PID: %d\n", curproc->pid);
 
   if(curproc == initproc)
     panic("init exiting");
@@ -472,7 +471,8 @@ void
 yield(void)
 {
   acquire(&ptable.lock);  //DOC: yieldlock
-  makeProcRunnable(myproc());
+  myproc()->state = RUNNABLE;
+  priorityQueueInsert(myproc());
   sched();
   release(&ptable.lock);
 }
@@ -547,7 +547,8 @@ wakeup1(void *chan)
 
   for(p = ptable.proc; p < &ptable.proc[NPROC]; p++)
     if(p->state == SLEEPING && p->chan == chan){
-      makeProcRunnable(p);
+      p->state = RUNNABLE;
+      priorityQueueInsert(p);
     }
 }
 
@@ -574,7 +575,8 @@ kill(int pid)
       p->killed = 1;
       // Wake process from sleep if necessary.
       if(p->state == SLEEPING){
-        makeProcRunnable(p);
+        p->state = RUNNABLE;
+        priorityQueueInsert(p);
       }
       release(&ptable.lock);
       return 0;

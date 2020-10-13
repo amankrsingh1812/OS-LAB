@@ -82,11 +82,6 @@ void priorityQueueInsert(struct proc* proc){
   return;
 }
 
-//helper function called when a process is added to ready queue(priority queue)
-void makeProcRunnable(struct proc* proc){
-  proc->state = RUNNABLE;
-  priorityQueueInsert(proc);
-}
 // Priority Queue Implementation ends
 
 static struct proc *initproc;
@@ -230,7 +225,8 @@ userinit(void)
   acquire(&ptable.lock);
 
   ptable.pqsize = 0;
-  makeProcRunnable(p);
+  p->state = RUNNABLE;
+  priorityQueueInsert(p);
 
   release(&ptable.lock);
 }
@@ -296,7 +292,8 @@ fork(void)
 
   acquire(&ptable.lock);
 
-  makeProcRunnable(np);
+  np->state = RUNNABLE;
+  priorityQueueInsert(np);
 
   release(&ptable.lock);
 
@@ -406,8 +403,7 @@ wait(void)
 void
 scheduler(void)
 {
-  struct proc *reqp=0;
-  // struct proc *p;
+  struct proc *p;
   struct cpu *c = mycpu();
   c->proc = 0;
   
@@ -415,23 +411,25 @@ scheduler(void)
     // Enable interrupts on this processor.
     sti();
 
-    reqp = 0;    
-
     //Choose a process from ready queue to run
     acquire(&ptable.lock);
-    reqp = priorityQueueExtractMin();     // Find the process with minimum Burst Time using Priority Queue
+    p = priorityQueueExtractMin();     // Find the process with minimum Burst Time using Priority Queue
 
-    if(reqp==0) {  // No process is curently runnable
+    if(p==0) {  // No process is curently runnable
       release(&ptable.lock);
       continue;
     }
 
-    cprintf("####### SCHEDULING - pid: %d  burstTime: %d\n", reqp->pid, reqp->burstTime);
-    c->proc = reqp;
-    switchuvm(reqp);
-    reqp->state = RUNNING;
-    reqp->numcs++; // Number of Context Switch Increment
-    swtch(&(c->scheduler), reqp->context);
+    // cprintf("####### SCHEDULING - pid: %d  burstTime: %d\n", p->pid, p->burstTime);
+
+    // Switch to chosen process.  It is the process's job
+    // to release ptable.lock and then reacquire it
+    // before jumping back to us.
+    c->proc = p;
+    switchuvm(p);
+    p->state = RUNNING;
+    p->numcs++; // Number of Context Switch Increment
+    swtch(&(c->scheduler), p->context);
     switchkvm();
     // Process is done running for now.
     // It should have changed its p->state before coming back.
@@ -473,7 +471,8 @@ void
 yield(void)
 {
   acquire(&ptable.lock);  //DOC: yieldlock
-  makeProcRunnable(myproc());
+  myproc()->state = RUNNABLE;
+  priorityQueueInsert(myproc());
   sched();
   release(&ptable.lock);
 }
@@ -548,7 +547,8 @@ wakeup1(void *chan)
 
   for(p = ptable.proc; p < &ptable.proc[NPROC]; p++)
     if(p->state == SLEEPING && p->chan == chan){
-      makeProcRunnable(p);
+      p->state = RUNNABLE;
+      priorityQueueInsert(p);
     }
 }
 
@@ -575,7 +575,8 @@ kill(int pid)
       p->killed = 1;
       // Wake process from sleep if necessary.
       if(p->state == SLEEPING){
-        makeProcRunnable(p);
+        p->state = RUNNABLE;
+        priorityQueueInsert(p);
       }
       release(&ptable.lock);
       return 0;
@@ -655,18 +656,23 @@ getMaxPid(void)
 }
 
 int 
-getProcInfo()
+getProcInfo(int pid, struct processInfo* pi)
 {
-  int ret = -1;
-  struct proc *p = myproc();
-  
+  struct proc *p = 0;
+  int found = 0;
   acquire(&ptable.lock);
-
-  cprintf(" PID: %d   NCS: %d    BurstTime: %d \n", p->pid, p->numcs, p->burstTime);
-  
-
+  for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
+    if(p->state != UNUSED && p->pid == pid){
+        pi->ppid = p->parent->pid;
+        pi->psize = p->sz;
+        pi->numberContextSwitches = p->numcs;
+        found = 1;
+        break;
+      }
+  }
   release(&ptable.lock);
-  return ret;
+  if(found) return 0;
+  return -1;
 }
 
 int
