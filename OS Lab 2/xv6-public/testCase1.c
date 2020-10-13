@@ -41,7 +41,7 @@ void fileIO(int bt, int readBytes, char filename[])
   int _read = read(fd, buf, readBytes);
   if (_read == readBytes) _read--;
   buf[_read] = 0;
-  printf(1, "1500 Words of README: \n%s\n---------\n", buf);
+  // printf(1, "1500 Words of README: \n%s\n---------\n", buf);
 
   printf(1, "Exiting PID: %d\n", getpid());
   exit();
@@ -57,9 +57,9 @@ int main(int argc, char *argv[])
   if ( !(pid[0] = fork()) )  looper(8,2);
   if ( !(pid[1] = fork()) )  userIO(1);
   if ( !(pid[2] = fork()) )  looper(10,4);
-  if ( !(pid[3] = fork()) )  fileIO(5, 1500, "README");
-  if ( !(pid[4] = fork()) )  looper(6,1);  
-  if ( !(pid[5] = fork()) )  fileIO(3, 2000, "README2");
+  if ( !(pid[3] = fork()) )  fileIO(6, 1500, "README");
+  if ( !(pid[4] = fork()) )  looper(5,1);  
+  if ( !(pid[5] = fork()) )  fileIO(3, 500, "README2");
 
   for (int i=0; i<6; i++)
     rpid[i] = wait();
@@ -67,9 +67,9 @@ int main(int argc, char *argv[])
   strcpy(exitInfoGatherer[0], "BurstTime: 8  - Empty loop running 2e8 times\t\t");
   strcpy(exitInfoGatherer[1], "BurstTime: 1  - Taking user IO and printing it\t\t");
   strcpy(exitInfoGatherer[2], "BurstTime: 10 - Empty loop running 4e8 times\t\t");
-  strcpy(exitInfoGatherer[3], "BurstTime: 5  - Reading 1500 Bytes from \"README\"\t");
-  strcpy(exitInfoGatherer[4], "BurstTime: 6  - Empty loop running 1e8 times\t\t");
-  strcpy(exitInfoGatherer[5], "BurstTime: 3  - Reading 2000 Bytes from \"README2\"\t");
+  strcpy(exitInfoGatherer[3], "BurstTime: 6  - Reading 1500 Bytes from \"README\"\t");
+  strcpy(exitInfoGatherer[4], "BurstTime: 5  - Empty loop running 1e8 times\t\t");
+  strcpy(exitInfoGatherer[5], "BurstTime: 3  - Reading 500 Bytes from \"README2\"\t");
 
   int outfd = 1;
   printf(outfd, "\n******** CHILDREN EXIT ORDER SUMMARY ********\n");

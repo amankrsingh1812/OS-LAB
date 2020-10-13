@@ -420,6 +420,7 @@ scheduler(void)
       continue;
     }
 
+    // Debug Statement
     // cprintf("####### SCHEDULING - pid: %d  burstTime: %d\n", p->pid, p->burstTime);
 
     // Switch to chosen process.  It is the process's job
