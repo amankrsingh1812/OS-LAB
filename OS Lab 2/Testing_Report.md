@@ -30,7 +30,7 @@ When `testCase1.c` is run, various important observations are made:
 * Each child process first sets its burst time, using a modified `set_burst_time` syscall, which sets its burst time and then calls `yield()` to preempt the child process. This is done because the burst time is being set inside the child process, and we want the child processes to actually start execution once all the child processes have been given burst times.
 * Since there is a child which reads user input (the second process forked) and prints it, the order in which the child processes finish executing is _partly dependent_ on _when_ the user gives the input. It first performs some printing, then waits for the user to input something. This waiting time determines how long it would be SLEEPING (and hence, won't be RUNNABLE). Since it has the shortest burst time, as soon as the user input has been read, the next process that will be scheduled is this process. Hence a fast user input means this processes finishes quickly, otherwise it may even finish in the end. 
 
-![est Case 1](/home/aman/Desktop/OSLAB/OS-LAB/OS Lab 2/testCase1.png)
+![est Case 1](./testCase1.png)
 
 #### testCase2.c
 
@@ -47,7 +47,7 @@ Initially both the child processes are forked and the driver process after creat
 Qualitatively, (see summary in output) the one with lower burst time is executed first.
 Quantitatively, (see output before summary) the turnaround time (time it took to complete its execution after being ready for execution) for the second process is almost _double_ the turnaround time for the first process. This is due to the fact that both the processes are ready for execution at almost the same time and one process executes itself while the other one waits for its execution and then is executed.
 
-![Test Case 2](/home/aman/Desktop/OSLAB/OS-LAB/OS Lab 2/testCase2.png)
+![Test Case 2](./testCase2.png)
 
 #### testCase3.c
 
