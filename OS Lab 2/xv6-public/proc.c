@@ -406,8 +406,7 @@ wait(void)
 void
 scheduler(void)
 {
-  struct proc *reqp=0;
-  // struct proc *p;
+  struct proc *p;
   struct cpu *c = mycpu();
   c->proc = 0;
   
@@ -415,23 +414,25 @@ scheduler(void)
     // Enable interrupts on this processor.
     sti();
 
-    reqp = 0;    
-
     //Choose a process from ready queue to run
     acquire(&ptable.lock);
-    reqp = priorityQueueExtractMin();     // Find the process with minimum Burst Time using Priority Queue
+    p = priorityQueueExtractMin();     // Find the process with minimum Burst Time using Priority Queue
 
-    if(reqp==0) {  // No process is curently runnable
+    if(p==0) {  // No process is curently runnable
       release(&ptable.lock);
       continue;
     }
 
-    cprintf("####### SCHEDULING - pid: %d  burstTime: %d\n", reqp->pid, reqp->burstTime);
-    c->proc = reqp;
-    switchuvm(reqp);
-    reqp->state = RUNNING;
-    reqp->numcs++; // Number of Context Switch Increment
-    swtch(&(c->scheduler), reqp->context);
+    cprintf("####### SCHEDULING - pid: %d  burstTime: %d\n", p->pid, p->burstTime);
+
+    // Switch to chosen process.  It is the process's job
+    // to release ptable.lock and then reacquire it
+    // before jumping back to us.
+    c->proc = p;
+    switchuvm(p);
+    p->state = RUNNING;
+    p->numcs++; // Number of Context Switch Increment
+    swtch(&(c->scheduler), p->context);
     switchkvm();
     // Process is done running for now.
     // It should have changed its p->state before coming back.
