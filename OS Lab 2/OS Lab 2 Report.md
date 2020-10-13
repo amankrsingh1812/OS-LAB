@@ -20,7 +20,7 @@ int             getMaxPid(void);
 int             getProcInfo(int, struct processInfo*);
 int             get_burst_time(void);
 int             set_burst_time(int);
-``` -->
+​``` -->
 
 * `syscall.h `- The mapping from system call names to system call numbers were added in this file at line 23
 <!-- ```C
@@ -30,7 +30,7 @@ int             set_burst_time(int);
 #define SYS_getProcInfo  24
 #define SYS_get_burst_time 25
 #define SYS_set_burst_time 26
-``` -->
+​``` -->
 * `syscall.c `- The mapping from system call numbers to system call functions were added in this file at line 106 and line 134
 <!-- ```C
 // syscall.c
@@ -45,7 +45,7 @@ extern int sys_set_burst_time(void);
 [SYS_getProcInfo] sys_getProcInfo,
 [SYS_get_burst_time] sys_get_burst_time,
 [SYS_set_burst_time] sys_set_burst_time,
-``` -->
+​``` -->
 * `usys.S `- The system call names were added in this file at line 32
 <!-- ```C
 // usys.S
@@ -54,20 +54,20 @@ SYSCALL(getMaxPid)
 SYSCALL(getProcInfo)
 SYSCALL(get_burst_time)
 SYSCALL(set_burst_time)
-``` -->
+​``` -->
 * `proc.h `- 2 extra fields ie. `int numcs` and `burstTime` were added in the struct `proc` to keep track the number of context switches and burst time of the process 
 <!-- ```C
 // proc.h
 int numcs;                                  // line 52
 int burstTime;              
-``` -->
+​``` -->
 * `sysproc.c `- The definition of system calls were added in this file and the file `processInfo.h` was included
 * `proc.c `- Since the struct `ptable` and other utility functions for process management were in this file, the main code for system calls was added in this file
 
 ### Syscall getNumProc 
 
 Function `sys_getNumProc(void)` was defined in file `sysproc.c` at line 95, which calls the function `getNumProc()` defined in `proc.c` and returns the value returned by it.
-```C
+​```C
 // sysproc.c
 int                                         // line 95
 sys_getNumProc(void)
@@ -277,99 +277,16 @@ EXTRA=\
 
 ### numProcTest 
 We created [numProcTest.c](Patch/PartA/wolfietest.c) in which we simply printed the output of the system call `getNumProc` to the console using `printf`. 1st parameter in `printf` is file descriptor which is 1 for console out. At the end we used `exit` system call to exit from this program.
-<!-- 
-```C
-// numProcTest.c
-#include "types.h"
-#include "user.h"
-
-int main(int argc, char *argv[]){
-    printf(1, "Total number of processes are: %d\n\n", getNumProc());
-    exit();
-}
-``` -->
 
 
 ### maxPidTest 
 We created [maxPidTest.c](./Patch/PartA/wolfietest.c) in which we simply printed the output of the system call `getMaxPid` to the console. At the end we used `exit` system call to exit from this program.
-<!-- 
-```C
-// maxPidTest.c
-#include "types.h"
-#include "user.h"
-
-int main(int argc, char *argv[]){
-    printf(1, "Max PID: %d\n\n", getMaxPid());
-    exit();
-}
-``` -->
 
 ### procInfoTest 
 We created [procInfoTest.c](Patch/PartA/wolfietest.c) in which we use the syscall getMaxPid to get the Max PID, then use the system call `getProcInfo` to get Info about the process with that PID and then print the values of the fields of the struct `processInfo` to the console. We included `processInfo.h` as we are using the struct `processInfo`. At the end we used `exit` system call to exit from this program.
 
-<!-- ```C
-// procInfoTest.c
-#include "types.h"
-#include "user.h"
-#include "processInfo.h"
-
-int main(int argc, char *argv[]){
-    struct processInfo pi;
-    int pid = getMaxPid();
-    if(getProcInfo(pid, &pi) != -1){
-        printf(1,"PID: %d, Parent PID: %d, PSize: %d, NumContextSwitches: %d\n\n", pid, pi.ppid, pi.psize, pi.numberContextSwitches);
-    }
-    
-    exit();
-}
-``` -->
-
 ### getSetBTime
 We created [getSetBTime.c](./Patch/PartA/getSetBTime.c) in which we first print the current burst time for this process (whose default value is 0), using the system call `get_burst_time`. Then we take user input for the new burst time to be set and after some validation use this input to set the new burst time using the system call `set_burst_time`, while passing the new value. Finally, we again use `get_burst_time` to demostrate that the burst time has indeed been set correctly.
-
-<!-- ```C
-// getSetBTime.c
-#include "types.h"
-#include "user.h"
-
-int getBurstTimeInput() {
-    printf(1, "Please enter a new burst time [expected range 1-20]: ");
-    
-    char buf[18];
-    int amt = read(0, buf, 18);
-    
-    if (amt > 5) 
-        return -1;
-    
-    buf[amt] = 0;
-    for (int i=0; buf[i]&&buf[i]!='\n'; i++)
-        if (buf[i]<'0' || buf[i]>'9')
-            return -1;
-
-    int bTime = 0;
-    for (int i=0; buf[i]&&buf[i]!='\n'; i++)
-        bTime = bTime*10 + (int)(buf[i]-'0');
-
-    return bTime;
-}
-
-int main(int argc, char *argv[]){
-    // Show original burst time
-    printf(1, "Original burst time of this process: %d\n", get_burst_time());
-    
-    // Read and set new burst time
-    int bTime = getBurstTimeInput();
-    if (bTime < 0) {
-        printf(1, "[-] Invalid burst time set. Aborting!!\n");
-        exit();
-    }
-    set_burst_time(bTime);
-    
-    // Print new burst time
-    printf(1, "New burst time of this process: %d\n", get_burst_time());
-    exit();
-}
-``` -->
 
 ![Syscall screenshot](partA_ss.png "Syscall screenshot")
 
@@ -383,9 +300,9 @@ Refer the patch files in [Patch/PartB1/](./Patch/PartB1/)
 
 This part require the default number of CPUs to simulate to be changed to 1. It was achieved by changing the constant `NCPU` to 1 in `param.h`
 
-```c
+```C
 //param.h
-#define NCPU          1  // maximum number of CPUs 				#line3
+#define NCPU          1                     // line3
 ```
 
 The default scheduler of `xv6` was an unweighted round robin scheduler which preempts the current process after running it for certain fixed time (indicated by an interrupt from hardware timer). But the required scheduler needs to be shortest job first scheduler, so it was required to disable this preemption. It was achieved by commenting the following code from the file `traps.c`
@@ -422,144 +339,18 @@ struct {
 ```
 
 The Utility functions for Priority Queue were implemented in the file `proc.c` from line 18 to line 90.
-<!-- 
-```c
-//proc.c
-
-// Priority Queue Functions 
-// Should be called only after acquiring ptable lock
-// Ready Queue is implemented as a Priority Queue So as to find process with minimum burst time in O(log(n))
-
-//Compare Function for processes 
-//Compare based on burst time
-int compProc(struct proc* proc1,struct proc* proc2){
-  if(proc1->burstTime == proc2->burstTime)
-    return (proc1->pid < proc2->pid);
-  return proc1->burstTime < proc2->burstTime;
-}
-
-//helper function to swap two processes present in ptable
-void swap(int i,int j){
-  struct proc* temp = ptable.priorityQueueArray[i];
-  ptable.priorityQueueArray[i] = ptable.priorityQueueArray[j];
-  ptable.priorityQueueArray[j] = temp;
-  return;
-}
-
-void priorityQueueHeapify(int curIndex){
-  int leftChild = 2*curIndex+1;
-  int rightChild = 2*curIndex+2;
-  int nextIndex = curIndex;
-
-  if(leftChild < ptable.pqsize && compProc(ptable.priorityQueueArray[leftChild],ptable.priorityQueueArray[nextIndex]))
-    nextIndex=leftChild;
-  
-  if(rightChild < ptable.pqsize && compProc(ptable.priorityQueueArray[rightChild],ptable.priorityQueueArray[nextIndex]))
-    nextIndex=rightChild;
-
-  if(nextIndex != curIndex){
-    swap(nextIndex,curIndex);
-    priorityQueueHeapify(nextIndex);
-  }
-  return;
-}
-
-struct proc* priorityQueueExtractMin(){
-  if(ptable.pqsize == 0)
-    return 0;
-
-  struct proc* minElt = ptable.priorityQueueArray[0];
-  ptable.priorityQueueArray[0] = ptable.priorityQueueArray[ptable.pqsize - 1];
-  ptable.pqsize--;
-  priorityQueueHeapify(0);
-
-  return minElt;
-}
-
-void priorityQueueInsert(struct proc* proc){
-  int curIndex = ptable.pqsize++;
-  ptable.priorityQueueArray[curIndex] = proc;
-
-  while(curIndex > 0){
-    int parentIndex = (curIndex-1)/2;
-    if(compProc(ptable.priorityQueueArray[parentIndex],ptable.priorityQueueArray[curIndex]))
-      break;
-    swap(curIndex,parentIndex);
-    curIndex = parentIndex;
-  }
-
-  return;
-}
-
-//helper function called when a process is added to ready queue(priority queue)
-void makeProcRunnable(struct proc* proc){
-  proc->state = RUNNABLE;
-  priorityQueueInsert(proc);
-}
-``` -->
 
 The function `makeProcRunnable()` was called whenever a process was made RUNNABLE. This function set the process state to runnable, and also added the process to the Ready Queue. This function was called at line 233, 299, 476, 551, 578 in the file `proc.c`. 
 Following are the functions in which `makeProcRunnable()` was called:
 * `userinit()` - The first process was added to the Ready Queue here
-<!-- 
-  ```c
-    acquire(&ptable.lock);             //line 228
-    ptable.pqsize = 0;
-    makeProcRunnable(p);
-    release(&ptable.lock);
-  ``` -->
-
 * `fork()` -  The newly created runnable process was added to Ready Queue here
-
-  <!-- ```c
-    acquire(&ptable.lock);           //line 297
-    makeProcRunnable(np);
-    release(&ptable.lock);
-  ``` -->
-
-*  `yield()` - In this function, the currently running process was made to yield CPU thereby making it runnable
-
-  <!-- ```c
-  // Give up the CPU for one scheduling round.
-  void
-  yield(void)
-  {
-    acquire(&ptable.lock);  //DOC: yieldlock
-    makeProcRunnable(myproc());
-    sched();
-    release(&ptable.lock);
-  }
-  ``` -->
-
+* `yield()` - In this function, the currently running process was made to yield CPU thereby making it runnable
 * `wakeup1()` - All sleeping process were made runnable in this function
-
-  <!-- ```c
-  static void
-  wakeup1(void *chan)
-  {
-    struct proc *p;
-  
-    for(p = ptable.proc; p < &ptable.proc[NPROC]; p++)
-      if(p->state == SLEEPING && p->chan == chan){
-        makeProcRunnable(p);
-      }
-  }
-  ``` -->
-
 * `kill()` - In order to kill a sleeping process its first made runnable
-
-  <!-- ```c
-  // line 575
-  
-  // Wake process from sleep if necessary.
-  if(p->state == SLEEPING){
-      makeProcRunnable(p);
-  }
-  ``` -->
 
 The function `scheduler` in `proc.c` was changed as follows in order to implement shortest job first scheduling. The following lines were changed inside the scheduler ie. line 419 to line 426. We first get the process with the minimum burst time from the Ready Queue using the `priorityQueueExtractMin()` function. If there is no runnable process, we release the lock and continue back into the `for loop` at line 413.
 
-```c
+```C
     p = priorityQueueExtractMin();          // line 419  
 
     if(p==0) {  // No process is curently runnable
@@ -577,93 +368,11 @@ For each iteration of outer `for` loop, the pointer to the process with  minimum
 The test file `test_scheduler.c` contains the following functions:
 
 * `looper()`: This function simply runs the inner loop `loopfac` number of times. The inner loop runs with an empty body for 10^8 iteractions. Thus in total the number of iterations is `loopfac * 10^8`. It is a means to include an CPU-bound process
-<!-- ```c
-// Loop "loopfac" number of times         line 4
-void looper(int bt, int loopfac) {
-  set_burst_time(bt);        
-
-  if (loopfac>5) 
-    loopfac = 5;
-
-  for (volatile int l=0; l<loopfac; l++)
-    for (volatile int i=0; i<100000000; i++)
-      ;
-
-  getProcInfo();
-  exit();
-}
-``` -->
 * `userIO()`: This function simply takes the reader input from STDIN and prints it back on STDOUT. It is a means to include an IO-bound process, which waits for user input while the other processes can run.
-<!-- ```c
-// User IO                                 line 19
-void userIO(int bt)
-{
-  set_burst_time(bt);
-
-  char buf[256];
-  printf(1, "Enter for user IO:\n");
-  int amt = read(0, buf, 256);
-  buf[amt] = 0;
-  printf(1, "So you entered: %s", buf);
-
-  getProcInfo(); 
-  exit();
-}
-``` -->
 * `fileIO()`: This function simply reads 1500 bytes from the README file from the xv6 file system and prints it to STDOUT. It is a means to include a file-IO bound process, which reads content while the other processes are RUNNABLE.
-<!-- ```c
-// File IO                                  line 34
-void fileIO(int bt)
-{
-  set_burst_time(bt);
-
-  int fd = open("README", 0);
-  char buf[1500];
-  read(fd, buf, 1500);
-  buf[1499] = 0;
-  printf(1, "1500 Words of README: \n%s\n---------\n", buf);
-
-  getProcInfo(); 
-  exit();
-}
-``` -->
 
 The driver code is mainly responsible for creating 5 child processes and calling the above functions to perform different tasks in different child processes. It passes the required parameters like the burst time to be set and `loopfac` in case of CPU bound loop based processes. The code then uses the PIDs to determine and print a summary of the order in which the processes completed their execution.
-<!-- ```c
-int main(int argc, char *argv[])                // line 50
-{
-  int pid[5];
-  int rpid[5];
-  char exitInfoGatherer[5][70];
 
-  if ( !(pid[0] = fork()) )  looper(6,2);
-  if ( !(pid[1] = fork()) )  userIO(1);
-  if ( !(pid[2] = fork()) )  looper(10,4);
-  if ( !(pid[3] = fork()) )  fileIO(3);
-  if ( !(pid[4] = fork()) )  looper(8,1);  
-
-  for (int i=0; i<5; i++)
-    rpid[i] = wait();
-
-  strcpy(exitInfoGatherer[0], "BurstTime: 6  - Empty loop running 2e8 times\n");
-  strcpy(exitInfoGatherer[1], "BurstTime: 1  - Taking user IO and printing it\n");
-  strcpy(exitInfoGatherer[2], "BurstTime: 10 - Empty loop running 4e8 times\n");
-  strcpy(exitInfoGatherer[3], "BurstTime: 3  - Reading from file and printing it\n");
-  strcpy(exitInfoGatherer[4], "BurstTime: 8  - Empty loop running 1e8 times\n");
-
-  printf(1, "\n******** CHILDREN EXIT ORDER SUMMARY ********\n");
-  for (int i=0; i<5; i++) {
-    for (int j=0; j<5; j++) {
-      if (rpid[i] == pid[j])
-        printf(1, exitInfoGatherer[j]);
-    }
-  }
-  printf(1, "\n****** Summary ends, completing parent *******\n\n");
-
-  getProcInfo();
-	exit();
-}
-``` -->
 Five child processes are being forked from the parent process, and their PIDs are being saved for later use (for printing the final order of execution):
 1. A loop which runs 10^8 loop 2 times, and burst time set to 6.
 2. A process for user IO, with burst time set to 1.
@@ -676,3 +385,101 @@ When `test_scheduler.c` is run, various important observations are made:
 * Each child process first sets its burst time, using a modified `set_burst_time` syscall, which sets its burst time and then calls `yield()` to preempt the child process. This is done because the burst time is being set inside the child process, and we want the child processes to actually start execution once all the child processes have been given burst times.
 * Since there is a child which reads user input (the second prodess forked) and prints it, the order in which the child processes finish executing is _partly dependent_ on _when_ the user gives the input. It first performs some printing, then waits for the user to input something. This waiting time determines how long it would be SLEEPING (and hence, won't be RUNNABLE). Since it has the shortest burst time, as soon as the user input has been read, the next process that will be scheduled is this process. Hence a fast user input means this processes finishes quickly, otherwise it may even finish in the end. 
 <!-- However, it is impossible for it to finish first, as there are pure CPU bound processes which once scheduled, will complete all the instructions without sleeping/waiting. -->
+
+---
+
+
+
+## Hybrid Round Robin Scheduler
+
+**Gist of algorithm:** Here we are using a FIFO queue to perform round robin scheduling with one additional constraint that processes are sorted according to burst time in the queue (in some rotated fashion For Eg - [7 8 1 2 3] here elements 1, 2, 3, 7, 8 are sorted if rotated thrice). Initially lets say we have [1, 2, 3, 7, 8,] as burst times. We take out process at front of queue and execute it and when a context happens we'll enqueue it at the back. So our fifo queue becomes [2, 3, 7, 8, 1]. In this fashion we can give fair chance to all processes in ready queue. 
+
+When a new process arrives, we have to just insert in sorted order in our ready queue. For Eg if current ready queue is [2, 3, 7, 8, 1] and a process with burst time 5 arrives, it will be inserted as follows [2, 3, 5, 7, 8, 1] and then same round robin fashion continues.
+
+**Time Complexity:** In scheduler we have take out process at front, this will take O(1) time. Adding a process again to ready queue at the end also takes O(1) time. Inserting a new process takes O(n) time as we need to iterate over queue to find correct position to insert.
+
+**Changes to Code:**  Refer to <path-file> for detailed code.
+
+We have added a structure `rqueue` to mimic ready queue and defined two functions `enqueue` and `dequeue` to insert/remove from queue.
+
+```c
+struct {
+  struct proc* array[NPROC];             
+  int front;
+  int rear; 
+  int size;  
+} rqueue; // Ready Queue
+
+void enqueue(struct proc* np); // Push at rear  
+struct proc* dequeue();        // Pop from front 
+```
+
+Next is when user forks current process, we have to add this new porcess to ready queue. This new process will have a default burst time of 0. Now we'll have to insert this at corrrect position in our ready queue. To do so we have a function `insert_rqueue`
+
+```c
+int fork(void){
+	// ...
+	acquire(&ptable.lock);
+  np->state = RUNNABLE;
+  insert_rqueue(np);
+  release(&ptable.lock);
+	// ...
+}
+
+void insert_rqueue(struct proc* np){
+ 	// Insert a new process with default burst time (0) at correct position 
+  // ...
+}
+```
+
+In `scheduler` we are dequeuing process at front and scheduling it using a context switch. If the ready queue is empty we release the lock and try again. In `yield` we are adding current process to ready queue again after making it `RUNNABLE`.
+
+```c
+void scheduler(void) {
+  struct proc* reqp
+  for(;;){
+   	// ...
+    acquire(&ptable.lock);
+    reqp = dequeue(); 
+
+    if(reqp == 0) {  // No process is curently runnable
+      release(&ptable.lock);
+      continue;
+    }
+
+		// ... context switch 
+    release(&ptable.lock);
+  }
+}
+
+void yield(void) {
+  acquire(&ptable.lock);
+  struct proc* proc = myproc();
+  proc->state = RUNNABLE;
+  enqueue(proc);
+  sched();
+  release(&ptable.lock);
+}
+```
+
+Finally in `set_burst_time` we're re-positioning current process to correct position in ready queue and invoking scheduler prematurely to make this change reflect and give chance to next process (pre-emption).
+
+```c
+int set_burst_time(int n){
+  struct proc* cur = myproc();
+  cur->burstTime = n;
+  acquire(&ptable.lock);
+  
+  // Reposition this process in ready queue
+  
+  cur->state = RUNNABLE;
+  sched();
+  release(&ptable.lock);
+  return 0;
+}
+```
+Since the default scheduling algorithm in `xv6` was Round-Robin, the pre-emption of process at the end of its time-slice is already happening and we do not need to make any changes for that. 
+ 
+
+
+**Output**: <TODO: Add this>
