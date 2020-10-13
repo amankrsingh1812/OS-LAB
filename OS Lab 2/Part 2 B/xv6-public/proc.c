@@ -43,19 +43,30 @@ struct proc* dequeue(){
 
 // This is used to insert a new process with default burst time (0)
 void insert_rqueue(struct proc* np){
-  int proc_inserted = 0;
+  // int proc_inserted = 0;
   const int size = rqueue.size;
+
+
+  // [0, ]
 
   if(size == 0 || rqueue.array[rqueue.front]->burstTime == 0){
     enqueue(np);
     return;
   }
 
+  struct proc* min_proc = 0;
   for(int i = 0; i < size; ++i){
     struct proc* cur = dequeue();
-    if(!proc_inserted && cur->burstTime == 0){
+    if(min_proc == 0 || min_proc->burstTime >= cur->burstTime){
+      min_proc = cur;
+    }
+    enqueue(cur);
+  }
+
+  for(int i = 0; i < size; ++i){
+    struct proc* cur = dequeue();
+    if(cur == min_proc){
       enqueue(np);
-      proc_inserted = 1;
     }
     enqueue(cur);
   }
@@ -420,7 +431,7 @@ scheduler(void)
       continue;
     }
 
-    cprintf("SCHEDULING - pid: %d  burstTime: %d state: %d\n", reqp->pid, reqp->burstTime, reqp->state);
+    // cprintf("SCHEDULING - pid: %d  burstTime: %d state: %d\n", reqp->pid, reqp->burstTime, reqp->state);
     // debug_queue();
 
     c->proc = reqp;
@@ -691,7 +702,7 @@ set_burst_time(int n)
 
 
   // at this instant rqueue looks like this
-  // [0, 0, 0, non-zero, non-zero, ....., non-zero, 0, 0, 0]
+  // [0] + [0, 0, 0, non-zero, non-zero, ....., non-zero, 0, 0, 0]
   struct proc* first_proc = rqueue.array[rqueue.front];
 
   // Step 1: place all 0 burstTime process at end

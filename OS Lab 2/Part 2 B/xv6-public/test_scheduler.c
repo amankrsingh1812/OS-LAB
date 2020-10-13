@@ -9,7 +9,7 @@ void looper(int bt, int loopfac) {
     loopfac = 5;
 
   for (volatile int l=0; l<loopfac; l++)
-    for (volatile int i=0; i<1000; i++)
+    for (volatile int i=0; i<10000000; i++)
       ;
 
   getProcInfo();
@@ -40,7 +40,7 @@ void fileIO(int bt)
   char buf[1500];
   read(fd, buf, 1500);
   buf[1499] = 0;
-  printf(1, "1500 Words of README: \n%s\n---------\n", buf);
+  // printf(1, "1500 Words of README: \n%s\n---------\n", buf);
 
   getProcInfo(); 
   exit();
@@ -50,59 +50,59 @@ void fileIO(int bt)
 int main(int argc, char *argv[])
 {
 
-  int pid[3];
-  int rpid[3];
+  // int pid[3];
+  // int rpid[3];
 
-  char exitInfoGatherer[3][70];
-
-  if ( !(pid[0] = fork()) )  looper(6,2);
-  if ( !(pid[1] = fork()) )  looper(10,4);
-  if ( !(pid[2] = fork()) )  looper(8,1); 
-
-
-  for (int i=0; i<3; i++)
-    rpid[i] = wait();
-
-  strcpy(exitInfoGatherer[0], "BurstTime: 6  - Empty loop running 2e8 times\n");
-  strcpy(exitInfoGatherer[1], "BurstTime: 10 - Empty loop running 4e8 times\n");
-  strcpy(exitInfoGatherer[2], "BurstTime: 8  - Empty loop running 1e8 times\n");
-
-  printf(1, "\n******** CHILDREN EXIT ORDER SUMMARY ********\n");
-  for (int i=0; i<3; i++) {
-    for (int j=0; j<3; j++) {
-      if (rpid[i] == pid[j])
-        printf(1, exitInfoGatherer[j]);
-    }
-  }
-  printf(1, "\n****** Summary ends, completing parent *******\n\n");
-
-  // int pid[5];
-  // int rpid[5];
-  // char exitInfoGatherer[5][70];
+  // char exitInfoGatherer[3][70];
 
   // if ( !(pid[0] = fork()) )  looper(6,2);
-  // if ( !(pid[1] = fork()) )  userIO(1);
-  // if ( !(pid[2] = fork()) )  looper(10,4);
-  // if ( !(pid[3] = fork()) )  fileIO(3);
-  // if ( !(pid[4] = fork()) )  looper(8,1);  
+  // if ( !(pid[1] = fork()) )  looper(10,4);
+  // if ( !(pid[2] = fork()) )  looper(8,1); 
 
-  // for (int i=0; i<5; i++)
+
+  // for (int i=0; i<3; i++)
   //   rpid[i] = wait();
 
   // strcpy(exitInfoGatherer[0], "BurstTime: 6  - Empty loop running 2e8 times\n");
-  // strcpy(exitInfoGatherer[1], "BurstTime: 1  - Taking user IO and printing it\n");
-  // strcpy(exitInfoGatherer[2], "BurstTime: 10 - Empty loop running 4e8 times\n");
-  // strcpy(exitInfoGatherer[3], "BurstTime: 3  - Reading from file and printing it\n");
-  // strcpy(exitInfoGatherer[4], "BurstTime: 8  - Empty loop running 1e8 times\n");
+  // strcpy(exitInfoGatherer[1], "BurstTime: 10 - Empty loop running 4e8 times\n");
+  // strcpy(exitInfoGatherer[2], "BurstTime: 8  - Empty loop running 1e8 times\n");
 
   // printf(1, "\n******** CHILDREN EXIT ORDER SUMMARY ********\n");
-  // for (int i=0; i<5; i++) {
-  //   for (int j=0; j<5; j++) {
+  // for (int i=0; i<3; i++) {
+  //   for (int j=0; j<3; j++) {
   //     if (rpid[i] == pid[j])
   //       printf(1, exitInfoGatherer[j]);
   //   }
   // }
   // printf(1, "\n****** Summary ends, completing parent *******\n\n");
+
+  int pid[5];
+  int rpid[5];
+  char exitInfoGatherer[5][70];
+
+  if ( !(pid[0] = fork()) )  looper(6,2);
+  if ( !(pid[1] = fork()) )  userIO(1);
+  if ( !(pid[2] = fork()) )  looper(10,4);
+  if ( !(pid[3] = fork()) )  fileIO(3);
+  if ( !(pid[4] = fork()) )  looper(8,1);  
+
+  for (int i=0; i<5; i++)
+    rpid[i] = wait();
+
+  strcpy(exitInfoGatherer[0], "BurstTime: 8  - Empty loop running 2e8 times\n");
+  strcpy(exitInfoGatherer[1], "BurstTime: 1  - Taking user IO and printing it\n");
+  strcpy(exitInfoGatherer[2], "BurstTime: 10 - Empty loop running 4e8 times\n");
+  strcpy(exitInfoGatherer[3], "BurstTime: 3  - Reading from file and printing it\n");
+  strcpy(exitInfoGatherer[4], "BurstTime: 6  - Empty loop running 1e8 times\n");
+
+  printf(1, "\n******** CHILDREN EXIT ORDER SUMMARY ********\n");
+  for (int i=0; i<5; i++) {
+    for (int j=0; j<5; j++) {
+      if (rpid[i] == pid[j])
+        printf(1, exitInfoGatherer[j]);
+    }
+  }
+  printf(1, "\n****** Summary ends, completing parent *******\n\n");
 
   getProcInfo();
 	exit();
