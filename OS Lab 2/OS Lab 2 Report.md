@@ -435,7 +435,7 @@ When `testCase1.c` is run, various important observations are made:
 
 **Screenshot:** In the screenshot below, we can see that even though the first process (PID: 14) has the least burst time, it _can not_ complete execution because it is waiting for user IO and hence in SLEEPING state. Hence, it can only resume once the user gives the Input. After which it gets executed.
 
-![Test Case 1](/home/aman/Desktop/OSLAB/OS-LAB/OS Lab 2/testCase1.png)
+![Test Case 1](./testCase1.png)
 ---
 
 ### testCase2.c
@@ -457,7 +457,7 @@ _Note_ that as default burst time is 0, the driver code/parent process (which ha
 
 **_Quantitatively:_** (see output before summary) the turnaround time (time it took to complete its execution after being ready for execution) for the second process is almost _double_ the turnaround time for the first process. This is due to the fact that both the processes are ready for execution at almost the same time and one process executes itself while the other one waits for its execution and then is executed.
 
-![Test Case 2](/home/aman/Desktop/OSLAB/OS-LAB/OS Lab 2/testCase2.png)
+![Test Case 2](./testCase2.png)
 ---
 
 ### testCase3.c
@@ -474,11 +474,11 @@ The above program is run on `Xv6` with SJF (Shortest Job First) scheduler and wi
 
 * Shortest Job First scheduler 
 
-  ![Shortest Job First scheduler ](/home/aman/Desktop/OSLAB/OS-LAB/OS Lab 2/testCase3_sjf.png)
+  ![Shortest Job First scheduler ](./testCase3_sjf.png)
 
 * Round Robin scheduler
 
-  ![Round Robin scheduler](/home/aman/Desktop/OSLAB/OS-LAB/OS Lab 2/testCase3_roundRobin.png)
+  ![Round Robin scheduler](./testCase3_roundRobin.png)
 
 Two significant differences are being observed:
 
