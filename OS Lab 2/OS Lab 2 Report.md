@@ -361,8 +361,7 @@ scheduler(void)
   struct proc *p;
   ...
   for(;;){
-    ...
-    //Choose a process from ready queue to run
+    ...  // Choose a process from ready queue to run
     acquire(&ptable.lock);
     p = priorityQueueExtractMin();     // Find the process with minimum Burst Time using Priority Queue
 
@@ -466,10 +465,8 @@ int fork(void){
 	...
 }
 
-void insert_rqueue(struct proc* np){
- 	// Insert a new process with default burst time (0) at correct position 
-  // ...
-}
+void insert_rqueue(struct proc* np)  // Insert a new process with default burst time (0) at correct position 
+
 ```
 
 In `scheduler` we are dequeuing process at front and scheduling it using a context switch. If the ready queue is empty we release the lock and try again. In `yield` we are adding current process to ready queue again after making it `RUNNABLE`.
