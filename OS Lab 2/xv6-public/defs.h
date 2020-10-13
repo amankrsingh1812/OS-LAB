@@ -124,7 +124,7 @@ void            yield(void);
 int		        wolfie(void*, uint);
 int 		    getProcNum(void);
 int 		    getMaxPid(void);
-int             getProcInfo();
+int             getProcInfo(int, struct processInfo*);
 int             get_burst_time(void);
 int             set_burst_time(int);
 

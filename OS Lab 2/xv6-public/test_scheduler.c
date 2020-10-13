@@ -12,7 +12,6 @@ void looper(int bt, int loopfac) {
     for (volatile int i=0; i<100000000; i++)
       ;
 
-  getProcInfo();
   exit();
 }
 
@@ -27,7 +26,6 @@ void userIO(int bt)
   buf[amt] = 0;
   printf(1, "So you entered: %s", buf);
 
-  getProcInfo(); 
   exit();
 }
 
@@ -40,9 +38,8 @@ void fileIO(int bt)
   char buf[1500];
   read(fd, buf, 1500);
   buf[1499] = 0;
-  printf(1, "1500 Words of README: \n%s\n---------\n", buf);
+  // printf(1, "1500 Words of README: \n%s\n---------\n", buf);
 
-  getProcInfo(); 
   exit();
 }
 
@@ -62,22 +59,22 @@ int main(int argc, char *argv[])
   for (int i=0; i<5; i++)
     rpid[i] = wait();
 
-  strcpy(exitInfoGatherer[0], "BurstTime: 6  - Empty loop running 2e8 times\n");
+  strcpy(exitInfoGatherer[0], "BurstTime: 8  - Empty loop running 2e8 times\n");
   strcpy(exitInfoGatherer[1], "BurstTime: 1  - Taking user IO and printing it\n");
   strcpy(exitInfoGatherer[2], "BurstTime: 10 - Empty loop running 4e8 times\n");
   strcpy(exitInfoGatherer[3], "BurstTime: 3  - Reading from file and printing it\n");
-  strcpy(exitInfoGatherer[4], "BurstTime: 8  - Empty loop running 1e8 times\n");
+  strcpy(exitInfoGatherer[4], "BurstTime: 6  - Empty loop running 1e8 times\n");
 
-  printf(1, "\n******** CHILDREN EXIT ORDER SUMMARY ********\n");
+  int outfd = 1;
+  printf(outfd, "\n******** CHILDREN EXIT ORDER SUMMARY ********\n");
   for (int i=0; i<5; i++) {
     for (int j=0; j<5; j++) {
       if (rpid[i] == pid[j])
-        printf(1, exitInfoGatherer[j]);
+        printf(outfd, exitInfoGatherer[j]);
     }
   }
-  printf(1, "\n****** Summary ends, completing parent *******\n\n");
+  printf(outfd, "\n****** Summary ends, completing parent *******\n\n");
 
-  getProcInfo();
 	exit();
 }
 

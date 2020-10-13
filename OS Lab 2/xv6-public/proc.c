@@ -655,18 +655,23 @@ getMaxPid(void)
 }
 
 int 
-getProcInfo()
+getProcInfo(int pid, struct processInfo* pi)
 {
-  int ret = -1;
-  struct proc *p = myproc();
-  
+  struct proc *p = 0;
+  int found = 0;
   acquire(&ptable.lock);
-
-  cprintf(" PID: %d   NCS: %d    BurstTime: %d \n", p->pid, p->numcs, p->burstTime);
-  
-
+  for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
+    if(p->state != UNUSED && p->pid == pid){
+        pi->ppid = p->parent->pid;
+        pi->psize = p->sz;
+        pi->numberContextSwitches = p->numcs;
+        found = 1;
+        break;
+      }
+  }
   release(&ptable.lock);
-  return ret;
+  if(found) return 0;
+  return -1;
 }
 
 int

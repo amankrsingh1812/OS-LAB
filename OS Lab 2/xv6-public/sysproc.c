@@ -131,9 +131,12 @@ sys_getMaxPid(void)
 int 
 sys_getProcInfo(void)
 {
-  return getProcInfo();
+  int pid;
+  struct processInfo* pi;
+  if(argint(0, &pid) < 0) return -1;
+  if(argptr(1, (void*)&pi, sizeof(pi)) < 0) return -1;
+  return getProcInfo(pid, pi);
 }
-
 
 int
 sys_get_burst_time(void)
