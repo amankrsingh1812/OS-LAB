@@ -313,8 +313,6 @@ exit(void)
   struct proc *p;
   int fd;
 
-  cprintf("Exiting PID: %d\n", curproc->pid);
-
   if(curproc == initproc)
     panic("init exiting");
 
@@ -423,7 +421,7 @@ scheduler(void)
       continue;
     }
 
-    cprintf("####### SCHEDULING - pid: %d  burstTime: %d\n", p->pid, p->burstTime);
+    // cprintf("####### SCHEDULING - pid: %d  burstTime: %d\n", p->pid, p->burstTime);
 
     // Switch to chosen process.  It is the process's job
     // to release ptable.lock and then reacquire it
