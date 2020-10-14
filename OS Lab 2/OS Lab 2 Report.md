@@ -67,7 +67,7 @@ int burstTime;
 ### Syscall getNumProc 
 
 Function `sys_getNumProc(void)` was defined in file `sysproc.c` at line 95, which calls the function `getNumProc()` defined in `proc.c` and returns the value returned by it.
-​```C
+```c
 // sysproc.c
 int                                         // line 95
 sys_getNumProc(void)
