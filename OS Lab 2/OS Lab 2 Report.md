@@ -464,10 +464,10 @@ _Note_ that as default burst time is 0, the driver code/parent process (which ha
 
 This file is used illustrate the **difference between default round robin scheduler and the shortest job first scheduler**. Five child processes are being forked from the parent process :
 
-* 2 D loop running 8 X 10000000 times with burst time 10
+* 2D loop running 8 X 10000000 times with burst time 10
 * loop running 500000000 times and calculating Fibonacci number with burst time 15 
-* 3 D loop running 1000 X 1000 X 1000 times with burst time 18
-* 2 D loop running 2 X 500000000 times with burst time 19
+* 3D loop running 1000 X 1000 X 1000 times with burst time 18
+* 2D loop running 2 X 500000000 times with burst time 19
 * loop running 1000000000 times and calculating Fibonacci number with burst time 20
 
 The above program is run on `Xv6` with SJF (Shortest Job First) scheduler and with Round Robin scheduler independently. Output obtained is given below:
