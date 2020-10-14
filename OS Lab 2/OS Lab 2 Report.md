@@ -1,6 +1,6 @@
 ## Part A: 
 
-Refer the patch files in [Patch/PartA/](./Patch/PartA/)
+Refer the patch files in `Patch/PartA/`
 
 For creating the system calls, we needed to change these files:- 
 * `user.h `- The function prototypes of our system calls (for user-space) were added in this file at line 27
@@ -204,7 +204,7 @@ For testing our system calls, we created 4 user-level applications -
 
 For creating the user-level application, we need to make some changes in the `MakeFile` and create the `c` files for the user-level application.
 
-In [Makefile](Patch/PartA/Makefile) we need to add our user-level applications to `UPROGS` and `EXTRA	`.
+In `Patch/PartA/Makefile` we need to add our user-level applications to `UPROGS` and `EXTRA	`.
 
 ```makefile
 // Makefile
@@ -221,17 +221,17 @@ EXTRA=\
 ```
 
 ### numProcTest 
-We created [numProcTest.c](Patch/PartA/numProcTest.c) in which we simply printed the output of the system call `getNumProc` to the console using `printf`. 1st parameter in `printf` is file descriptor which is 1 for console out. At the end we used `exit` system call to exit from this program.
+We created `numProcTest.c` in which we simply printed the output of the system call `getNumProc` to the console using `printf`. 1st parameter in `printf` is file descriptor which is 1 for console out. At the end we used `exit` system call to exit from this program.
 
 
 ### maxPidTest 
-We created [maxPidTest.c](./Patch/PartA/maxPidTest.c) in which we simply printed the output of the system call `getMaxPid` to the console. At the end we used `exit` system call to exit from this program.
+We created `maxPidTest.c`in which we simply printed the output of the system call `getMaxPid` to the console. At the end we used `exit` system call to exit from this program.
 
 ### procInfoTest 
-We created [procInfoTest.c](Patch/PartA/procInfoTest.c) in which we use the syscall getMaxPid to get the Max PID, then use the system call `getProcInfo` to get Info about the process with that PID and then print the values of the fields of the struct `processInfo` to the console. We included `processInfo.h` as we are using the struct `processInfo`. At the end we used `exit` system call to exit from this program.
+We created `procInfoTest.c` in which we use the syscall getMaxPid to get the Max PID, then use the system call `getProcInfo` to get Info about the process with that PID and then print the values of the fields of the struct `processInfo` to the console. We included `processInfo.h` as we are using the struct `processInfo`. At the end we used `exit` system call to exit from this program.
 
 ### getSetBTime
-We created [getSetBTime.c](./Patch/PartA/getSetBTime.c) in which we first print the current burst time for this process (whose default value is 0), using the system call `get_burst_time`. Then we take user input for the new burst time to be set and after some validation use this input to set the new burst time using the system call `set_burst_time`, while passing the new value. Finally, we again use `get_burst_time` to demostrate that the burst time has indeed been set correctly.
+We created `getSetBTime.c` in which we first print the current burst time for this process (whose default value is 0), using the system call `get_burst_time`. Then we take user input for the new burst time to be set and after some validation use this input to set the new burst time using the system call `set_burst_time`, while passing the new value. Finally, we again use `get_burst_time` to demostrate that the burst time has indeed been set correctly.
 
 ![Syscall screenshot](partA_ss.png "Syscall screenshot")
 
@@ -239,7 +239,7 @@ We created [getSetBTime.c](./Patch/PartA/getSetBTime.c) in which we first print 
 
 ## Part B (Shortest Job First Scheduler):  
 
-Refer the patch files in [Patch/PartB/](./Patch/PartB/)
+Refer the patch files in `Patch/PartB/` for detailed code.
 
 ### Scheduler Implementation
 
@@ -446,7 +446,7 @@ When a new process arrives, we have to just insert in sorted order in our ready 
 
 **Time Complexity:** In scheduler we have take out process at front, this will take O(1) time. Adding a process again to ready queue at the end also takes O(1) time. Inserting a new process takes O(n) time as we need to iterate over queue to find correct position to insert.
 
-**Changes to Code:**  Refer to [Patch/Bonus](Patch/Bonus) for detailed code.
+**Changes to Code:**  Refer to `Patch/Bonus` for detailed code.
 
 We have added a structure `rqueue` to mimic ready queue and defined two functions `enqueue` and `dequeue` to insert/remove from queue.
 
