@@ -188,7 +188,7 @@ We added an extra field `burstTime` in the struct `proc` to keep track of the bu
 
 ```C
 // proc.h
-int burstTime;                                // line 52             
+int burstTime;                                // line 53            
 ```
 We have initialized the `burstTime` field of a process to 0 in the function `allocproc()`. This function is called while creating a process and hence, is called only once for a process.
 ```C
@@ -208,7 +208,7 @@ sys_get_burst_time(void)
 The function `get_burst_time` contains the main code for this syscall can be found in the file `proc.c` at line 602. Since we have already mantained the burst time in the struct `proc`, we simply use the pointer to the currently running process which is returned by myproc(), with which we read the burstTime property of the process.
 ```C
 // proc.c
-int											  // line 602
+int											                    // line 602
 get_burst_time()
 {
   return myproc()->burstTime;
@@ -276,14 +276,14 @@ EXTRA=\
 ```
 
 ### numProcTest 
-We created [numProcTest.c](Patch/PartA/wolfietest.c) in which we simply printed the output of the system call `getNumProc` to the console using `printf`. 1st parameter in `printf` is file descriptor which is 1 for console out. At the end we used `exit` system call to exit from this program.
+We created [numProcTest.c](Patch/PartA/numProcTest.c) in which we simply printed the output of the system call `getNumProc` to the console using `printf`. 1st parameter in `printf` is file descriptor which is 1 for console out. At the end we used `exit` system call to exit from this program.
 
 
 ### maxPidTest 
-We created [maxPidTest.c](./Patch/PartA/wolfietest.c) in which we simply printed the output of the system call `getMaxPid` to the console. At the end we used `exit` system call to exit from this program.
+We created [maxPidTest.c](./Patch/PartA/maxPidTest.c) in which we simply printed the output of the system call `getMaxPid` to the console. At the end we used `exit` system call to exit from this program.
 
 ### procInfoTest 
-We created [procInfoTest.c](Patch/PartA/wolfietest.c) in which we use the syscall getMaxPid to get the Max PID, then use the system call `getProcInfo` to get Info about the process with that PID and then print the values of the fields of the struct `processInfo` to the console. We included `processInfo.h` as we are using the struct `processInfo`. At the end we used `exit` system call to exit from this program.
+We created [procInfoTest.c](Patch/PartA/procInfoTest.c) in which we use the syscall getMaxPid to get the Max PID, then use the system call `getProcInfo` to get Info about the process with that PID and then print the values of the fields of the struct `processInfo` to the console. We included `processInfo.h` as we are using the struct `processInfo`. At the end we used `exit` system call to exit from this program.
 
 ### getSetBTime
 We created [getSetBTime.c](./Patch/PartA/getSetBTime.c) in which we first print the current burst time for this process (whose default value is 0), using the system call `get_burst_time`. Then we take user input for the new burst time to be set and after some validation use this input to set the new burst time using the system call `set_burst_time`, while passing the new value. Finally, we again use `get_burst_time` to demostrate that the burst time has indeed been set correctly.
@@ -308,6 +308,8 @@ This part require the default number of CPUs to simulate to be changed to 1. It 
 The default scheduler of `xv6` was an unweighted round robin scheduler which preempts the current process after running it for certain fixed time (indicated by an _interrupt_ from _hardware timer_). But the required scheduler needs to be Shortest Job First scheduler, so it was required to disable this preemption. It was achieved by commenting the following code from the file `traps.c`
 
 ```c
+// trap.c
+
 // if(myproc() && myproc()->state == RUNNING &&        // line 105
 //    tf->trapno == T_IRQ0+IRQ_TIMER)
 //      yield();
@@ -316,7 +318,7 @@ Since the burst time of a process was set by the _process itself_, so after sett
 
 ```c
 // proc.c
-int
+int                                         // line 686
 set_burst_time(int n)
 {
   myproc()->burstTime = n;
