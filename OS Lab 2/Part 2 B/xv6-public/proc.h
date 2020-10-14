@@ -12,6 +12,7 @@ struct cpu {
 
 // int time_slice = 0;
 extern struct proc* base_process;
+extern int base_process_pid;
 
 extern struct cpu cpus[NCPU];
 extern int ncpu;

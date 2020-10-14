@@ -21,6 +21,7 @@ struct {
 } rqueue; // Running Queue
 
 struct proc* base_process = 0;
+int base_process_pid = 0;
 
 void enqueue(struct proc* np){
   if(rqueue.size == NPROC) return; 
@@ -429,20 +430,28 @@ scheduler(void)
     reqp = dequeue(); 
 
     if(reqp == 0) {
-      base_process = 0;
+      if(base_process != 0){
+        // cprintf("No running processes");
+        debug_queue();
+        base_process = 0;
+        base_process_pid = 0;
+      }
       release(&ptable.lock); // No process is curently runnable
       continue;
     }
 
+    // debug_queue();
+
     if(rqueue.size == 0 && reqp->pid >= 3){
       // this is the only process in queue
-      if(base_process == 0){
+      if(base_process_pid == 0){
         base_process = reqp;
+        base_process_pid = reqp->pid;
       }
     }
 
-    int pid = base_process == 0 ? 0 : base_process->pid;
-    cprintf("SCHEDULING - pid: %d  burstTime: %d baseprocess: %d\n", reqp->pid, reqp->burstTime, pid);
+    // int pid = base_process == 0 ? 0 : base_process->pid;
+    cprintf("SCHEDULING - pid: %d  burstTime: %d baseprocess: %d\n", reqp->pid, reqp->burstTime, base_process_pid);
     // debug_queue();
 
     c->proc = reqp;
@@ -778,6 +787,7 @@ set_burst_time(int n)
   if(should_rotate){
     while(rqueue.array[rqueue.front] != minBurstproc) enqueue(dequeue());
     base_process = minBurstproc;
+    base_process_pid = minBurstproc->pid;
   }
 
 context_switch:

@@ -112,7 +112,7 @@ trap(struct trapframe *tf)
       if(time_slice_initializing == 1) ++time_slice;
       else {
         time_slice_initializing = 1;
-        time_slice = 0;
+        time_slice = 1;
       }
     }
     else{
