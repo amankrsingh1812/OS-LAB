@@ -500,7 +500,7 @@ When a new process arrives, we have to just insert in sorted order in our ready 
 
 **Time Complexity:** In scheduler we have take out process at front, this will take O(1) time. Adding a process again to ready queue at the end also takes O(1) time. Inserting a new process takes O(n) time as we need to iterate over queue to find correct position to insert.
 
-**Changes to Code:**  Refer to <path-file> for detailed code.
+**Changes to Code:**  Refer to [Patch/PartB2](Patch/PartB2) for detailed code.
 
 We have added a structure `rqueue` to mimic ready queue and defined two functions `enqueue` and `dequeue` to insert/remove from queue.
 
