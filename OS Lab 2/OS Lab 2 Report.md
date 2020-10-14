@@ -1,4 +1,4 @@
-## Part A: 
+## **Part A**: 
 
 Refer the patch files in `Patch/PartA/`
 
@@ -12,7 +12,7 @@ For creating the system calls, we needed to change these files:-
 * `sysproc.c `- The definition of system calls were added in this file and the file `processInfo.h` was included
 * `proc.c `- Since the struct `ptable` and other utility functions for process management were in this file, the main code for system calls was added in this file
 
-### Syscall getNumProc 
+### **Syscall getNumProc** 
 
 Function `sys_getNumProc(void)` was defined in file `sysproc.c` at line 95, which calls the function `getNumProc()` defined in `proc.c` and returns the value returned by it. 
 
@@ -37,7 +37,7 @@ getNumProc(void)
 ---
 
 
-### Syscall getMaxPid
+### **Syscall getMaxPid**
 Function `sys_getMaxPid(void)` was defined in file `sysproc.c` at line 103, which calls the function `getMaxPid()` defined in `proc.c` and returns the value returned by it.
 
 The function `getMaxPid` contains the main code for this syscall can be found in the file `proc.c` at line 563. We have looped through all the slots of the `proc` array of the `ptable` and found the maximum of all the process with a state other than UNUSED. Before iterating through the `proc` array we acquired the lock and released it after it. This is done to ensure that another process doesn't modify the ptable while we are iterating through it.  
@@ -58,9 +58,11 @@ getMaxPid(void)
 }
 ```
 ---
-### Syscall getProcInfo
+### **Syscall getProcInfo**
 
 We added an extra field `numcs` in the struct `proc` to keep track of the number of context switches of a process
+ 
+ <br/>
 
 ```C
 // proc.h
@@ -117,7 +119,7 @@ getProcInfo(int pid, struct processInfo* pi)
 
 ---
 
-### Syscall get_burst_time
+### **Syscall get_burst_time**
 
 We added an extra field `burstTime` in the struct `proc` to keep track of the burst time of the process.
 
@@ -126,6 +128,9 @@ We added an extra field `burstTime` in the struct `proc` to keep track of the bu
 int burstTime;                                // line 53            
 ```
 We have initialized the `burstTime` field of a process to 0 in the function `allocproc()`. This function is called while creating a process and hence, is called only once for a process.
+
+<br/>
+
 ```C
 // proc.c
 p->burstTime = 0;                             // line 96             
@@ -144,7 +149,7 @@ get_burst_time()
 ```
 ---
 
-### Syscall set_burst_time
+### **Syscall set_burst_time**
 
 Function `sys_set_burst_time(void)` was defined in file `sysproc.c` at line 134. It first gets the argument burstTime `btime` using `argint`, then calls the function `set_burst_time(btime)` defined in `proc.c` and returns the value returned by it.
 ```C
@@ -174,7 +179,7 @@ set_burst_time(int n)
 ```
 ---
 
-## User-level Application for our System Calls
+## **User-level Application for our System Calls**
 For testing our system calls, we created 4 user-level applications -
 * `numProcTest` for testing `getNumProc()`  
 * `maxPidTest` for testing `getMaxPid()`  
@@ -184,6 +189,13 @@ For testing our system calls, we created 4 user-level applications -
 For creating the user-level application, we need to make some changes in the `MakeFile` and create the `c` files for the user-level application.
 
 In `Patch/PartA/Makefile` we need to add our user-level applications to `UPROGS` and `EXTRA	`.
+
+
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
 
 ```makefile
 // Makefile
@@ -199,28 +211,28 @@ EXTRA=\
 	
 ```
 
-### numProcTest 
+### **numProcTest** 
 We created `numProcTest.c` in which we simply printed the output of the system call `getNumProc` to the console using `printf`. 1st parameter in `printf` is file descriptor which is 1 for console out. At the end we used `exit` system call to exit from this program.
 
 
-### maxPidTest 
+### **maxPidTest** 
 We created `maxPidTest.c`in which we simply printed the output of the system call `getMaxPid` to the console. At the end we used `exit` system call to exit from this program.
 
-### procInfoTest 
+### **procInfoTest** 
 We created `procInfoTest.c` in which we use the syscall getMaxPid to get the Max PID, then use the system call `getProcInfo` to get Info about the process with that PID and then print the values of the fields of the struct `processInfo` to the console. We included `processInfo.h` as we are using the struct `processInfo`. At the end we used `exit` system call to exit from this program.
 
-### getSetBTime
+### **getSetBTime**
 We created `getSetBTime.c` in which we first print the current burst time for this process (whose default value is 0), using the system call `get_burst_time`. Then we take user input for the new burst time to be set and after some validation use this input to set the new burst time using the system call `set_burst_time`, while passing the new value. Finally, we again use `get_burst_time` to demostrate that the burst time has indeed been set correctly.
 
 ![Syscall screenshot](partA_ss.png "Syscall screenshot")
 
 ---
 
-## Part B (Shortest Job First Scheduler):  
+## **Part B (Shortest Job First Scheduler)**  
 
 Refer the patch files in `Patch/PartB/` for detailed code.
 
-### Scheduler Implementation
+### **Scheduler Implementation**
 
 This part require the default number of CPUs to simulate to be changed to 1. It was achieved by changing the constant `NCPU` to 1 in `param.h`
 
@@ -230,6 +242,10 @@ This part require the default number of CPUs to simulate to be changed to 1. It 
 ```
 
 The default scheduler of `xv6` was an unweighted round robin scheduler which preempts the current process after running it for certain fixed time (indicated by an _interrupt_ from _hardware timer_). But the required scheduler needs to be Shortest Job First scheduler, so it was required to disable this preemption. It was achieved by commenting the following code from the file `traps.c`
+
+<br/>
+<br/>
+<br/>
 
 ```c
 // trap.c
@@ -327,11 +343,11 @@ The important places in which we added a process to the Ready Queue were the fol
     release(&ptable.lock);
   }
   ```
-### Testing 
+### **Testing** 
 
 We used created 3 files for testing and examining our scheduler under varied circumstances to validate its robustness and take observations. The files are described below:
 
-#### testCase1.c
+#### **testCase1.c**
 
 This file is used to study the behavior of implemented SJF scheduler when there is a mixture of **CPU bound and IO bound processes**.
 The test file `testCase1.c` contains the following functions:
@@ -364,7 +380,7 @@ When `testCase1.c` is run, various important observations are made:
 ![Test Case 1](./testCase1.png)
 ---
 
-#### testCase2.c
+#### **testCase2.c**
 
 This file is used to illustrate the **significance of the burst time** of the process in the order of execution of the processes waiting to be run.
 
@@ -386,7 +402,7 @@ _Note_ that as default burst time is 0, the driver code/parent process (which ha
 ![Test Case 2](./testCase2.png)
 ---
 
-#### testCase3.c
+#### **testCase3.c**
 
 This file is used illustrate the **difference between default round robin scheduler and the shortest job first scheduler**. Five child processes are being forked from the parent process :
 
@@ -417,7 +433,7 @@ These trends in `Responsiveness` and `Turnaround time` can also be seen in the o
 
 ---
 
-## Bonus (Hybrid Round Robin Scheduler)
+## **Bonus (Hybrid Round Robin Scheduler)**
 
 **Gist of algorithm:** Here we are using a FIFO queue to perform round robin scheduling with one additional constraint that processes are sorted according to burst time in the queue (in some rotated fashion For Eg - [7 8 1 2 3] here elements 1, 2, 3, 7, 8 are sorted if rotated thrice). Initially lets say we have [1, 2, 3, 7, 8,] as burst times. We take out process at front of queue and execute it and when a context happens we'll enqueue it at the back. So our fifo queue becomes [2, 3, 7, 8, 1]. In this fashion we can give fair chance to all processes in ready queue. 
 
@@ -505,7 +521,12 @@ int set_burst_time(int n){
 }
 ```
 
-In the `trap` function inside `trap.c` we are implementing the time quanta. For this we have defined `base_process` as the process from which time quanta is determined (smallest burst time process in queue). Now if the currently executing process is base process, we don't pre-empt it and count number of ticks taken till its completion. Then we are using exactly these many ticks for all other processes. 
+In the `trap` function inside `trap.c` we are implementing the time quanta. For this we have defined `base_process` as the process from which time quanta is determined (smallest burst time process in queue). Now if the currently executing process is base process, we don't pre-empt it and count number of ticks taken till its completion. Then we are using exactly these many ticks for all other processes.
+
+<br/>
+<br/>
+<br/>
+
 ```c
 void trap(struct trapframe *tf){
   //...
@@ -532,7 +553,7 @@ void trap(struct trapframe *tf){
 }
 ```
 
-### Testing 
+### **Testing** 
 
 For testing the hybrid scheduler an user-level application `test_scheduler` is created. The output obtained is shown below:
 
