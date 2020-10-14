@@ -10,6 +10,9 @@ struct cpu {
   struct proc *proc;           // The process running on this cpu or null
 };
 
+// int time_slice = 0;
+extern struct proc* base_process;
+
 extern struct cpu cpus[NCPU];
 extern int ncpu;
 
