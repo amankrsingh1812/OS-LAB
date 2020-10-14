@@ -67,7 +67,7 @@ int burstTime;
 ### Syscall getNumProc 
 
 Function `sys_getNumProc(void)` was defined in file `sysproc.c` at line 95, which calls the function `getNumProc()` defined in `proc.c` and returns the value returned by it.
-```c
+​```c
 // sysproc.c
 int                                         // line 95
 sys_getNumProc(void)
@@ -292,7 +292,9 @@ We created [getSetBTime.c](./Patch/PartA/getSetBTime.c) in which we first print 
 
 ---
 
-## Part B_1:  
+
+
+## Part B (Shortest Job First Scheduler):  
 
 Refer the patch files in [Patch/PartB1/](./Patch/PartB1/)
 
@@ -401,11 +403,11 @@ The important places in which we added a process to the Ready Queue were the fol
     release(&ptable.lock);
   }
   ```
-## Testing 
+### Testing 
 
 We used created 3 files for testing and examining our scheduler under varied circumstances to validate its robustness and take observations. The files are described below:
 
-### testCase1.c
+#### testCase1.c
 
 This file is used to study the behavior of implemented SJF scheduler when there is a mixture of **CPU bound and IO bound processes**.
 The test file `testCase1.c` contains the following functions:
@@ -438,7 +440,7 @@ When `testCase1.c` is run, various important observations are made:
 ![Test Case 1](./testCase1.png)
 ---
 
-### testCase2.c
+#### testCase2.c
 
 This file is used to illustrate the **significance of the burst time** of the process in the order of execution of the processes waiting to be run.
 
@@ -460,7 +462,7 @@ _Note_ that as default burst time is 0, the driver code/parent process (which ha
 ![Test Case 2](./testCase2.png)
 ---
 
-### testCase3.c
+#### testCase3.c
 
 This file is used illustrate the **difference between default round robin scheduler and the shortest job first scheduler**. Five child processes are being forked from the parent process :
 
@@ -493,7 +495,7 @@ These trends in `Responsiveness` and `Turnaround time` can also be seen in the o
 
 
 
-## Hybrid Round Robin Scheduler
+## Bonus (Hybrid Round Robin Scheduler)
 
 **Gist of algorithm:** Here we are using a FIFO queue to perform round robin scheduling with one additional constraint that processes are sorted according to burst time in the queue (in some rotated fashion For Eg - [7 8 1 2 3] here elements 1, 2, 3, 7, 8 are sorted if rotated thrice). Initially lets say we have [1, 2, 3, 7, 8,] as burst times. We take out process at front of queue and execute it and when a context happens we'll enqueue it at the back. So our fifo queue becomes [2, 3, 7, 8, 1]. In this fashion we can give fair chance to all processes in ready queue. 
 
@@ -518,7 +520,7 @@ struct proc* dequeue();        // Pop from front
 ```
 
 
-Next is when user forks current process, we have to add this new porcess to ready queue. This new process will have a default burst time of 0. Now we'll have to insert this at corrrect position in our ready queue. To do so we have a function `insert_rqueue`
+Next is when user forks current process, we have to add this new process to ready queue. This new process will have a default burst time of 0. Now we'll have to insert this at correct position in our ready queue. To do so we have a function `insert_rqueue`
 
 ```c
 int fork(void){
@@ -564,7 +566,7 @@ void yield(void) {
 }
 ```
 
-Finally in `set_burst_time` we're re-positioning current process to correct position in ready queue and invoking scheduler prematurely to make this change reflect and give chance to next process (pre-emption).
+Finally in `set_burst_time` we're re-positioning current process to correct position in ready queue and invoking scheduler prematurely to make this change reflect and give chance to next process (preemption).
 
 ```c
 int set_burst_time(int n){
@@ -608,10 +610,13 @@ void trap(struct trapframe *tf){
 }
 ```
 
+### Testing 
 
+For testing the hybrid scheduler an user-level application `test_scheduler` is created. The output obtained is shown below:
 
-**Output**: ![](hybrid_testCase.png)
-Intially we have a parent process with pid 3. Parent is forking 3 child processes with pids 4, 5 and 6 and burst time 4, 8 and 2 respectively. After that it went on sleep waiting for children to finish. Now we have [4, 5, 6] in our ready queue each with burst time 0. Each of them set their own burst time and order in queue becomes [6, 4, 5]. These process are now sorted according to their burst time. Time quanta of 2 is chosen as it is the burst time of smallest process
+### ![](hybrid_testCase.png)
+
+Initially we have a parent process with pid 3. Parent is forking 3 child processes with pids 4, 5 and 6 and burst time 4, 8 and 2 respectively. After that it went on sleep waiting for children to finish. Now we have [4, 5, 6] in our ready queue each with burst time 0. Each of them set their own burst time and order in queue becomes [6, 4, 5]. These process are now sorted according to their burst time. Time quanta of 2 is chosen as it is the burst time of smallest process
 
 **Expected**
 ```bash
