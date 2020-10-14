@@ -305,6 +305,22 @@ fork(void)
   np->state = RUNNABLE;
   insert_rqueue(np);
 
+
+  if(np->parent->pid == 2){
+    base_process = np;
+    base_process_pid = np->pid;
+  }
+
+  // if(rqueue.size == 1 && np->pid >= 3){
+  //   // this is the only process in queue
+  //   if(base_process_pid == 0){
+  //       base_process = np;
+  //       base_process_pid = np->pid;
+  //   }
+  // }
+
+
+
   release(&ptable.lock);
 
   return pid;
@@ -430,25 +446,25 @@ scheduler(void)
     reqp = dequeue(); 
 
     if(reqp == 0) {
-      if(base_process != 0){
-        // cprintf("No running processes");
-        // debug_queue();
-        base_process = 0;
-        base_process_pid = 0;
-      }
+      // if(base_process != 0){
+      //   // cprintf("No running processes");
+      //   // debug_queue();
+      //   base_process = 0;
+      //   base_process_pid = 0;
+      // }
       release(&ptable.lock); // No process is curently runnable
       continue;
     }
 
     // debug_queue();
 
-    if(rqueue.size == 0 && reqp->pid >= 3){
-      // this is the only process in queue
-      if(base_process_pid == 0){
-        base_process = reqp;
-        base_process_pid = reqp->pid;
-      }
-    }
+    // if(rqueue.size == 0 && reqp->pid >= 3){
+    //   // this is the only process in queue
+    //   if(base_process_pid == 0){
+    //     base_process = reqp;
+    //     base_process_pid = reqp->pid;
+    //   }
+    // }
 
     // int pid = base_process == 0 ? 0 : base_process->pid;
     cprintf("SCHEDULING - pid: %d  burstTime: %d baseprocess: %d\n", reqp->pid, reqp->burstTime, base_process_pid);
@@ -720,27 +736,22 @@ set_burst_time(int n)
   // Reposition this process in rqueue
   int size = rqueue.size;
 
-
   // at this instant rqueue looks like this
   // [0] + [0, 0, 0, non-zero, non-zero, ....., non-zero, 0, 0, 0]
   struct proc* first_proc = rqueue.array[rqueue.front];
 
   // Step 1: place all 0 burstTime process at end
-  // cprintf("Step 1: ");
-  // debug_queue();
   for(int i = 0; i < size; ++i){
     if(rqueue.array[rqueue.front]->burstTime > 0) break;
 
     enqueue(dequeue());
   }
 
-
   if(rqueue.array[rqueue.front]->burstTime == 0){
     // all processes have zero burst time
     enqueue(cur);
     goto context_switch;
   }
-
 
   // Step 2: Rotate array and place our process at correct spot
   int proc_inserted = 0;
@@ -755,14 +766,8 @@ set_burst_time(int n)
     enqueue(p);
   }
 
-  // cprintf("After Step 2: ");
-  // debug_queue();
-
   if(proc_inserted == 0){
     // all process have non-zero burst time and current process has max burst time;
-    // cprintf("all process have non-zero burst time and current process has max burst time\n");
-    // debug_queue();
-
     enqueue(cur);
     goto context_switch;
   }
