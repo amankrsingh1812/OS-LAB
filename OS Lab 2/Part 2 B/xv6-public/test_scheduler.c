@@ -8,11 +8,8 @@ void looper(int bt, int loopfac, int idx) {
   set_burst_time(bt);  
   int tick_start = uptime();  
 
-  if (loopfac>5) 
-    loopfac = 5;
-
   for (volatile int l=0; l<loopfac; l++)
-    for (volatile int i=0; i<10000000; i++)
+    for (volatile int i=0; i<100000000; i++)
       ;
 
   // getProcInfo();
@@ -67,19 +64,19 @@ int main(int argc, char *argv[])
   char exitInfoGatherer[3][70];
 
   arrivalTime[0] = uptime();
-  if ( !(pid[0] = fork()) )  looper(8,2,0);
+  if ( !(pid[0] = fork()) )  looper(4,4,0);
   arrivalTime[1] = uptime();
-  if ( !(pid[1] = fork()) )  looper(16,4,1);
+  if ( !(pid[1] = fork()) )  looper(8,8,1);
   arrivalTime[2] = uptime();
-  if ( !(pid[2] = fork()) )  looper(4,1,2); 
+  if ( !(pid[2] = fork()) )  looper(2,2,2); 
 
 
   for (int i=0; i<3; i++)
     rpid[i] = wait();
 
-  strcpy(exitInfoGatherer[0], "BurstTime: 8  - Empty loop running 2e8 times\n");
-  strcpy(exitInfoGatherer[1], "BurstTime: 16 - Empty loop running 4e8 times\n");
-  strcpy(exitInfoGatherer[2], "BurstTime: 4  - Empty loop running 1e8 times\n");
+  strcpy(exitInfoGatherer[0], "BurstTime: 4  - Empty loop running 4e8 times\n");
+  strcpy(exitInfoGatherer[1], "BurstTime: 8 - Empty loop running 8e8 times\n");
+  strcpy(exitInfoGatherer[2], "BurstTime: 2  - Empty loop running 2e8 times\n");
 
   printf(1, "\n******** CHILDREN EXIT ORDER SUMMARY ********\n");
   for (int i=0; i<3; i++) {

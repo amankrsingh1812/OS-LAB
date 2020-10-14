@@ -432,7 +432,7 @@ scheduler(void)
     if(reqp == 0) {
       if(base_process != 0){
         // cprintf("No running processes");
-        debug_queue();
+        // debug_queue();
         base_process = 0;
         base_process_pid = 0;
       }
