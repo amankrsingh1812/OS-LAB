@@ -165,8 +165,6 @@ get_burst_time()
 ```
 ---
 
-
-
 ### Syscall set_burst_time
 
 Function `sys_set_burst_time(void)` was defined in file `sysproc.c` at line 134. It first gets the argument burstTime `btime` using `argint`, then calls the function `set_burst_time(btime)` defined in `proc.c` and returns the value returned by it.
@@ -196,8 +194,6 @@ set_burst_time(int n)
 }
 ```
 ---
-
-
 
 ## User-level Application for our System Calls
 For testing our system calls, we created 4 user-level applications -
@@ -241,11 +237,9 @@ We created [getSetBTime.c](./Patch/PartA/getSetBTime.c) in which we first print 
 
 ---
 
-
-
 ## Part B (Shortest Job First Scheduler):  
 
-Refer the patch files in [Patch/PartB1/](./Patch/PartB1/)
+Refer the patch files in [Patch/PartB/](./Patch/PartB/)
 
 ### Scheduler Implementation
 
@@ -280,7 +274,7 @@ set_burst_time(int n)
 
 **Time Complexity:** For implementing shortest job first scheduling the Ready Queue was implemented as a Priority Queue  (min heap) so that finding the job with shortest burst time and inserting a new job into the list could be done in `O(log n)` where `n` is the number of processes in the ready queue. 
 
-**Implementation:**  Refer to <path-file> for detailed code.
+**Implementation:**  Refer to patch for detailed code.
 
 In `proc.c` two new fields were added to `ptable` structure ie. the `priorityQueueArray`, which would store the pointers of the processes in the form of a min heap and `pqsize`, which is equal to the size of the ready queue at any point of time.
 
@@ -444,8 +438,6 @@ These trends in `Responsiveness` and `Turnaround time` can also be seen in the o
 
 ---
 
-
-
 ## Bonus (Hybrid Round Robin Scheduler)
 
 **Gist of algorithm:** Here we are using a FIFO queue to perform round robin scheduling with one additional constraint that processes are sorted according to burst time in the queue (in some rotated fashion For Eg - [7 8 1 2 3] here elements 1, 2, 3, 7, 8 are sorted if rotated thrice). Initially lets say we have [1, 2, 3, 7, 8,] as burst times. We take out process at front of queue and execute it and when a context happens we'll enqueue it at the back. So our fifo queue becomes [2, 3, 7, 8, 1]. In this fashion we can give fair chance to all processes in ready queue. 
@@ -454,7 +446,7 @@ When a new process arrives, we have to just insert in sorted order in our ready 
 
 **Time Complexity:** In scheduler we have take out process at front, this will take O(1) time. Adding a process again to ready queue at the end also takes O(1) time. Inserting a new process takes O(n) time as we need to iterate over queue to find correct position to insert.
 
-**Changes to Code:**  Refer to [Patch/PartB2](Patch/PartB2) for detailed code.
+**Changes to Code:**  Refer to [Patch/Bonus](Patch/Bonus) for detailed code.
 
 We have added a structure `rqueue` to mimic ready queue and defined two functions `enqueue` and `dequeue` to insert/remove from queue.
 
