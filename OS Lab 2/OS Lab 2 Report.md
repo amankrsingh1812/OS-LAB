@@ -15,7 +15,8 @@ For creating the system calls, we needed to change these files:-
 ### Syscall getNumProc 
 
 Function `sys_getNumProc(void)` was defined in file `sysproc.c` at line 95, which calls the function `getNumProc()` defined in `proc.c` and returns the value returned by it.
-​```c
+
+```C
 // sysproc.c
 int                                         // line 95
 sys_getNumProc(void)
