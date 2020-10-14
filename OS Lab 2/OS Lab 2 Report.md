@@ -4,63 +4,11 @@ Refer the patch files in [Patch/PartA/](./Patch/PartA/)
 
 For creating the system calls, we needed to change these files:- 
 * `user.h `- The function prototypes of our system calls (for user-space) were added in this file at line 27
-<!-- ```C
-// user.h
-int getProcNum(void);                       // line 27 
-int getMaxPid(void);
-int getProcInfo(struct processInfo*);
-int get_burst_time(void);
-int set_burst_time(int);
-``` -->
 * `defs.h `- The function prototypes of our system calls (for kernel-space) were added in this file at line 124
-<!-- ```C
-// defs.h
-int             getNumProc(void);           // line 124
-int             getMaxPid(void);
-int             getProcInfo(int, struct processInfo*);
-int             get_burst_time(void);
-int             set_burst_time(int);
-​``` -->
-
 * `syscall.h `- The mapping from system call names to system call numbers were added in this file at line 23
-<!-- ```C
-// syscall.h
-#define SYS_getNumProc  22                  // line 23
-#define SYS_getMaxPid  23
-#define SYS_getProcInfo  24
-#define SYS_get_burst_time 25
-#define SYS_set_burst_time 26
-​``` -->
 * `syscall.c `- The mapping from system call numbers to system call functions were added in this file at line 106 and line 134
-<!-- ```C
-// syscall.c
-extern int sys_getNumProc(void);            // line 106
-extern int sys_getMaxPid(void);
-extern int sys_getProcInfo(void);
-extern int sys_get_burst_time(void);
-extern int sys_set_burst_time(void);
-
-[SYS_getProcNum] sys_getProcNum,            // line 134
-[SYS_getMaxPid] sys_getMaxPid,
-[SYS_getProcInfo] sys_getProcInfo,
-[SYS_get_burst_time] sys_get_burst_time,
-[SYS_set_burst_time] sys_set_burst_time,
-​``` -->
 * `usys.S `- The system call names were added in this file at line 32
-<!-- ```C
-// usys.S
-SYSCALL(getNumProc)                         // line 32
-SYSCALL(getMaxPid)
-SYSCALL(getProcInfo)
-SYSCALL(get_burst_time)
-SYSCALL(set_burst_time)
-​``` -->
 * `proc.h `- 2 extra fields ie. `int numcs` and `burstTime` were added in the struct `proc` to keep track the number of context switches and burst time of the process 
-<!-- ```C
-// proc.h
-int numcs;                                  // line 52
-int burstTime;              
-​``` -->
 * `sysproc.c `- The definition of system calls were added in this file and the file `processInfo.h` was included
 * `proc.c `- Since the struct `ptable` and other utility functions for process management were in this file, the main code for system calls was added in this file
 
