@@ -580,8 +580,63 @@ int set_burst_time(int n){
   return 0;
 }
 ```
-Since the default scheduling algorithm in `xv6` was Round-Robin, the pre-emption of process at the end of its time-slice is already happening and we do not need to make any changes for that. 
+
+In the `trap` function inside `trap.c` we are implementing the time quanta. For this we have defined `base_process` as the process from which time quanta is determined (smallest burst time process in queue). Now if the currently executing process is base process, we don't pre-empt it and count number of ticks taken till its completion. Then we are using exactly these many ticks for all other processes. 
+```c
+void trap(struct trapframe *tf){
+  //...
+  static int ticks_since_last_yield = 0;
+  static int time_slice = 0;
+
+  if(myproc() && myproc()->state == RUNNING && tf->trapno == T_IRQ0+IRQ_TIMER){
+    if(myproc() == base_process){
+      // Count number of ticks for base process from which time quata is detemined
+    }
+    else{
+      // Call yield after every kth tick (k being time quanta)
+      if(ticks_since_last_yield == time_slice){
+        ticks_since_last_yield = 0;
+        yield();
+      }
+      else{
+        ticks_since_last_yield++;
+      }
+    }
+  }
+
+  // ...
+}
+```
 
 
 
-**Output**: <TODO: Add this>
+**Output**: ![](hybrid_testCase.png)
+Intially we have a parent process with pid 3. Parent is forking 3 child processes with pids 4, 5 and 6 and burst time 4, 8 and 2 respectively. After that it went on sleep waiting for children to finish. Now we have [4, 5, 6] in our ready queue each with burst time 0. Each of them set their own burst time and order in queue becomes [6, 4, 5]. These process are now sorted according to their burst time. Time quanta of 2 is chosen as it is the burst time of smallest process
+
+**Expected**
+```bash
+t = 0   processes : [6, 4, 5]  scheduled: 6   remaining burst time : [2, 4, 8]
+t = 2   processes : [4, 5]     scheduled: 4   remaining burst time : [4, 8]
+t = 4   processes : [4, 5]     scheduled: 5   remaining burst time : [2, 8]
+t = 6   processes : [4, 5]     scheduled: 4   remaining burst time : [2, 6]
+t = 8   processes : [5]        scheduled: 5   remaining burst time : [6]
+t = 10  processes : [5]        scheduled: 5   remaining burst time : [4]
+t = 12  processes : [5]        scheduled: 5   remaining burst time : [2]
+t = 14  processes : []         scheduled:     remaining burst time : []
+```
+
+**Observed**:
+
+Scheduling of only child processes. In the actual output, parent (pid 3) is waking up whenever its child exits.
+```bash
+t = 0   processes : [6, 4, 5]  scheduled: 6
+t = 2   processes : [4, 5]     scheduled: 4
+t = 4   processes : [4, 5]     scheduled: 5
+t = 6   processes : [4, 5]     scheduled: 4
+t = 8   processes : [5]        scheduled: 5
+t = 10  processes : [5]        scheduled: 5
+t = 12  processes : [5]        scheduled: 5
+t = 14  processes : [5]        scheduled: 5
+```
+
+The observed output is same as the expected output except the case that process with pid 5 is executed 5 times rather than 4. This is due to the fact that in reality increasing the loop iteration count doesn't always proportionately increase actual execution time because not all conditions are same like cache and branch predictors.

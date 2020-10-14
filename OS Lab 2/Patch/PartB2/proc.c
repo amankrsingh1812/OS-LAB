@@ -18,8 +18,12 @@ struct {
   int front;
   int rear; 
   int size;  
-} rqueue; // Running Queue
+} rqueue; // Ready Queue
 
+struct proc* base_process = 0;
+int base_process_pid = 0;
+
+// Push to rear
 void enqueue(struct proc* np){
   if(rqueue.size == NPROC) return; 
   rqueue.rear = (rqueue.rear + 1) % NPROC;
@@ -27,6 +31,7 @@ void enqueue(struct proc* np){
   rqueue.size = rqueue.size + 1;  
 }
 
+// Pop from front
 struct proc* dequeue(){
   if (rqueue.size == 0) return 0; 
   struct proc* next = rqueue.array[rqueue.front]; 
@@ -43,11 +48,7 @@ struct proc* dequeue(){
 
 // This is used to insert a new process with default burst time (0)
 void insert_rqueue(struct proc* np){
-  // int proc_inserted = 0;
   const int size = rqueue.size;
-
-
-  // [0, ]
 
   if(size == 0 || rqueue.array[rqueue.front]->burstTime == 0){
     enqueue(np);
@@ -317,7 +318,7 @@ exit(void)
   struct proc *p;
   int fd;
 
-  cprintf("Exiting PID: %d\n", curproc->pid);
+  // cprintf("Exiting PID: %d\n", curproc->pid);
 
   if(curproc == initproc)
     panic("init exiting");
@@ -412,7 +413,6 @@ void
 scheduler(void)
 {
   struct proc *reqp=0;
-  // struct proc *p;
   struct cpu *c = mycpu();
   c->proc = 0;
 
@@ -426,13 +426,24 @@ scheduler(void)
     acquire(&ptable.lock);
     reqp = dequeue(); 
 
-    if(reqp == 0) {  // No process is curently runnable
-      release(&ptable.lock);
+    if(reqp == 0) {
+      if(base_process != 0){
+        base_process = 0;
+        base_process_pid = 0;
+      }
+      release(&ptable.lock); // No process is curently runnable
       continue;
     }
 
-    // cprintf("SCHEDULING - pid: %d  burstTime: %d state: %d\n", reqp->pid, reqp->burstTime, reqp->state);
-    // debug_queue();
+    if(rqueue.size == 0 && reqp->pid >= 3){
+      // this is the only process in queue
+      if(base_process_pid == 0){
+        base_process = reqp;
+        base_process_pid = reqp->pid;
+      }
+    }
+
+    cprintf("SCHEDULING - pid: %d  burstTime: %d baseprocess: %d\n", reqp->pid, reqp->burstTime, base_process_pid);
 
     c->proc = reqp;
     switchuvm(reqp);
@@ -698,16 +709,13 @@ set_burst_time(int n)
   acquire(&ptable.lock);
   
   // Reposition this process in rqueue
-  const int size = rqueue.size;
-
+  int size = rqueue.size;
 
   // at this instant rqueue looks like this
   // [0] + [0, 0, 0, non-zero, non-zero, ....., non-zero, 0, 0, 0]
   struct proc* first_proc = rqueue.array[rqueue.front];
 
   // Step 1: place all 0 burstTime process at end
-  // cprintf("Step 1: ");
-  // debug_queue();
   for(int i = 0; i < size; ++i){
     if(rqueue.array[rqueue.front]->burstTime > 0) break;
 
@@ -720,7 +728,6 @@ set_burst_time(int n)
     enqueue(cur);
     goto context_switch;
   }
-
 
   // Step 2: Rotate array and place our process at correct spot
   int proc_inserted = 0;
@@ -735,14 +742,8 @@ set_burst_time(int n)
     enqueue(p);
   }
 
-  // cprintf("After Step 2: ");
-  // debug_queue();
-
   if(proc_inserted == 0){
     // all process have non-zero burst time and current process has max burst time;
-    // cprintf("all process have non-zero burst time and current process has max burst time\n");
-    // debug_queue();
-
     enqueue(cur);
     goto context_switch;
   }
@@ -750,10 +751,29 @@ set_burst_time(int n)
   // Step 3: Return to original state with first_proc in front;
   while(rqueue.array[rqueue.front] != first_proc) enqueue(dequeue());
 
-context_switch:
+  // Step 4: After all processes have set their burst times then
+  // place minimum burst time process in front 
+  size = rqueue.size;
+  int should_rotate = 1;
+  struct proc* minBurstproc = 0;
+  for(int i = 0; i < size; ++i){
+    struct proc* p = dequeue();
+    if(p->burstTime == 0){
+      should_rotate = 0;
+    }
+    if(minBurstproc == 0 || minBurstproc->burstTime > p->burstTime){
+      minBurstproc = p;
+    }
+    enqueue(p);
+  }
 
-  // cprintf("making context switch\n");
-  // debug_queue();
+  if(should_rotate){
+    while(rqueue.array[rqueue.front] != minBurstproc) enqueue(dequeue());
+    base_process = minBurstproc;
+    base_process_pid = minBurstproc->pid;
+  }
+
+context_switch:
 
   cur->state = RUNNABLE;
   sched();
