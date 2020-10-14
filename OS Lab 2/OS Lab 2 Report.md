@@ -14,17 +14,10 @@ For creating the system calls, we needed to change these files:-
 
 ### Syscall getNumProc 
 
-Function `sys_getNumProc(void)` was defined in file `sysproc.c` at line 95, which calls the function `getNumProc()` defined in `proc.c` and returns the value returned by it.
+Function `sys_getNumProc(void)` was defined in file `sysproc.c` at line 95, which calls the function `getNumProc()` defined in `proc.c` and returns the value returned by it. 
 
-```C
-// sysproc.c
-int                                         // line 95
-sys_getNumProc(void)
-{
-  return getNumProc();
-}
-```
 The function `getNumProc` contains the main code for this syscall can be found in the file `proc.c` at line 546. We have looped through all the slots of the `ptable's proc array` of the  and incremented the counter whenever we find a proc slot with a state other than UNUSED. Before iterating through the `proc` array we acquired the lock and released it after it. This is done to ensure that another process doesn't modify the ptable while we are iterating through it.  
+
 ```C
 // proc.c
 int                                         // line 546                     
@@ -46,14 +39,7 @@ getNumProc(void)
 
 ### Syscall getMaxPid
 Function `sys_getMaxPid(void)` was defined in file `sysproc.c` at line 103, which calls the function `getMaxPid()` defined in `proc.c` and returns the value returned by it.
-```C
-// sysproc.c
-int                                         // line 103 
-sys_getMaxPid(void)
-{
-  return getMaxPid();
-}
-```
+
 The function `getMaxPid` contains the main code for this syscall can be found in the file `proc.c` at line 563. We have looped through all the slots of the `proc` array of the `ptable` and found the maximum of all the process with a state other than UNUSED. Before iterating through the `proc` array we acquired the lock and released it after it. This is done to ensure that another process doesn't modify the ptable while we are iterating through it.  
 ```C
 // proc.c
@@ -146,14 +132,7 @@ p->burstTime = 0;                             // line 96
 ```
 
 Function `sys_get_burst_time(void)` was defined in file `sysproc.c` at line 125, which calls the function `get_burst_time()` defined in `proc.c` and returns the value returned by it.
-```C
-// sysproc.c
-int                                         // line 125
-sys_get_burst_time(void)
-{
-  return get_burst_time();
-}
-```
+
 The function `get_burst_time` contains the main code for this syscall can be found in the file `proc.c` at line 602. Since we have already mantained the burst time in the struct `proc`, we simply use the pointer to the currently running process which is returned by myproc(), with which we read the burstTime property of the process.
 ```C
 // proc.c
