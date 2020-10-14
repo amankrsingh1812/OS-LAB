@@ -20,6 +20,9 @@ struct {
   int size;  
 } rqueue; // Running Queue
 
+struct proc* base_process = 0;
+int base_process_pid = 0;
+
 void enqueue(struct proc* np){
   if(rqueue.size == NPROC) return; 
   rqueue.rear = (rqueue.rear + 1) % NPROC;
@@ -317,7 +320,7 @@ exit(void)
   struct proc *p;
   int fd;
 
-  cprintf("Exiting PID: %d\n", curproc->pid);
+  // cprintf("Exiting PID: %d\n", curproc->pid);
 
   if(curproc == initproc)
     panic("init exiting");
@@ -426,12 +429,29 @@ scheduler(void)
     acquire(&ptable.lock);
     reqp = dequeue(); 
 
-    if(reqp == 0) {  // No process is curently runnable
-      release(&ptable.lock);
+    if(reqp == 0) {
+      if(base_process != 0){
+        // cprintf("No running processes");
+        // debug_queue();
+        base_process = 0;
+        base_process_pid = 0;
+      }
+      release(&ptable.lock); // No process is curently runnable
       continue;
     }
 
-    // cprintf("SCHEDULING - pid: %d  burstTime: %d state: %d\n", reqp->pid, reqp->burstTime, reqp->state);
+    // debug_queue();
+
+    if(rqueue.size == 0 && reqp->pid >= 3){
+      // this is the only process in queue
+      if(base_process_pid == 0){
+        base_process = reqp;
+        base_process_pid = reqp->pid;
+      }
+    }
+
+    // int pid = base_process == 0 ? 0 : base_process->pid;
+    cprintf("SCHEDULING - pid: %d  burstTime: %d baseprocess: %d\n", reqp->pid, reqp->burstTime, base_process_pid);
     // debug_queue();
 
     c->proc = reqp;
@@ -698,7 +718,7 @@ set_burst_time(int n)
   acquire(&ptable.lock);
   
   // Reposition this process in rqueue
-  const int size = rqueue.size;
+  int size = rqueue.size;
 
 
   // at this instant rqueue looks like this
@@ -749,6 +769,26 @@ set_burst_time(int n)
 
   // Step 3: Return to original state with first_proc in front;
   while(rqueue.array[rqueue.front] != first_proc) enqueue(dequeue());
+
+  size = rqueue.size;
+  int should_rotate = 1;
+  struct proc* minBurstproc = 0;
+  for(int i = 0; i < size; ++i){
+    struct proc* p = dequeue();
+    if(p->burstTime == 0){
+      should_rotate = 0;
+    }
+    if(minBurstproc == 0 || minBurstproc->burstTime > p->burstTime){
+      minBurstproc = p;
+    }
+    enqueue(p);
+  }
+
+  if(should_rotate){
+    while(rqueue.array[rqueue.front] != minBurstproc) enqueue(dequeue());
+    base_process = minBurstproc;
+    base_process_pid = minBurstproc->pid;
+  }
 
 context_switch:
 
