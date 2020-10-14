@@ -1,8 +1,9 @@
 #include "types.h"
 #include "user.h"
 
-void childProcess(int bt) {
-  int tick_start = uptime();       
+int arrivalTime[2];
+
+void childProcess(int idx,int bt) {
   set_burst_time(bt); 
   int fib[2] = {0, 1};
 
@@ -17,9 +18,9 @@ void childProcess(int bt) {
   int tick_end = uptime();
   printf(1, "Exiting PID: %d\tArrivalUptime: %d\tCompletionUptime: %d\tTurnaroundTime: %d\n"
   , getpid()
-  , tick_start
+  , arrivalTime[idx]
   , tick_end
-  , tick_end - tick_start
+  , tick_end - arrivalTime[idx]
   );
   exit();
 }
@@ -31,8 +32,10 @@ int main(int argc, char *argv[])
   int rpid[2];
   char exitInfoGatherer[2][70];
 
-  if ( !(pid[0] = fork()) )  childProcess(20);
-  if ( !(pid[1] = fork()) )  childProcess(5);
+  arrivalTime[0] = uptime();
+  if ( !(pid[0] = fork()) )  childProcess(0,20);
+  arrivalTime[1] = uptime();
+  if ( !(pid[1] = fork()) )  childProcess(1,5);
 
   for (int i=0; i<2; i++)
     rpid[i] = wait();

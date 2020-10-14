@@ -310,7 +310,7 @@ exit(void)
   struct proc *p;
   int fd;
 
-  cprintf("Exiting PID: %d\n", curproc->pid);
+  // cprintf("Exiting PID: %d\n", curproc->pid);
 
   if(curproc == initproc)
     panic("init exiting");

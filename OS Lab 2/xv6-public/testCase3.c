@@ -1,8 +1,11 @@
 #include "types.h"
 #include "user.h"
 
-void fib(int bt,int N) {
+int arrivalTime[5];
+
+void fib(int idx,int bt,int N) {
   set_burst_time(bt); 
+  int tick_start = uptime();       
   int fib[2] = {0, 1};
 
   for (volatile int i=0; i<N; i++) {
@@ -14,15 +17,20 @@ void fib(int bt,int N) {
   }
 
   int tick_end = uptime();
-  printf(1, "Exiting PID: %d\tCompletionUptime: %d\n"
+  printf(1, "Exiting PID: %d\tArrivalUptime: %d\tCompletionUptime: %d\tTurnaroundTime: %d\tResponseUptime: %d\n"
   , getpid()
-  , tick_end 
+  , arrivalTime[idx]
+  , tick_end
+  , tick_end - arrivalTime[idx]
+  , tick_start - arrivalTime[idx]
   );
   exit();
 }
 
-void looper2(int bt){
+void looper2(int idx,int bt){
     set_burst_time(bt);
+    int tick_start = uptime();       
+
     int N=1000;
     for (volatile int i = 0; i < N; i++) 
     { 
@@ -34,15 +42,19 @@ void looper2(int bt){
         } 
     } 
   int tick_end = uptime();
-  printf(1, "Exiting PID: %d\tCompletionUptime: %d\n"
+  printf(1, "Exiting PID: %d\tArrivalUptime: %d\tCompletionUptime: %d\tTurnaroundTime: %d\tResponseUptime: %d\n"
   , getpid()
-  , tick_end 
+  , arrivalTime[idx]
+  , tick_end
+  , tick_end - arrivalTime[idx]
+  , tick_start - arrivalTime[idx]
   );
   exit();
 }
 
-void looper(int bt, int loopfac,int N) {
+void looper(int idx,int bt, int loopfac,int N) {
   set_burst_time(bt);        
+  int tick_start = uptime();       
 
   if (loopfac>5) 
     loopfac = 5;
@@ -52,9 +64,12 @@ void looper(int bt, int loopfac,int N) {
       ;
 
   int tick_end = uptime();
-  printf(1, "Exiting PID: %d\tCompletionUptime: %d\n"
+  printf(1, "Exiting PID: %d\tArrivalUptime: %d\tCompletionUptime: %d\tTurnaroundTime: %d\tResponseUptime: %d\n"
   , getpid()
-  , tick_end 
+  , arrivalTime[idx]
+  , tick_end
+  , tick_end - arrivalTime[idx]
+  , tick_start - arrivalTime[idx]
   );
   exit();
 }
@@ -65,11 +80,16 @@ int main(int argc, char *argv[])
   int rpid[5];
   char exitInfoGatherer[5][70];
 
-  if ( !(pid[0] = fork()) )  fib(20,1000000000);
-  if ( !(pid[1] = fork()) )  looper(10,8,10000000);
-  if ( !(pid[2] = fork()) )  looper2(18);  
-  if ( !(pid[3] = fork()) )  fib(12,500000000);
-  if ( !(pid[4] = fork()) )  looper(19,2,500000000);
+  arrivalTime[0] = uptime();
+  if ( !(pid[0] = fork()) )  fib(0,20,1000000000);
+  arrivalTime [1] = uptime();
+  if ( !(pid[1] = fork()) )  looper(1,10,8,10000000);
+  arrivalTime [2] = uptime();
+  if ( !(pid[2] = fork()) )  looper2(2,18);  
+  arrivalTime [3] = uptime();
+  if ( !(pid[3] = fork()) )  fib(3,12,500000000);
+  arrivalTime [4] = uptime();
+  if ( !(pid[4] = fork()) )  looper(4,19,2,500000000);
 
   for (int i=0; i<5; i++)
     rpid[i] = wait();
