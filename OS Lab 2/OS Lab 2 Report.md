@@ -443,7 +443,7 @@ When a new process arrives, we have to just insert in sorted order in our ready 
 
 **Changes to Code:**  Refer to `Patch/Bonus` for detailed code.
 
-We have added a structure `rqueue` to mimic ready queue and defined two functions `enqueue` and `dequeue` to insert/remove from queue.
+We have added a structure `rqueue` to mimic ready queue and defined two functions `enqueue` and `dequeue` to insert/remove from queue. We have also defined two more functions `insert_rqueue` for inserting a new process and `insert_rqueue_sorted` to insert an existing process with set burst time.
 
 ```c
 struct {
@@ -453,25 +453,25 @@ struct {
   int size;  
 } rqueue; // Ready Queue
 
-void enqueue(struct proc* np); // Push at rear  
-struct proc* dequeue();        // Pop from front 
+void enqueue(struct proc* np);        // Push at rear  
+struct proc* dequeue();               // Pop from front 
+
+void insert_rqueue(struct proc* np)   // Insert a new process with default burst time (0) at correct position 
+insert_rqueue_sorted(struct proc* np) // Insert a process with set burst time
 ```
 
 
-Next is when user forks current process, we have to add this new process to ready queue. This new process will have a default burst time of 0. Now we'll have to insert this at correct position in our ready queue. To do so we have a function `insert_rqueue`
+Next is when user forks current process, we have to add this new process to ready queue. This new process will have a default burst time of 0. Now we'll have to insert this at correct position in our ready queue. To do so we're using the `insert_rqueue`
 
 ```c
 int fork(void){
-	...
-	acquire(&ptable.lock);
+  ...
+  acquire(&ptable.lock);
   np->state = RUNNABLE;
   insert_rqueue(np);
   release(&ptable.lock);
-	...
+  ...
 }
-
-void insert_rqueue(struct proc* np)  // Insert a new process with default burst time (0) at correct position 
-
 ```
 
 In `scheduler` we are dequeuing process at front and scheduling it using a context switch. If the ready queue is empty we release the lock and try again. In `yield` we are adding current process to ready queue again after making it `RUNNABLE`.
@@ -504,6 +504,29 @@ void yield(void) {
 }
 ```
 
+Whenever the process transitions from `SLEEPING` to `RUNNABLE` we need to call `insert_rqueue_sorted` to add it to ready queue. This is done inside `wakeup` and `kill` functions. 
+```c
+static void wakeup1(void *chan) {
+  ...
+  if(p->state == SLEEPING && p->chan == chan){
+    p->state = RUNNABLE;
+    insert_rqueue_sorted(p);
+  }
+  ...
+}
+
+int kill(int pid){
+  struct proc *p;
+  ...
+  if(p->state == SLEEPING){
+    p->state = RUNNABLE;
+    insert_rqueue_sorted(p);
+  }
+  ...
+  return -1;
+}
+```
+
 Finally in `set_burst_time` we're re-positioning current process to correct position in ready queue and invoking scheduler prematurely to make this change reflect and give chance to next process (preemption).
 
 ```c
@@ -512,7 +535,9 @@ int set_burst_time(int n){
   cur->burstTime = n;
   acquire(&ptable.lock);
   
-  ... // Reposition this process in ready queue
+  insert_rqueue_sorted(cur)
+  // ... Check if all processes have set their burst time
+  // ... If yes then choose smallest among them for determining time quanta
   
   cur->state = RUNNABLE;
   sched();
@@ -532,19 +557,26 @@ void trap(struct trapframe *tf){
   //...
   static int ticks_since_last_yield = 0;
   static int time_slice = 0;
+  static struct proc* last proc;
 
   if(myproc() && myproc()->state == RUNNING && tf->trapno == T_IRQ0+IRQ_TIMER){
     if(myproc() == base_process){
       // Count number of ticks for base process from which time quata is detemined
     }
     else{
-      // Call yield after every kth tick (k being time quanta)
-      if(ticks_since_last_yield == time_slice){
-        ticks_since_last_yield = 0;
-        yield();
+      if(myproc() == last_proc){
+        // Call yield after every kth tick (k being time quanta)
+        if(ticks_since_last_yield == time_slice){
+            ticks_since_last_yield = 0;
+            yield();
+        }
+        else{
+            ticks_since_last_yield++;
+        }
       }
       else{
-        ticks_since_last_yield++;
+          ticks_since_last_yield = 0;
+          last_proc = myproc()
       }
     }
   }
@@ -555,14 +587,14 @@ void trap(struct trapframe *tf){
 
 ### **Testing** 
 
-For testing the hybrid scheduler an user-level application `test_scheduler` is created. The output obtained is shown below:
-
-### ![](hybrid_testCase.png)
+#### **Test 1:** CPU bound processes only (testCase1.c)
 
 Initially we have a parent process with pid 3. Parent is forking 3 child processes with pids 4, 5 and 6 and burst time 4, 8 and 2 respectively. After that it went on sleep waiting for children to finish. Now we have [4, 5, 6] in our ready queue each with burst time 0. Each of them set their own burst time and order in queue becomes [6, 4, 5]. These process are now sorted according to their burst time. Time quanta of 2 is chosen as it is the burst time of smallest process
 
+> ![](test1_hybridRR.png)
+
 **Expected**
-```bash
+```python
 t = 0   processes : [6, 4, 5]  scheduled: 6   remaining burst time : [2, 4, 8]
 t = 2   processes : [4, 5]     scheduled: 4   remaining burst time : [4, 8]
 t = 4   processes : [4, 5]     scheduled: 5   remaining burst time : [2, 8]
@@ -576,7 +608,7 @@ t = 14  processes : []         scheduled:     remaining burst time : []
 **Observed**:
 
 Scheduling of only child processes. In the actual output, parent (pid 3) is waking up whenever its child exits.
-```bash
+```python
 t = 0   processes : [6, 4, 5]  scheduled: 6
 t = 2   processes : [4, 5]     scheduled: 4
 t = 4   processes : [4, 5]     scheduled: 5
@@ -588,3 +620,30 @@ t = 14  processes : [5]        scheduled: 5
 ```
 
 The observed output is same as the expected output except the case that process with pid 5 is executed 5 times rather than 4. This is due to the fact that in reality increasing the loop iteration count doesn't always proportionately increase actual execution time because not all conditions are same like cache and branch predictors.
+
+#### **Test 2:** Both CPU and IO bound processes (testCase2.c)
+
+Here we have 5 processes with { pid: burst time } as follows - [{4: 4}, {5: 5}, {6: 8}, {7: 10}, {8: 2}]. Process 4, 6 and 8 are CPU bound processes whereas processes 5 and 7 are IO bound processes. After these processes set their own burst time the ready looks like this - [8, 4, 5, 6, 7]. Now following is the order in which scheduing is being done.
+
+> ![](test2_hybridRR.png)
+
+
+```python
+t = 0    processes : [8, 4, 5, 6, 7]  scheduled: 8   --> executing on CPU / finishes
+t = 2    processes : [4, 5, 6, 7]     scheduled: 4   --> executing on CPU
+t = 4    processes : [4, 5, 6, 7]     scheduled: 5   --> Went on sleep for user IO
+t = 8    processes : [4, 6, 7]        scheduled: 6   --> executing on CPU 
+t = 10   processes : [4, 6, 7]        scheduled: 7   --> file IO
+t = 12   processes : [4, 6, 7]        scheduled: 4   --> executing on CPU / finishes
+t = 14   processes : [6, 7]           scheduled: 6   --> executing on CPU
+t = 16   processes : [6, 7]           scheduled: 7   --> file IO
+t = 18   processes : [6, 7]           scheduled: 6   --> executing on CPU
+t = 20   processes : [6, 7]           scheduled: 7   --> file IO
+t = 22   processes : [6, 7]           scheduled: 6   --> executing on CPU / finishes
+t = 24   processes : [7]              scheduled: 7   --> file IO
+t = 26   processes : [7]              scheduled: 7   --> file IO          / finishes
+...                                                  --> waiting for user IO 
+t = 30   processes : [5]              scheduled: 5   --> user IO complete / finishes
+```
+
+So from above table we can see that scheduling is done exactly as expected. Process with burst time 2, 4, 5, 8 and 10 were scheduled exactly 1, 2, 2, 4 and 5 times respectively. When we repeated the same test again and again, almost same results were found with the exception that time taked by file IO was bit inconsistent. This is due to the fact that burst time of IO whether file IO or user IO cannot be predicted accurately.
