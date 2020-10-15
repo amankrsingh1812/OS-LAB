@@ -499,7 +499,8 @@ scheduler(void)
     // }
 
     // int pid = base_process == 0 ? 0 : base_process->pid;
-    cprintf("SCHEDULING - pid: %d  burstTime: %d baseprocess: %d\n", reqp->pid, reqp->burstTime, base_process_pid);
+    if(reqp->pid>=3)    //donot print for shell and userinit
+      cprintf("SCHEDULING - pid: %d  burstTime: %d baseprocess: %d\n", reqp->pid, reqp->burstTime, base_process_pid);
     // debug_queue();
 
     c->proc = reqp;

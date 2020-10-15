@@ -514,7 +514,6 @@ static void wakeup1(void *chan) {
   }
   ...
 }
-
 int kill(int pid){
   struct proc *p;
   ...
