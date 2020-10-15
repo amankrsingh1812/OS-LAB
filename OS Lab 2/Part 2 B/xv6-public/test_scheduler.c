@@ -82,11 +82,11 @@ int main(int argc, char *argv[])
   arrivalTime[0] = uptime();
   if ( !(pid[0] = fork()) )  looper(4,4,0);
   arrivalTime[1] = uptime();
-  if ( !(pid[1] = fork()) )  userIO(4, 1);
+  if ( !(pid[1] = fork()) )  userIO(5, 1);
   arrivalTime[2] = uptime();
   if ( !(pid[2] = fork()) )  looper(8,8,2);
   arrivalTime[3] = uptime();
-  if ( !(pid[3] = fork()) )  fileIO(3, 3);
+  if ( !(pid[3] = fork()) )  fileIO(10, 3);
   arrivalTime[4] = uptime();
   if ( !(pid[4] = fork()) )  looper(2,2,4); 
 
@@ -94,11 +94,11 @@ int main(int argc, char *argv[])
   for (int i=0; i<5; i++)
     rpid[i] = wait();
 
-  strcpy(exitInfoGatherer[0], "BurstTime: 4  - Empty loop running 4e8 times\n");
-  strcpy(exitInfoGatherer[1], "BurstTime: 1  - Taking user IO and printing it\n");
-  strcpy(exitInfoGatherer[2], "BurstTime: 8 - Empty loop running 8e8 times\n");
-  strcpy(exitInfoGatherer[3], "BurstTime: 3  - Reading from file and printing it\n");
-  strcpy(exitInfoGatherer[4], "BurstTime: 2  - Empty loop running 2e8 times\n");
+  strcpy(exitInfoGatherer[0], "BurstTime: 4   - Empty loop running 4e8 times\n");
+  strcpy(exitInfoGatherer[1], "BurstTime: 5   - Taking user IO and printing it\n");
+  strcpy(exitInfoGatherer[2], "BurstTime: 8   - Empty loop running 8e8 times\n");
+  strcpy(exitInfoGatherer[3], "BurstTime: 10  - Reading from file and printing it\n");
+  strcpy(exitInfoGatherer[4], "BurstTime: 2   - Empty loop running 2e8 times\n");
 
   printf(1, "\n******** CHILDREN EXIT ORDER SUMMARY ********\n");
   for (int i=0; i<5; i++) {
