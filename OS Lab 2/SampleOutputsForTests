@@ -1,185 +1,22 @@
-###################  OUTPUTS RECEIVED  ########################################################
+###################  Test Commands  ########################################################
+Following tests are present in corresponding patch files
 
 ---------------------  PART - A  ---------------------------------------------------------------
 
 $ numProcTest
-Total number of processes are: 3
-
 $ maxPidTest
-Max PID: 5
-
 $ procInfoTest
-PID: 6, Parent PID: 2, PSize: 12288, NumContextSwitches: 15
-
 $ getSetBTime
-Original burst time of this process: 0
-Please enter a new burst time [expected range 1-20]: 8
-New burst time of this process: 8
-$ QEMU: Terminated
-
 
 ----------------------  PART - B_1  ---------------------------------------------------------------
 
 $ testCase1
-Enter for user IO:
-Exiting PID: 9
-Exiting PID: 10
-Exiting PID: 5
-dgExiting PID: 7
-Exiting PID: 8
-
-Exiting PID: 6
-
-******** CHILDREN EXIT ORDER SUMMARY ********
-BurstTime: 5  - Empty loop running 1e8 times		PID: 9
-BurstTime: 3  - Reading 500 Bytes from "README2"	PID: 10
-BurstTime: 8  - Empty loop running 2e8 times		PID: 5
-BurstTime: 10 - Empty loop running 4e8 times		PID: 7
-BurstTime: 6  - Reading 1500 Bytes from "README"	PID: 8
-BurstTime: 1  - Taking user IO and printing it		PID: 6
-
-****** Summary ends, completing parent *******
-
 $ testCase2
-Exiting PID: 13	ArrivalUptime: 2233	CompletionUptime: 2383	TurnaroundTime: 150
-Exiting PID: 12	ArrivalUptime: 2233	CompletionUptime: 2533	TurnaroundTime: 300
-
-******** CHILDREN EXIT ORDER SUMMARY ********
-BurstTime: 5   - Fibonacci loop running	PID: 13
-BurstTime: 20  - Fibonacci loop running	PID: 12
-
-****** Summary ends, completing parent *******
-
 $ testCase3
-Exiting PID: 16	ArrivalUptime: 3145	CompletionUptime: 3167	TurnaroundTime: 22	ResponseUptime: 1
-Exiting PID: 18	ArrivalUptime: 3146	CompletionUptime: 3418	TurnaroundTime: 272	ResponseUptime: 22
-Exiting PID: 17	ArrivalUptime: 3146	CompletionUptime: 4192	TurnaroundTime: 1046	ResponseUptime: 273
-Exiting PID: 19	ArrivalUptime: 3146	CompletionUptime: 4601	TurnaroundTime: 1455	ResponseUptime: 1047
-Exiting PID: 15	ArrivalUptime: 3145	CompletionUptime: 5100	TurnaroundTime: 1955	ResponseUptime: 1457
-
-******** CHILDREN EXIT ORDER SUMMARY ********
-BurstTime: 10   - 2 D loop running 8 X 10000000 times      	PID: 16
-BurstTime: 15   - Fibonacci loop running 500000000  times  	PID: 18
-BurstTime: 18  - 3 D loop running 1000 X 1000 X 1000 times	PID: 17
-BurstTime: 19   -2 D loop running 2 X 500000000 times      	PID: 19
-BurstTime: 20  - Fibonacci loop running 1000000000 times  	PID: 15
-
-****** Summary ends, completing parent *******
-
-$ QEMU: Terminated
-
 
 ----------------------  PART - B_2 - BONUS ---------------------------------------------------------------
 
 
 $ testCase1
-SCHEDULING - pid: 2  burstTime: 0 baseprocess: 3
-SCHEDULING - pid: 4  burstTime: 0 baseprocess: 4
-SCHEDULING - pid: 4  burstTime: 0 baseprocess: 4
-SCHEDULING - pid: 4  burstTime: 0 baseprocess: 4
-SCHEDULING - pid: 4  burstTime: 0 baseprocess: 4
-SCHEDULING - pid: 4  burstTime: 0 baseprocess: 4
-SCHEDULING - pid: 4  burstTime: 0 baseprocess: 4
-SCHEDULING - pid: 4  burstTime: 0 baseprocess: 4
-SCHEDULING - pid: 4  burstTime: 0 baseprocess: 4
-SCHEDULING - pid: 4  burstTime: 0 baseprocess: 4
-SCHEDULING - pid: 5  burstTime: 0 baseprocess: 4
-Setting burst time
-SCHEDULING - pid: 6  burstTime: 0 baseprocess: 4
-Setting burst time
-SCHEDULING - pid: 7  burstTime: 0 baseprocess: 4
-Setting burst time
-SCHEDULING - pid: 7  burstTime: 2 baseprocess: 7
-Exiting PID: 7	ArrivalUptime: 0	CompletionUptime: 1555	TurnaroundTime: 1555	ResponseUptime: 1472
-Waking up parent
-SCHEDULING - pid: 5  burstTime: 4 baseprocess: 7
-SCHEDULING - pid: 6  burstTime: 8 baseprocess: 7
-SCHEDULING - pid: 4  burstTime: 0 baseprocess: 7
-SCHEDULING - pid: 5  burstTime: 4 baseprocess: 7
-Exiting PID: 5	ArrivalUptime: 1471	CompletionUptime: 1815	TurnaroundTime: 344	ResponseUptime: 85
-Waking up parent
-SCHEDULING - pid: 6  burstTime: 8 baseprocess: 7
-SCHEDULING - pid: 4  burstTime: 0 baseprocess: 7
-SCHEDULING - pid: 6  burstTime: 8 baseprocess: 7
-SCHEDULING - pid: 6  burstTime: 8 baseprocess: 7
-Exiting PID: 6	ArrivalUptime: 0	CompletionUptime: 2044	TurnaroundTime: 2044	ResponseUptime: 1653
-Waking up parent
-SCHEDULING - pid: 4  burstTime: 0 baseprocess: 7
-
-******** CHILDREN EXIT ORDER SUMMARY ********
-BurstTime: 2   - Empty loop running 2e8 times
-BurstTime: 4   - Empty loop running 4e8 times
-BurstTime: 8   - Empty loop running 8e8 times
-
-****** Summary ends, completing parent *******
-
-Waking up parent
-SCHEDULING - pid: 2  burstTime: 0 baseprocess: 7
 $ testCase2
-SCHEDULING - pid: 2  burstTime: 0 baseprocess: 7
-SCHEDULING - pid: 8  burstTime: 0 baseprocess: 8
-SCHEDULING - pid: 8  burstTime: 0 baseprocess: 8
-SCHEDULING - pid: 8  burstTime: 0 baseprocess: 8
-SCHEDULING - pid: 8  burstTime: 0 baseprocess: 8
-SCHEDULING - pid: 8  burstTime: 0 baseprocess: 8
-SCHEDULING - pid: 8  burstTime: 0 baseprocess: 8
-SCHEDULING - pid: 8  burstTime: 0 baseprocess: 8
-SCHEDULING - pid: 8  burstTime: 0 baseprocess: 8
-SCHEDULING - pid: 8  burstTime: 0 baseprocess: 8
-SCHEDULING - pid: 8  burstTime: 0 baseprocess: 8
-SCHEDULING - pid: 9  burstTime: 0 baseprocess: 8
-Setting burst time
-SCHEDULING - pid: 10  burstTime: 0 baseprocess: 8
-Setting burst time
-SCHEDULING - pid: 11  burstTime: 0 baseprocess: 8
-Setting burst time
-SCHEDULING - pid: 12  burstTime: 0 baseprocess: 8
-Setting burst time
-SCHEDULING - pid: 13  burstTime: 0 baseprocess: 8
-Setting burst time
-SCHEDULING - pid: 13  burstTime: 2 baseprocess: 13
-Exiting PID: 13	ArrivalUptime: 2640	CompletionUptime: 2722	TurnaroundTime: 82	ResponseUptime: 1
-Waking up parent
-SCHEDULING - pid: 9  burstTime: 4 baseprocess: 13
-SCHEDULING - pid: 10  burstTime: 5 baseprocess: 13
-Enter for user IO:
-SCHEDULING - pid: 11  burstTime: 8 baseprocess: 13
-SCHEDULING - pid: 12  burstTime: 10 baseprocess: 13
-SCHEDULING - pid: 8  burstTime: 0 baseprocess: 13
-SCHEDULING - pid: 9  burstTime: 4 baseprocess: 13
-Exiting PID: 9	ArrivalUptime: 2639	CompletionUptime: 2970	TurnaroundTime: 331	ResponseUptime: 84
-Waking up parent
-SCHEDULING - pid: 11  burstTime: 8 baseprocess: 13
-sdfds
-SCHEDULING - pid: 12  burstTime: 10 baseprocess: 13
-SCHEDULING - pid: 8  burstTime: 0 baseprocess: 13
-SCHEDULING - pid: 10  burstTime: 5 baseprocess: 13
-So you entered: sdfds
-Exiting PID: 10	ArrivalUptime: 2639	CompletionUptime: 3055	TurnaroundTime: 416	ResponseUptime: 167
-Waking up parent
-SCHEDULING - pid: 11  burstTime: 8 baseprocess: 13
-SCHEDULING - pid: 12  burstTime: 10 baseprocess: 13
-SCHEDULING - pid: 8  burstTime: 0 baseprocess: 13
-SCHEDULING - pid: 11  burstTime: 8 baseprocess: 13
-Exiting PID: 11	ArrivalUptime: 2639	CompletionUptime: 3215	TurnaroundTime: 576	ResponseUptime: 167
-Waking up parent
-SCHEDULING - pid: 12  burstTime: 10 baseprocess: 13
-Exiting PID: 12	ArrivalUptime: 2640	CompletionUptime: 3216	TurnaroundTime: 576	ResponseUptime: 250
-Waking up parent
-SCHEDULING - pid: 8  burstTime: 0 baseprocess: 13
-
-******** CHILDREN EXIT ORDER SUMMARY ********
-BurstTime: 2   - Empty loop running 2e8 times
-BurstTime: 4   - Empty loop running 4e8 times
-BurstTime: 5   - Taking user IO and printing it
-BurstTime: 8   - Empty loop running 8e8 times
-BurstTime: 10  - Reading from file and printing it
-
-****** Summary ends, completing parent *******
-
-Waking up parent
-SCHEDULING - pid: 2  burstTime: 0 baseprocess: 13
-$ QEMU: Terminated
-
-
 
