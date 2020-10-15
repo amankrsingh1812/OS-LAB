@@ -546,11 +546,12 @@ int set_burst_time(int n){
 }
 ```
 
-In the `trap` function inside `trap.c` we are implementing the time quanta. For this we have defined `base_process` as the process from which time quanta is determined (smallest burst time process in queue). Now if the currently executing process is base process, we don't pre-empt it and count number of ticks taken till its completion. Then we are using exactly these many ticks for all other processes.
+In the `trap` function inside `trap.c` we are implementing the time quanta. For this we have defined `base_process` as the process from which time quanta is determined (smallest burst time process in queue). Thus, we have made the time quanta equal to the execution time of the `base_process`. 
 
-<br/>
-<br/>
-<br/>
+**Note** that here execution time is accounted in terms of the no. of `ticks` passed during the execution of the process. 
+
+So, if the currently executing process is base process, we don't pre-empt it and count number of ticks taken till its completion. Then we are using exactly these many ticks for all other processes.
+
 
 ```c
 void trap(struct trapframe *tf){
@@ -646,4 +647,4 @@ t = 26   processes : [7]              scheduled: 7   --> file IO          / fini
 t = 30   processes : [5]              scheduled: 5   --> user IO complete / finishes
 ```
 
-So from above table we can see that scheduling is done exactly as expected. Process with burst time 2, 4, 5, 8 and 10 were scheduled exactly 1, 2, 2, 4 and 5 times respectively. When we repeated the same test again and again, almost same results were found with the exception that time taked by file IO was bit inconsistent. This is due to the fact that burst time of IO whether file IO or user IO cannot be predicted accurately.
+So from above table we can see that the Hybrid scheduling has been done exactly as expected. Process with burst time 2, 4, 5, 8 and 10 were scheduled 1, 2, 2, 4 and 5 times respectively. When we repeated the same test again and again, almost same results were obtained. The only exception was seen in the time taken by file IO, which was a bit inconsistent. This is because the burst time of IO whether file-IO or user-IO cannot be predicted accurately. For eg. User-IO depends on `when` the user gives the input. 
