@@ -23,34 +23,6 @@ void looper(int bt, int loopfac, int idx) {
   exit();
 }
 
-// User IO
-void userIO(int bt)
-{
-  set_burst_time(bt);
-
-  char buf[256];
-  printf(1, "Enter for user IO:\n");
-  int amt = read(0, buf, 256);
-  buf[amt] = 0;
-  printf(1, "So you entered: %s", buf);
-
-  // getProcInfo(); 
-  exit();
-}
-
-// File IO
-void fileIO(int bt){
-  set_burst_time(bt);
-
-  int fd = open("README", 0);
-  char buf[1500];
-  read(fd, buf, 1500);
-  buf[1499] = 0;
-  // printf(1, "1500 Words of README: \n%s\n---------\n", buf);
-  exit();
-}
-
-
 int main(int argc, char *argv[])
 {
 
@@ -62,17 +34,17 @@ int main(int argc, char *argv[])
   arrivalTime[0] = uptime();
   if ( !(pid[0] = fork()) )  looper(4,4,0);
   arrivalTime[1] = uptime();
-  if ( !(pid[1] = fork()) )  looper(8,8,1);
+  if ( !(pid[1] = fork()) )  looper(8,8,2);
   arrivalTime[2] = uptime();
-  if ( !(pid[2] = fork()) )  looper(2,2,2); 
+  if ( !(pid[2] = fork()) )  looper(2,2,4); 
 
 
   for (int i=0; i<3; i++)
     rpid[i] = wait();
 
-  strcpy(exitInfoGatherer[0], "BurstTime: 4  - Empty loop running 4e8 times\n");
-  strcpy(exitInfoGatherer[1], "BurstTime: 8 - Empty loop running 8e8 times\n");
-  strcpy(exitInfoGatherer[2], "BurstTime: 2  - Empty loop running 2e8 times\n");
+  strcpy(exitInfoGatherer[0], "BurstTime: 4   - Empty loop running 4e8 times\n");
+  strcpy(exitInfoGatherer[1], "BurstTime: 8   - Empty loop running 8e8 times\n");
+  strcpy(exitInfoGatherer[2], "BurstTime: 2   - Empty loop running 2e8 times\n");
 
   printf(1, "\n******** CHILDREN EXIT ORDER SUMMARY ********\n");
   for (int i=0; i<3; i++) {
@@ -84,4 +56,5 @@ int main(int argc, char *argv[])
   printf(1, "\n****** Summary ends, completing parent *******\n\n");
   exit();
 }
+
 

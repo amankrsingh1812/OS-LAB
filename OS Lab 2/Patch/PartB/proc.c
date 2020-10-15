@@ -691,4 +691,3 @@ set_burst_time(int n)
   return 0;
 }
 
-

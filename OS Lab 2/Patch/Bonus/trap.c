@@ -106,6 +106,7 @@ trap(struct trapframe *tf)
   static int ticks_since_last_yield = 0;
   static int time_slice = 0;
   static int time_slice_initializing = 0;
+  static struct proc* last_proc = 0;
   if(myproc() && myproc()->state == RUNNING && tf->trapno == T_IRQ0+IRQ_TIMER){
     if(myproc() == base_process){
       // Don't give up on base_process
@@ -116,14 +117,23 @@ trap(struct trapframe *tf)
       }
     }
     else{
-      // Call yield after every kth tick (k being time quanta)
       time_slice_initializing = 0;
-      if(ticks_since_last_yield == time_slice){
-        ticks_since_last_yield = 0;
-        yield();
+      if(last_proc == myproc()){
+        if(ticks_since_last_yield == time_slice){
+          ticks_since_last_yield = 0;
+          yield();
+        }
+        else{
+          ticks_since_last_yield++;
+        }
       }
       else{
-        ticks_since_last_yield++;
+        last_proc = myproc();
+        ticks_since_last_yield = 0;
+        if(ticks_since_last_yield == time_slice){
+          ticks_since_last_yield = 0;
+          yield();
+        }
       }
     }
   }
