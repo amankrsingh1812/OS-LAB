@@ -12,6 +12,39 @@ struct {
   struct proc proc[NPROC];
 } ptable;
 
+struct swapqueue{
+  struct spinlock lock;
+  char* qchan;
+  char* reqchan;
+  int front;
+  int rear; 
+  int size;  
+  struct proc* queue[NPROC+1];
+} soq, siq;
+
+void enqueue(struct swapqueue* sq, struct proc* np){
+  if(sq->size == NPROC) return; 
+  sq->rear = (sq->rear + 1) % NPROC;
+  sq->queue[sq->rear] = np; 
+  sq->size++;  
+}
+
+struct proc* dequeue(struct swapqueue* sq){
+  if (sq->size == 0) return 0; 
+  struct proc* next = sq->queue[sq->front]; 
+  sq->front = (sq->front + 1) % NPROC; 
+  sq->size = sq->size - 1; 
+
+  if(sq->size == 0){
+    sq->front = 0;
+    sq->rear = NPROC - 1;
+  }
+
+  return next; 
+}
+
+
+
 static struct proc *initproc;
 
 int nextpid = 1;
@@ -151,6 +184,20 @@ userinit(void)
   p->state = RUNNABLE;
 
   release(&ptable.lock);
+
+  acquire(&soq.lock);
+  soq.qchan = (void*)0x8080;
+  soq.reqchan = (void*)0x8000;
+  soq.front = soq.size = 0; 
+  soq.rear = NPROC - 1;
+  release(&soq.lock);
+
+  acquire(&siq.lock);
+  siq.qchan = (void*)0x8081;
+  siq.reqchan = (void*)0x8001;
+  siq.front = siq.size = 0; 
+  siq.rear = NPROC - 1;
+  release(&siq.lock);
 }
 
 // Grow current process's memory by n bytes.
@@ -407,7 +454,7 @@ forkret(void)
     first = 0;
     iinit(ROOTDEV);
     initlog(ROOTDEV);
-    create_kernel_process("test1",testKernelProcess);
+    create_kernel_process("swapoutprocess",swapoutprocess);
   }
 
   // Return to "caller", actually trapret (see allocproc).
@@ -608,6 +655,25 @@ void testKernelProcess()
   return;
 }
 
+void swapoutprocess(){
+  release(&ptable.lock);
+  cprintf("Sucess\n");
+  while(1){
+    cprintf("\n\nENtering swapout\n");
+    acquire(&soq.lock);
+    for(int i=0;i<soq.size;i++){
+      cprintf("PID: %d\n", soq.queue[(soq.front + i)%NPROC]);
+      // ...
+      soq.queue[(soq.front + i)%NPROC]->satisfied = 1;
+    }
+    cprintf("\n\n");
+    wakeup(soq.reqchan);
+    sleep(soq.qchan, &soq.lock);
+    release(&soq.lock);
+  }
+
+}
+
 void ps()
 {
   struct proc *p;
@@ -618,4 +684,67 @@ void ps()
       cprintf("Process: %s Pid: %d\n",p->name,p->pid);
     }
   release(&ptable.lock);
+}
+
+
+// void insertq(struct swapqueue* sq, struct proc* p){
+  
+//   return;
+// }
+
+// Atomically release lock and sleep on chan.
+// Reacquires lock when awakened.
+// void
+// sleep2(void *chan)
+// {
+//   struct proc *p = myproc();
+  
+//   if(p == 0)
+//     panic("sleep");
+  
+//   acquire(&ptable.lock);  //DOC: sleeplock1
+  
+//   // Go to sleep.
+//   p->chan = chan;
+//   p->state = SLEEPING;
+  
+//   sched();
+
+//   // Tidy up.
+//   p->chan = 0;
+
+//   // Reacquire original lock.
+//   release(&ptable.lock);
+// }
+
+// void deq(){
+//   acquire(&ptable.lock);
+
+//   sleep(0001, &ptable.lock);
+
+//   release(&ptable.lock);
+// }
+
+
+
+
+
+char* f(char* ptr){
+  if(ptr) return ptr;
+  struct proc* p = myproc();
+  
+  acquire(&ptable.lock);
+  p->satisfied = 0;
+
+  acquire(&soq.lock);
+  enqueue(&soq, p);
+  wakeup(soq.qchan);
+  release(&soq.lock);
+  
+  while(!p->satisfied)
+    sleep(soq.reqchan, &ptable.lock);
+  
+  release(&ptable.lock);
+  return 0;
+
 }

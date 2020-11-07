@@ -123,6 +123,8 @@ void            yield(void);
 void            create_kernel_process(const char *name, void (*entrypoint)());
 void            testKernelProcess(void);
 void            ps(void);
+char*           f(char*);
+void            swapoutprocess();
 
 // swtch.S
 void            swtch(struct context**, struct context*);
