@@ -22,6 +22,14 @@ struct swapqueue{
   struct proc* queue[NPROC+1];
 } soq, siq;
 
+struct frame{
+  struct proc* pr;
+  int empty;
+  int lastref;
+  pte_t* pte; 
+} frames[1<<12];
+
+
 void enqueue(struct swapqueue* sq, struct proc* np){
   if(sq->size == NPROC) return; 
   sq->rear = (sq->rear + 1) % NPROC;
@@ -57,6 +65,8 @@ void
 pinit(void)
 {
   initlock(&ptable.lock, "ptable");
+  initlock(&soq.lock, "soq");
+  initlock(&siq.lock, "siq");
 }
 
 // Must be called with interrupts disabled
@@ -184,17 +194,18 @@ userinit(void)
   p->state = RUNNABLE;
 
   release(&ptable.lock);
-
+  // cprintf("SOQ4: %s\n", soq.lock.name);
   acquire(&soq.lock);
-  soq.qchan = (void*)0x8080;
-  soq.reqchan = (void*)0x8000;
+  soq.qchan = (void*)0xA8080;
+  soq.reqchan = (void*)0xA8000;
   soq.front = soq.size = 0; 
   soq.rear = NPROC - 1;
   release(&soq.lock);
+  // cprintf("RSOQ4\n");
 
   acquire(&siq.lock);
-  siq.qchan = (void*)0x8081;
-  siq.reqchan = (void*)0x8001;
+  siq.qchan = (void*)0xB8081;
+  siq.reqchan = (void*)0xB8001;
   siq.front = siq.size = 0; 
   siq.rear = NPROC - 1;
   release(&siq.lock);
@@ -647,29 +658,45 @@ found:
   return;
 }
 
-void testKernelProcess()
-{
-  release(&ptable.lock);
-  cprintf("Sucess\n");
-  while(1);
-  return;
-}
+// void testKernelProcess()
+// {
+//   release(&ptable.lock);
+//   cprintf("Sucess\n");
+//   while(1);
+//   return;
+// }
+
+// int choosevictim(){
+//   int big = -1;
+//   for(int i=0;i<(1<<12);i++){
+//     if(big < ) {
+
+//     }
+//   }
+//   return 0;
+// }
 
 void swapoutprocess(){
-  release(&ptable.lock);
   cprintf("Sucess\n");
+  sleep(soq.qchan, &ptable.lock);
   while(1){
     cprintf("\n\nENtering swapout\n");
+    cprintf("SOQ1\n");
     acquire(&soq.lock);
     for(int i=0;i<soq.size;i++){
-      cprintf("PID: %d\n", soq.queue[(soq.front + i)%NPROC]);
+      cprintf("PID: %d\n", soq.queue[(soq.front + i)%NPROC]->pid);
       // ...
+      // int victimframe = choosevictim();
+      // victimframe++;
+      dequeue(&soq);
       soq.queue[(soq.front + i)%NPROC]->satisfied = 1;
     }
     cprintf("\n\n");
-    wakeup(soq.reqchan);
-    sleep(soq.qchan, &soq.lock);
+    wakeup1(soq.reqchan);
+    // release(&ptable.lock);
+    sleep(soq.qchan, &ptable.lock);
     release(&soq.lock);
+    // acquire(&ptable.lock);
   }
 
 }
@@ -677,6 +704,7 @@ void swapoutprocess(){
 void ps()
 {
   struct proc *p;
+    cprintf("PT1\n");
   acquire(&ptable.lock);
     for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
       if(p->state == UNUSED)
@@ -737,10 +765,16 @@ char* f(char* ptr){
   p->satisfied = 0;
 
   acquire(&soq.lock);
-  enqueue(&soq, p);
-  wakeup(soq.qchan);
+    enqueue(&soq, p);
+    wakeup1(soq.qchan);
   release(&soq.lock);
-  
+
+  // for(int i=0;i<NPROC;i++){
+  //   if(ptable.proc[i].state)
+  //   cprintf("PID: %d, STATE: %d\n", ptable.proc[i].pid, ptable.proc[i].state);
+  // }
+
+
   while(!p->satisfied)
     sleep(soq.reqchan, &ptable.lock);
   
