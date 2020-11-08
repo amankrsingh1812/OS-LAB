@@ -6,6 +6,10 @@
 #include "x86.h"
 #include "proc.h"
 #include "spinlock.h"
+#include "sleeplock.h"
+#include "fs.h"
+#include "file.h"
+#include "stat.h"
 
 struct {
   struct spinlock lock;
@@ -29,6 +33,158 @@ struct victim
   uint va; 
 };
 
+// ----------------------------------------
+
+static struct inode*
+create(char *path, short type, short major, short minor)
+{
+  struct inode *ip, *dp;
+  char name[DIRSIZ];
+
+  if((dp = nameiparent(path, name)) == 0)
+    return 0;
+  ilock(dp);
+
+  if((ip = dirlookup(dp, name, 0)) != 0){
+    iunlockput(dp);
+    ilock(ip);
+    if(type == T_FILE && ip->type == T_FILE)
+      return ip;
+    iunlockput(ip);
+    return 0;
+  }
+
+  if((ip = ialloc(dp->dev, type)) == 0)
+    panic("create: ialloc");
+
+  ilock(ip);
+  ip->major = major;
+  ip->minor = minor;
+  ip->nlink = 1;
+  iupdate(ip);
+
+  if(dirlink(dp, name, ip->inum) < 0)
+    panic("create: dirlink");
+
+  iunlockput(dp);
+
+  return ip;
+}
+
+// Open inode if exists
+// Otherwise create new
+struct inode*
+open_inode(char *name) {
+  struct inode *ip;
+  begin_op();
+  // cprintf("Write begin\n");
+  
+  ip = namei(name);
+  if (ip)
+    return ip;
+  
+  // cprintf("Write create\n");
+  ip = create(name, T_FILE, 0, 0);
+  if (!ip) {
+    panic("Unable to create/open inode");
+    end_op();
+    return 0;
+  }
+  
+  iunlock(ip);
+  end_op();
+  return ip;
+}
+
+// Write / Overwrite contents
+// to opened inode
+int
+write_inode(struct inode *ip, char *addr, int n) {
+  int max = ((MAXOPBLOCKS-1-1-2) / 2) * 512;
+  int i = 0, off = 0, r;
+  while(i < n){
+    int n1 = n - i;
+    if(n1 > max)
+      n1 = max;
+
+    begin_op();
+    ilock(ip);
+    if ((r = writei(ip, addr + i, off, n1)) > 0)
+      off += r;
+    iunlock(ip);
+    end_op();
+
+    if(r < 0)
+      break;
+    if(r != n1)
+      panic("short filewrite");
+    i += r;
+  }
+  return i == n ? n : -1;
+}
+
+// Create name string from
+// PID and VA[32:13]
+void
+get_name(int pid, uint addr, char *name) {
+  int i = 0;
+  while (pid) {
+    name[i++] = '0' + (pid%10);
+    pid = pid / 10;
+  } 
+  name[i++] = '_';
+  while (addr) {
+    name[i++] = '0' + (addr%10);
+    addr = addr / 10;
+  }
+  name[i] = 0;
+}
+
+// Write page to disk using
+// PID, 20MSBs of VA, buffer
+void 
+write_page(int pid, uint addr, char *buf) {
+  // cprintf("Write start\n");
+  struct inode *ip;
+  char name[14];
+
+  get_name(pid, addr, name);
+  // cprintf("Write open\n");
+  ip = open_inode(name);
+
+  int bytesTranfer = write_inode(ip, buf, 4096);
+  if (bytesTranfer < 0) {
+    cprintf("Unable to write. Exiting (proc.c::write_page)!!");
+    return;
+  }
+  // cprintf("Write complete\n");
+}
+
+// Read one page from disk
+// for given PID, 20MSBs of VA
+// to buffer
+// Returns number of bytes read
+int 
+read_page(int pid, uint addr, char *buf) {
+  struct inode *ip;
+  char name[14];
+
+  get_name(pid, addr, name);
+  ip = open_inode(name);
+
+  ilock(ip);
+  int bytesTranfer = readi(ip, buf, 0, 4096);
+  iunlock(ip);
+
+  if (bytesTranfer < 0) {
+    cprintf("Unable to read. Exiting (proc.c::read_page)!!");
+    return -1;
+  }
+  cprintf("Read complete\n");
+  return bytesTranfer;
+}
+
+// ----------------------------------------------
 // struct frame{
 //   struct proc* pr;
 //   int empty;
@@ -438,7 +594,10 @@ sched(void)
   if(!holding(&ptable.lock))
     panic("sched ptable.lock");
   if(mycpu()->ncli != 1)
-    panic("sched locks");
+  {
+    cprintf("%s ",myproc()->name);
+    panic("sched locks ");
+  }
   if(p->state == RUNNING)
     panic("sched running");
   if(readeflags()&FL_IF)
@@ -475,6 +634,7 @@ forkret(void)
     iinit(ROOTDEV);
     initlog(ROOTDEV);
     create_kernel_process("swapoutprocess",swapoutprocess);
+    create_kernel_process("swapinprocess",swapinprocess);
   }
 
   // Return to "caller", actually trapret (see allocproc).
@@ -675,31 +835,42 @@ found:
 //   return;
 // }
 
-void chooseVictim(){
+void chooseVictim(int pid){
   
   struct proc* p;
-  struct victim victims[4]={0};
+  struct victim victims[4]={{0,0,0},{0,0,0},{0,0,0},{0,0,0}};
   pde_t *pte;
+  // cprintf("chooseVictim begin\n");
+  cprintf("%d\n",victims[0].pte);
   for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
-      if(p->state == UNUSED || p->pid == 2 || p->pid == 3)
+      if(p->state == UNUSED || p->pid < 5|| p->pid == pid)
         continue;
-      for(int i = 0; i < p->sz; i += PGSIZE){
+      for(uint i = 0; i < p->sz; i += PGSIZE){
         pte = (pte_t*)getpte(p->pgdir, (void *) i);
         if(!((*pte) & PTE_U)||!((*pte) & PTE_P)||!((*pte) & PTE_W))
           continue;
-        int idx =(((*pte)&96)>>5);
+        int idx =(((*pte)&(uint)96)>>5);
         victims[idx].pte = pte;
         victims[idx].va = i;
         victims[idx].pr = p;
+        // if(idx==0)
+        // cprintf("vic %d %u\n",p->pid,pte);
       }
   }
+    cprintf("nic %u %d\n",victims[0].pte,pid);
+
+  // cprintf("chooseVictim loop end\n");
   for(int i=0;i<4;i++)
   {
-    if(victims[i].pte!=0)
+    if(victims[i].pte != 0)
     {
       pte = victims[i].pte;
-
-      *pte = ((*pte)&~PTE_U);
+      victims[i].pr->swapOutCount++;
+      // cprintf("Victim begin %d\n",i);
+      write_page(victims[i].pr->pid, (victims[i].va)>>12, (void *)P2V(PTE_ADDR(*pte)));   
+      cprintf("%d Pid:%d %d %d %d\n",i,victims[i].pr->pid,*pte,(*pte&(~PTE_P)),victims[i].va);
+      *pte = ((*pte)&(~PTE_P));
+      // cprintf("Victim end %d\n",victims[i].pr->pid);
       return;
     }
   }
@@ -709,25 +880,39 @@ void chooseVictim(){
 void swapoutprocess(){
   cprintf("Sucess\n");
   sleep(soq.qchan, &ptable.lock);
+
   while(1){
     cprintf("\n\nENtering swapout\n");
-    cprintf("SOQ1\n");
+    // cprintf("SOQ1\n");
+    // pushcli();
     acquire(&soq.lock);
     for(int i=0;i<soq.size;i++){
-      cprintf("PID: %d\n", soq.queue[(soq.front + i)%NPROC]->pid);
+      // cprintf("PID: %d\n", soq.queue[(soq.front + i)%NPROC]->pid);
       // ...
       // int victimframe = choosevictim();
       // victimframe++;
-      chooseVictim();
+      // cprintf("chooseVictim start\n");
+      release(&ptable.lock);
+      release(&soq.lock);
+      // sti();
+      chooseVictim(soq.queue[(soq.front + i)%NPROC]->pid);
+      // cli();
+      acquire(&soq.lock);
+      acquire(&ptable.lock);
+      // cprintf("chooseVictim end\n");
 
-      dequeue(&soq);
       soq.queue[(soq.front + i)%NPROC]->satisfied = 1;
+      dequeue(&soq);
     }
     cprintf("\n\n");
+    // acquire(&soq.lock);
+
     wakeup1(soq.reqchan);
-    // release(&ptable.lock);
-    sleep(soq.qchan, &ptable.lock);
     release(&soq.lock);
+      // acquire(&ptable.lock);
+    // popcli();
+    sleep(soq.qchan, &ptable.lock);
+    // release(&soq.lock);
     // acquire(&ptable.lock);
   }
 
@@ -737,25 +922,34 @@ void swapinprocess(){
   cprintf("Sucess\n");
   sleep(siq.qchan, &ptable.lock);
   while(1){
-    cprintf("\n\nENtering swapout\n");
-    cprintf("SOQ1\n");
+    cprintf("\n\nENtering swapin\n");
+    cprintf("SOQ2\n");
     acquire(&siq.lock);
     for(int i=0;i<siq.size;i++){
+      struct proc* p=siq.queue[(siq.front + i)%NPROC];
       cprintf("PID: %d\n", siq.queue[(siq.front + i)%NPROC]->pid);
       // ...
       // int victimframe = choosevictim();
       // victimframe++;
-      char* mem = kalloc();
-
+      release(&ptable.lock);
+      release(&siq.lock);
       
+      char* mem = kalloc();
+      read_page(p->pid,((p->trapva)>>12),mem);
+      
+      acquire(&siq.lock);
+      acquire(&ptable.lock);
+      cprintf("%d %d\n",*getpte(p->pgdir,(void *)p->trapva),p->swapOutCount);
+      swapInMap(p->pgdir, (void *)p->trapva, PGSIZE, V2P(mem));
+      p->swapOutCount--;
       dequeue(&siq);
-      siq.queue[(siq.front + i)%NPROC]->satisfied = 1;
+      // siq.queue[(siq.front + i)%NPROC]->satisfied = 1;
     }
     cprintf("\n\n");
     wakeup1(siq.reqchan);
+    release(&siq.lock);
     // release(&ptable.lock);
     sleep(siq.qchan, &ptable.lock);
-    release(&siq.lock);
     // acquire(&ptable.lock);
   }
 
@@ -819,25 +1013,47 @@ void ps()
 
 void submitToSwapOut(){
   struct proc* p = myproc();
-  
+  // pushcli();
+  cli();
+  cprintf("submitToSwapOut\n");
   acquire(&ptable.lock);
   p->satisfied = 0;
 
   acquire(&soq.lock);
-    enqueue(&soq, p);
-    wakeup1(soq.qchan);
+  enqueue(&soq, p);
+  wakeup1(soq.qchan);
   release(&soq.lock);
 
-  // for(int i=0;i<NPROC;i++){
-  //   if(ptable.proc[i].state)
-  //   cprintf("PID: %d, STATE: %d\n", ptable.proc[i].pid, ptable.proc[i].state);
-  // }
-
-
-  while(!p->satisfied)
-    sleep(soq.reqchan, &ptable.lock);
+  sleep(soq.reqchan, &ptable.lock);
   
   release(&ptable.lock);
+  sti();
+  // popcli();
+
   return;
 
 }
+
+void submitToSwapIn(){
+  struct proc* p = myproc();
+  
+  cli();
+  // uint g=*getpte(p->pgdir,(void *)rcr2());
+  cprintf("submitToSwapIn %d\n",p->trapva);
+  acquire(&ptable.lock);
+
+  acquire(&siq.lock);
+    enqueue(&siq, p);
+    wakeup1(siq.qchan);
+  release(&siq.lock);
+  
+  sleep(siq.reqchan, &ptable.lock);
+  
+  release(&ptable.lock);
+  sti();
+
+  return;
+
+}
+
+

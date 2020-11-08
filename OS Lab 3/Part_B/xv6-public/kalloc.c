@@ -89,6 +89,7 @@ kalloc(void)
   r = kmem.freelist;
   while(!r)
   {
+    cprintf("Running \n");
     if(kmem.use_lock)
       release(&kmem.lock);
     submitToSwapOut();

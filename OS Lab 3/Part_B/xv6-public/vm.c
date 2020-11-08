@@ -69,7 +69,10 @@ mappages(pde_t *pgdir, void *va, uint size, uint pa, int perm)
     if((pte = walkpgdir(pgdir, a, 1)) == 0)
       return -1;
     if(*pte & PTE_P)
+    {
+      cprintf("%d %d %d\n",a,va,*pte);
       panic("remap");
+    }
     *pte = pa | perm | PTE_P;
     // if(perm & PTE_U != 0)
     // {
@@ -391,6 +394,11 @@ copyout(pde_t *pgdir, uint va, void *p, uint len)
 
 pte_t* getpte(pde_t *pgdir, const void *va){
   return walkpgdir(pgdir,va,0);
+}
+
+void swapInMap(pde_t *pgdir, void *va, uint size, uint pa){
+  cprintf("swapINMAP: %d\n",PGROUNDDOWN((uint)va));
+  mappages(pgdir, va, size, pa, PTE_W|PTE_U);
 }
 //PAGEBREAK!
 // Blank page.

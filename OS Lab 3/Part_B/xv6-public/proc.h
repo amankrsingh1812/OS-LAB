@@ -51,6 +51,7 @@ struct proc {
   char name[16];               // Process name (debugging)
   int satisfied;
   uint trapva;
+  int swapOutCount;
 };
 
 // Process memory is laid out contiguously, low addresses first:
