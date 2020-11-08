@@ -71,6 +71,10 @@ mappages(pde_t *pgdir, void *va, uint size, uint pa, int perm)
     if(*pte & PTE_P)
       panic("remap");
     *pte = pa | perm | PTE_P;
+    // if(perm & PTE_U != 0)
+    // {
+    //   //call insert into frames table
+    // }
     if(a == last)
       break;
     a += PGSIZE;
@@ -385,6 +389,9 @@ copyout(pde_t *pgdir, uint va, void *p, uint len)
   return 0;
 }
 
+pte_t* getpte(pde_t *pgdir, const void *va){
+  return walkpgdir(pgdir,va,0);
+}
 //PAGEBREAK!
 // Blank page.
 //PAGEBREAK!

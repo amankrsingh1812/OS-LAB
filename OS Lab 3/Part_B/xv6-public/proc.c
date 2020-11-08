@@ -22,13 +22,22 @@ struct swapqueue{
   struct proc* queue[NPROC+1];
 } soq, siq;
 
-struct frame{
+struct victim
+{
+  pte_t* pte;
   struct proc* pr;
-  int empty;
-  int lastref;
-  pte_t* pte; 
-} frames[1<<12];
+  uint va; 
+};
 
+// struct frame{
+//   struct proc* pr;
+//   int empty;
+//   pte_t* pte; 
+// } frames[PHYSTOP/PGSIZE+1];
+
+// void insertIntoFrames(uint pa, pte_t* pte, struct proc* pr){
+
+// }
 
 void enqueue(struct swapqueue* sq, struct proc* np){
   if(sq->size == NPROC) return; 
@@ -666,15 +675,36 @@ found:
 //   return;
 // }
 
-// int choosevictim(){
-//   int big = -1;
-//   for(int i=0;i<(1<<12);i++){
-//     if(big < ) {
+void chooseVictim(){
+  
+  struct proc* p;
+  struct victim victims[4]={0};
+  pde_t *pte;
+  for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
+      if(p->state == UNUSED || p->pid == 2 || p->pid == 3)
+        continue;
+      for(int i = 0; i < p->sz; i += PGSIZE){
+        pte = (pte_t*)getpte(p->pgdir, (void *) i);
+        if(!((*pte) & PTE_U)||!((*pte) & PTE_P)||!((*pte) & PTE_W))
+          continue;
+        int idx =(((*pte)&96)>>5);
+        victims[idx].pte = pte;
+        victims[idx].va = i;
+        victims[idx].pr = p;
+      }
+  }
+  for(int i=0;i<4;i++)
+  {
+    if(victims[i].pte!=0)
+    {
+      pte = victims[i].pte;
 
-//     }
-//   }
-//   return 0;
-// }
+      *pte = ((*pte)&~PTE_U);
+      return;
+    }
+  }
+  return;
+}
 
 void swapoutprocess(){
   cprintf("Sucess\n");
@@ -688,6 +718,8 @@ void swapoutprocess(){
       // ...
       // int victimframe = choosevictim();
       // victimframe++;
+      chooseVictim();
+
       dequeue(&soq);
       soq.queue[(soq.front + i)%NPROC]->satisfied = 1;
     }
@@ -696,6 +728,34 @@ void swapoutprocess(){
     // release(&ptable.lock);
     sleep(soq.qchan, &ptable.lock);
     release(&soq.lock);
+    // acquire(&ptable.lock);
+  }
+
+}
+
+void swapinprocess(){
+  cprintf("Sucess\n");
+  sleep(siq.qchan, &ptable.lock);
+  while(1){
+    cprintf("\n\nENtering swapout\n");
+    cprintf("SOQ1\n");
+    acquire(&siq.lock);
+    for(int i=0;i<siq.size;i++){
+      cprintf("PID: %d\n", siq.queue[(siq.front + i)%NPROC]->pid);
+      // ...
+      // int victimframe = choosevictim();
+      // victimframe++;
+      char* mem = kalloc();
+
+      
+      dequeue(&siq);
+      siq.queue[(siq.front + i)%NPROC]->satisfied = 1;
+    }
+    cprintf("\n\n");
+    wakeup1(siq.reqchan);
+    // release(&ptable.lock);
+    sleep(siq.qchan, &ptable.lock);
+    release(&siq.lock);
     // acquire(&ptable.lock);
   }
 
@@ -757,8 +817,7 @@ void ps()
 
 
 
-char* f(char* ptr){
-  if(ptr) return ptr;
+void submitToSwapOut(){
   struct proc* p = myproc();
   
   acquire(&ptable.lock);
@@ -779,6 +838,6 @@ char* f(char* ptr){
     sleep(soq.reqchan, &ptable.lock);
   
   release(&ptable.lock);
-  return 0;
+  return;
 
 }
