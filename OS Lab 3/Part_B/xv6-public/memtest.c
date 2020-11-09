@@ -6,7 +6,7 @@
 void child_process(int i) 
 {
     // int pid= getpid();
-    for (int j=1; j<=20; j++) 
+    for (int j=1; j<=40; j++) 
     {
         // printf(1,"malloc called: %d\n",pid);
         char *ptr = (char *)malloc(PGSIZE);
