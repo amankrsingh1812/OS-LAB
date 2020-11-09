@@ -13,6 +13,7 @@ struct gatedesc idt[256];
 extern uint vectors[];  // in vectors.S: array of 256 entry pointers
 struct spinlock tickslock;
 uint ticks;
+pte_t pte ;
 
 void
 tvinit(void)
@@ -77,7 +78,18 @@ trap(struct trapframe *tf)
             cpuid(), tf->cs, tf->eip);
     lapiceoi();
     break;
-
+  case T_PGFLT:
+    pte = *getpte(myproc()->pgdir,(void *)rcr2());
+    // pte = (pte & PTE_P);
+    cprintf("page fault %d %d %d\n",rcr2(),pte,myproc()->pid);
+    myproc()->trapva=rcr2();
+    // if(myproc()->trapva < myproc()->sz)
+    // {
+      submitToSwapIn();
+      break;
+    // }
+    // myproc()->killed = 1;
+    // break;
   //PAGEBREAK: 13
   default:
     if(myproc() == 0 || (tf->cs&3) == 0){

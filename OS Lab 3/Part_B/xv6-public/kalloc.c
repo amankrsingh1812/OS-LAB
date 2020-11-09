@@ -87,10 +87,21 @@ kalloc(void)
   if(kmem.use_lock)
     acquire(&kmem.lock);
   r = kmem.freelist;
+  while(!r)
+  {
+    cprintf("Running \n");
+    if(kmem.use_lock)
+      release(&kmem.lock);
+    submitToSwapOut();
+    if(kmem.use_lock)
+      acquire(&kmem.lock);
+    r = kmem.freelist;
+  }
   if(r)
     kmem.freelist = r->next;
   if(kmem.use_lock)
     release(&kmem.lock);
-  return (char*)r;
+  return (char *)r;
 }
+
 

@@ -635,6 +635,7 @@ namex(char *path, int nameiparent, char *name)
     ilock(ip);
     if(ip->type != T_DIR){
       iunlockput(ip);
+
       return 0;
     }
     if(nameiparent && *path == '\0'){
@@ -642,11 +643,14 @@ namex(char *path, int nameiparent, char *name)
       iunlock(ip);
       return ip;
     }
+    // cprintf("if up\n");
     if((next = dirlookup(ip, name, 0)) == 0){
       iunlockput(ip);
       return 0;
     }
+    // cprintf("iunlock up\n");
     iunlockput(ip);
+    // cprintf("iunlock\n");
     ip = next;
   }
   if(nameiparent){

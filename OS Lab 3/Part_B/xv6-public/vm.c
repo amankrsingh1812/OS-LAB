@@ -49,6 +49,8 @@ walkpgdir(pde_t *pgdir, const void *va, int alloc)
     // The permissions here are overly generous, but they can
     // be further restricted by the permissions in the page table
     // entries, if necessary.
+    // if(myproc()->pid>4)
+    // cprintf("Walkpgdir Called %x %d",(uint)va,myproc()->pid);
     *pde = V2P(pgtab) | PTE_P | PTE_W | PTE_U;
   }
   return &pgtab[PTX(va)];
@@ -65,12 +67,21 @@ mappages(pde_t *pgdir, void *va, uint size, uint pa, int perm)
 
   a = (char*)PGROUNDDOWN((uint)va);
   last = (char*)PGROUNDDOWN(((uint)va) + size - 1);
+  // cprintf("Hi: %d %d\n",a,va);
+
   for(;;){
     if((pte = walkpgdir(pgdir, a, 1)) == 0)
       return -1;
     if(*pte & PTE_P)
+    {
+      cprintf("%d %d %d\n",a,va,*pte);
       panic("remap");
+    }
     *pte = pa | perm | PTE_P;
+    // if(perm & PTE_U != 0)
+    // {
+    //   //call insert into frames table
+    // }
     if(a == last)
       break;
     a += PGSIZE;
@@ -385,6 +396,14 @@ copyout(pde_t *pgdir, uint va, void *p, uint len)
   return 0;
 }
 
+pte_t* getpte(pde_t *pgdir, const void *va){
+  return walkpgdir(pgdir,va,0);
+}
+
+void swapInMap(pde_t *pgdir, void *va, uint size, uint pa){
+  cprintf("swapINMAP: %d\n",PGROUNDDOWN((uint)va));
+  mappages(pgdir, va, size, pa, PTE_W|PTE_U);
+}
 //PAGEBREAK!
 // Blank page.
 //PAGEBREAK!

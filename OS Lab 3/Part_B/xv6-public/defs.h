@@ -123,6 +123,10 @@ void            yield(void);
 void            create_kernel_process(const char *name, void (*entrypoint)());
 void            testKernelProcess(void);
 void            ps(void);
+void            submitToSwapIn(void);
+void            submitToSwapOut(void);
+void            swapoutprocess();
+void            swapinprocess();
 
 // swtch.S
 void            swtch(struct context**, struct context*);
@@ -188,6 +192,9 @@ void            switchuvm(struct proc*);
 void            switchkvm(void);
 int             copyout(pde_t*, uint, void*, uint);
 void            clearpteu(pde_t *pgdir, char *uva);
+uint*           getpte(pde_t *pgdir, const void *va);
+void            swapInMap(pde_t *pgdir, void *va, uint size, uint pa);
 
+// void            chooseVictim();
 // number of elements in fixed-size array
 #define NELEM(x) (sizeof(x)/sizeof((x)[0]))
