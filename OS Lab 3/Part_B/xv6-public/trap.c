@@ -83,13 +83,13 @@ trap(struct trapframe *tf)
     // pte = (pte & PTE_P);
     cprintf("page fault %d %d %d\n",rcr2(),pte,myproc()->pid);
     myproc()->trapva=rcr2();
-    if(myproc()->trapva < myproc()->sz)
-    {
+    // if(myproc()->trapva < myproc()->sz)
+    // {
       submitToSwapIn();
       break;
-    }
-    myproc()->killed = 1;
-    break;
+    // }
+    // myproc()->killed = 1;
+    // break;
   //PAGEBREAK: 13
   default:
     if(myproc() == 0 || (tf->cs&3) == 0){

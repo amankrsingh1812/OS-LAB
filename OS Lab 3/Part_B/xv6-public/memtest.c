@@ -5,10 +5,10 @@
 
 void child_process(int i) 
 {
-    int pid= getpid();
-    for (int j=1; j<=40; j++) 
+    // int pid= getpid();
+    for (int j=1; j<=15; j++) 
     {
-        printf(1,"malloc called: %d\n",pid);
+        // printf(1,"malloc called: %d\n",pid);
         char *ptr = (char *)malloc(PGSIZE);
         for (int k=0; k<PGSIZE; k++)
         {

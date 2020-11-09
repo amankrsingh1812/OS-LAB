@@ -125,7 +125,7 @@ recover_from_log(void)
 void
 begin_op(void)
 {
-  return;
+  // return;
   acquire(&log.lock);
   while(1){
     if(log.committing){
@@ -147,7 +147,7 @@ begin_op(void)
 void
 end_op(void)
 {
-  return;
+  // return;
   int do_commit = 0;
 
   acquire(&log.lock);
@@ -216,7 +216,7 @@ commit()
 void
 log_write(struct buf *b)
 {
-  return;
+  // return;
   int i;
 
   if (log.lh.n >= LOGSIZE || log.lh.n >= log.size - 1)

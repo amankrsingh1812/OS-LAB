@@ -844,7 +844,9 @@ void chooseVictim(int pid){
   for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
       if(p->state == UNUSED|| p->state == ZOMBIE || p->state == EMBRYO || p->pid < 5|| p->pid == pid)
         continue;
-      for(uint i = 0; i < p->sz; i += PGSIZE){
+      if((uint)p->pgdir < KERNBASE)
+        cprintf("S right\n");
+      for(uint i = PGSIZE; i< p->sz; i += PGSIZE){
         pte = (pte_t*)getpte(p->pgdir, (void *) i);
         if(!((*pte) & PTE_U)||!((*pte) & PTE_P)||!((*pte) & PTE_W))
           continue;
@@ -874,6 +876,7 @@ void chooseVictim(int pid){
       cprintf("%d Pid:%d %d %d %d\n",i,victims[i].pr->pid,*pte,(*pte&(~PTE_P)),victims[i].va);
       *pte = ((*pte)&(~PTE_P));
       kfree((char *)P2V(PTE_ADDR(*pte)));
+      lcr3(V2P(victims[i].pr->pgdir)); 
       // cprintf("Victim end %d\n",victims[i].pr->pid);
       return;
     }
