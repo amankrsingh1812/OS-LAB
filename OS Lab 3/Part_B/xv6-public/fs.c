@@ -633,7 +633,6 @@ namex(char *path, int nameiparent, char *name)
 
   while((path = skipelem(path, name)) != 0){
     ilock(ip);
-    // cprintf("ilock\n");
     if(ip->type != T_DIR){
       iunlockput(ip);
 

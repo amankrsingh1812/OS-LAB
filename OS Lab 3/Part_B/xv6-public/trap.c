@@ -13,6 +13,7 @@ struct gatedesc idt[256];
 extern uint vectors[];  // in vectors.S: array of 256 entry pointers
 struct spinlock tickslock;
 uint ticks;
+pte_t pte ;
 
 void
 tvinit(void)
@@ -78,9 +79,16 @@ trap(struct trapframe *tf)
     lapiceoi();
     break;
   case T_PGFLT:
-    cprintf("page fault %d %d %d\n",rcr2(),*getpte(myproc()->pgdir,(void *)rcr2()),myproc()->pid);
+    pte = *getpte(myproc()->pgdir,(void *)rcr2());
+    // pte = (pte & PTE_P);
+    cprintf("page fault %d %d %d\n",rcr2(),pte,myproc()->pid);
     myproc()->trapva=rcr2();
-    submitToSwapIn();
+    if(myproc()->trapva < myproc()->sz)
+    {
+      submitToSwapIn();
+      break;
+    }
+    myproc()->killed = 1;
     break;
   //PAGEBREAK: 13
   default:
@@ -106,9 +114,9 @@ trap(struct trapframe *tf)
 
   // Force process to give up CPU on clock tick.
   // If interrupts were on while locks held, would need to check nlock.
-  if(myproc() && myproc()->state == RUNNING &&
-     tf->trapno == T_IRQ0+IRQ_TIMER)
-    yield();
+  // if(myproc() && myproc()->state == RUNNING &&
+  //    tf->trapno == T_IRQ0+IRQ_TIMER)
+  //   yield();
 
   // Check if the process has been killed since we yielded
   if(myproc() && myproc()->killed && (tf->cs&3) == DPL_USER)

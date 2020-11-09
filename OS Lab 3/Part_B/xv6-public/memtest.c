@@ -1,12 +1,14 @@
 #include "types.h"
 #include "user.h"
 
-#define PGSIZE 4096*2
+#define PGSIZE 4096
 
 void child_process(int i) 
 {
-    for (int j=1; j<=10; j++) 
+    int pid= getpid();
+    for (int j=1; j<=40; j++) 
     {
+        printf(1,"malloc called: %d\n",pid);
         char *ptr = (char *)malloc(PGSIZE);
         for (int k=0; k<PGSIZE; k++)
         {

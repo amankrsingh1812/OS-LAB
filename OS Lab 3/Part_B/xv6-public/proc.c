@@ -76,14 +76,13 @@ create(char *path, short type, short major, short minor)
 struct inode*
 open_inode(char *name) {
   struct inode *ip;
+
   begin_op();
-  // cprintf("Write begin\n");
   
   ip = namei(name);
   if (ip)
     return ip;
   
-  // cprintf("Write create\n");
   ip = create(name, T_FILE, 0, 0);
   if (!ip) {
     panic("Unable to create/open inode");
@@ -843,7 +842,7 @@ void chooseVictim(int pid){
   // cprintf("chooseVictim begin\n");
   cprintf("%d\n",victims[0].pte);
   for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
-      if(p->state == UNUSED || p->pid < 5|| p->pid == pid)
+      if(p->state == UNUSED|| p->state == ZOMBIE || p->state == EMBRYO || p->pid < 5|| p->pid == pid)
         continue;
       for(uint i = 0; i < p->sz; i += PGSIZE){
         pte = (pte_t*)getpte(p->pgdir, (void *) i);
@@ -857,7 +856,7 @@ void chooseVictim(int pid){
         // cprintf("vic %d %u\n",p->pid,pte);
       }
   }
-    cprintf("nic %u %d\n",victims[0].pte,pid);
+    cprintf("nic %x %d\n",victims[0].pte,pid);
 
   // cprintf("chooseVictim loop end\n");
   for(int i=0;i<4;i++)
@@ -867,9 +866,14 @@ void chooseVictim(int pid){
       pte = victims[i].pte;
       victims[i].pr->swapOutCount++;
       // cprintf("Victim begin %d\n",i);
+      release(&ptable.lock);
+      release(&soq.lock);
       write_page(victims[i].pr->pid, (victims[i].va)>>12, (void *)P2V(PTE_ADDR(*pte)));   
+      acquire(&soq.lock);
+      acquire(&ptable.lock);
       cprintf("%d Pid:%d %d %d %d\n",i,victims[i].pr->pid,*pte,(*pte&(~PTE_P)),victims[i].va);
       *pte = ((*pte)&(~PTE_P));
+      kfree((char *)P2V(PTE_ADDR(*pte)));
       // cprintf("Victim end %d\n",victims[i].pr->pid);
       return;
     }
@@ -886,23 +890,25 @@ void swapoutprocess(){
     // cprintf("SOQ1\n");
     // pushcli();
     acquire(&soq.lock);
-    for(int i=0;i<soq.size;i++){
+    while(soq.size){
+      // struct proc* p=siq.queue[(siq.front + i)%NPROC];
+      struct proc *p = dequeue(&soq);
+      
+      cprintf("PID: %d\n", p->pid);
       // cprintf("PID: %d\n", soq.queue[(soq.front + i)%NPROC]->pid);
       // ...
       // int victimframe = choosevictim();
       // victimframe++;
       // cprintf("chooseVictim start\n");
-      release(&ptable.lock);
-      release(&soq.lock);
+
       // sti();
-      chooseVictim(soq.queue[(soq.front + i)%NPROC]->pid);
+      chooseVictim(p->pid);
       // cli();
-      acquire(&soq.lock);
-      acquire(&ptable.lock);
+
       // cprintf("chooseVictim end\n");
 
-      soq.queue[(soq.front + i)%NPROC]->satisfied = 1;
-      dequeue(&soq);
+      p->satisfied = 1;
+      // dequeue(&soq);
     }
     cprintf("\n\n");
     // acquire(&soq.lock);
@@ -925,9 +931,11 @@ void swapinprocess(){
     cprintf("\n\nENtering swapin\n");
     cprintf("SOQ2\n");
     acquire(&siq.lock);
-    for(int i=0;i<siq.size;i++){
-      struct proc* p=siq.queue[(siq.front + i)%NPROC];
-      cprintf("PID: %d\n", siq.queue[(siq.front + i)%NPROC]->pid);
+    while(siq.size){
+      // struct proc* p=siq.queue[(siq.front + i)%NPROC];
+      struct proc *p = dequeue(&siq);
+      
+      cprintf("PID: %d\n", p->pid);
       // ...
       // int victimframe = choosevictim();
       // victimframe++;
@@ -935,14 +943,14 @@ void swapinprocess(){
       release(&siq.lock);
       
       char* mem = kalloc();
+      cprintf("kalloc done\n");
       read_page(p->pid,((p->trapva)>>12),mem);
       
       acquire(&siq.lock);
       acquire(&ptable.lock);
       cprintf("%d %d\n",*getpte(p->pgdir,(void *)p->trapva),p->swapOutCount);
-      swapInMap(p->pgdir, (void *)p->trapva, PGSIZE, V2P(mem));
+      swapInMap(p->pgdir, (void *)PGROUNDDOWN(p->trapva), PGSIZE, V2P(mem));
       p->swapOutCount--;
-      dequeue(&siq);
       // siq.queue[(siq.front + i)%NPROC]->satisfied = 1;
     }
     cprintf("\n\n");
@@ -1014,8 +1022,8 @@ void ps()
 void submitToSwapOut(){
   struct proc* p = myproc();
   // pushcli();
-  cli();
-  cprintf("submitToSwapOut\n");
+  // cli();
+  cprintf("submitToSwapOut %d\n",p->pid);
   acquire(&ptable.lock);
   p->satisfied = 0;
 
@@ -1024,10 +1032,12 @@ void submitToSwapOut(){
   wakeup1(soq.qchan);
   release(&soq.lock);
 
+  // sti();
+  // popcli();
   sleep(soq.reqchan, &ptable.lock);
-  
+  // cli();
   release(&ptable.lock);
-  sti();
+  // sti();
   // popcli();
 
   return;
