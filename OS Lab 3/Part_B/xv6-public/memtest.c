@@ -6,7 +6,7 @@
 void child_process(int i) 
 {
     // int pid= getpid();
-    for (int j=1; j<=15; j++) 
+    for (int j=1; j<=20; j++) 
     {
         // printf(1,"malloc called: %d\n",pid);
         char *ptr = (char *)malloc(PGSIZE);
@@ -20,6 +20,7 @@ void child_process(int i)
             if (ptr[k] != (i + j*k)%128)
                 printf(1, "Error@ %d %d %d %d\n", i,j,k,ptr[k]);
     }
+    printf(1, "CHILD: %d\n", i);
     exit();
 }
 
