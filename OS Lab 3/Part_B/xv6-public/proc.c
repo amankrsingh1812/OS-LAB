@@ -34,6 +34,8 @@ struct victim
   uint va; 
 };
 
+int openFileCount = 2;
+
 // ----------------------------------------
 
 int
@@ -250,6 +252,7 @@ get_name(int pid, uint addr, char *name) {
 
 
 int write_page(int pid, uint addr, char *buf){
+  openFileCount++;
   char name[14];
 
   get_name(pid, addr, name);
@@ -343,6 +346,7 @@ int read_page(int pid, uint addr, char *buf){
   }
   fileclose(f);
   delete_page(name);
+  // openFileCount--;
   return noc;
 }
 // // Write page to disk using
@@ -1040,7 +1044,7 @@ found:
 //   return;
 // }
 
-void chooseVictim(int pid){
+int chooseVictim(int pid){
   
   struct proc* p;
   struct victim victims[4]={{0,0,0},{0,0,0},{0,0,0},{0,0,0}};
@@ -1048,13 +1052,13 @@ void chooseVictim(int pid){
   // cprintf("chooseVictim begin\n");
   cprintf("%d\n",victims[0].pte);
   for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
-      if(p->state == UNUSED|| p->state == ZOMBIE || p->state == EMBRYO || p->pid < 5|| p->pid == pid)
+      if(p->state == UNUSED|| p->state == EMBRYO || p->pid < 5|| p->pid == pid)
         continue;
       if((uint)p->pgdir < KERNBASE)
         cprintf("S right\n");
       for(uint i = PGSIZE; i< p->sz; i += PGSIZE){
         pte = (pte_t*)getpte(p->pgdir, (void *) i);
-        if(!((*pte) & PTE_U)||!((*pte) & PTE_P)||!((*pte) & PTE_W))
+        if(!((*pte) & PTE_U)||!((*pte) & PTE_P))
           continue;
         int idx =(((*pte)&(uint)96)>>5);
         victims[idx].pte = pte;
@@ -1073,21 +1077,30 @@ void chooseVictim(int pid){
     {
       pte = victims[i].pte;
       victims[i].pr->swapOutCount++;
+      int origstate = victims[i].pr->state;
+      char* origchan = victims[i].pr->chan;
+      victims[i].pr->state = SLEEPING;
+      victims[i].pr->chan = 0;
       // cprintf("Victim begin %d\n",i);
+      uint reqpte = *pte;
+      *pte=0;
       release(&ptable.lock);
       release(&soq.lock);
-      write_page(victims[i].pr->pid, (victims[i].va)>>12, (void *)P2V(PTE_ADDR(*pte)));   
+      write_page(victims[i].pr->pid, (victims[i].va)>>12, (void *)P2V(PTE_ADDR(reqpte)));   
       acquire(&soq.lock);
       acquire(&ptable.lock);
-      cprintf("%d Pid:%d %d %d %d\n",i,victims[i].pr->pid,*pte,(*pte&(~PTE_P)),victims[i].va);
-      *pte = ((*pte)&(~PTE_P));
-      kfree((char *)P2V(PTE_ADDR(*pte)));
+      cprintf("%d Pid:%d %d %d %d\n",i,victims[i].pr->pid,reqpte,(reqpte&(~PTE_P)),victims[i].va);
+      // *pte = ((*pte)&(~PTE_P));
+      kfree((char *)P2V(PTE_ADDR(reqpte)));
       lcr3(V2P(victims[i].pr->pgdir)); 
+      victims[i].pr->state = origstate;
+      victims[i].pr->chan = origchan;
+      // *pte = 0;
       // cprintf("Victim end %d\n",victims[i].pr->pid);
-      return;
+      return 1;
     }
   }
-  return;
+  return 0;
 }
 
 void swapoutprocess(){
@@ -1101,6 +1114,22 @@ void swapoutprocess(){
     acquire(&soq.lock);
     while(soq.size){
       // struct proc* p=siq.queue[(siq.front + i)%NPROC];
+      int g=0;
+      while (openFileCount == NOFILE)
+      {
+        cprintf("flimit \n");
+        if(g==4)
+          while(1);
+        g++;
+        wakeup1(soq.reqchan);
+        release(&ptable.lock);
+        release(&soq.lock);
+        yield();
+        acquire(&ptable.lock);
+        acquire(&soq.lock);
+        /* code */
+      }
+      
       struct proc *p = dequeue(&soq);
       
       cprintf("PID: %d\n", p->pid);
@@ -1111,7 +1140,15 @@ void swapoutprocess(){
       // cprintf("chooseVictim start\n");
 
       // sti();
-      chooseVictim(p->pid);
+      // if(!chooseVictim(p->pid))
+      // {
+      //   cprintf("Zlimit \n");
+      //   release(&ptable.lock);
+      //   release(&soq.lock);
+      //   yield();
+      //   acquire(&ptable.lock);
+      //   acquire(&soq.lock);
+      // }
       // cli();
 
       // cprintf("chooseVictim end\n");
@@ -1143,7 +1180,7 @@ void swapinprocess(){
     while(siq.size){
       // struct proc* p=siq.queue[(siq.front + i)%NPROC];
       struct proc *p = dequeue(&siq);
-      
+      openFileCount--;
       cprintf("PID: %d\n", p->pid);
       // ...
       // int victimframe = choosevictim();
@@ -1243,7 +1280,8 @@ void submitToSwapOut(){
 
   // sti();
   // popcli();
-  sleep(soq.reqchan, &ptable.lock);
+  while(p->satisfied==0)
+    sleep(soq.reqchan, &ptable.lock);
   // cli();
   release(&ptable.lock);
   // sti();
@@ -1256,7 +1294,7 @@ void submitToSwapOut(){
 void submitToSwapIn(){
   struct proc* p = myproc();
   
-  cli();
+  // cli();
   // uint g=*getpte(p->pgdir,(void *)rcr2());
   cprintf("submitToSwapIn %d\n",p->trapva);
   acquire(&ptable.lock);
@@ -1269,7 +1307,7 @@ void submitToSwapIn(){
   sleep(siq.reqchan, &ptable.lock);
   
   release(&ptable.lock);
-  sti();
+  // sti();
 
   return;
 
