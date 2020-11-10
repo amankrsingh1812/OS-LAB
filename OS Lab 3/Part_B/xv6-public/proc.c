@@ -1140,15 +1140,15 @@ void swapoutprocess(){
       // cprintf("chooseVictim start\n");
 
       // sti();
-      // if(!chooseVictim(p->pid))
-      // {
-      //   cprintf("Zlimit \n");
-      //   release(&ptable.lock);
-      //   release(&soq.lock);
-      //   yield();
-      //   acquire(&ptable.lock);
-      //   acquire(&soq.lock);
-      // }
+      if(!chooseVictim(p->pid))
+      {
+        cprintf("Zlimit \n");
+        release(&ptable.lock);
+        release(&soq.lock);
+        yield();
+        acquire(&ptable.lock);
+        acquire(&soq.lock);
+      }
       // cli();
 
       // cprintf("chooseVictim end\n");
