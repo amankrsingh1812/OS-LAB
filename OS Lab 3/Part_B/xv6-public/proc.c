@@ -33,7 +33,6 @@ struct victim
   struct proc* pr;
   uint va; 
 };
-
 int openFileCount = 2;
 
 // ----------------------------------------
@@ -102,9 +101,6 @@ int open_file(char *path, int omode) {
   int fd;
   struct file *f;
   struct inode *ip;
-
-  // if(argstr(0, &path) < 0 || argint(1, &omode) < 0)
-  //   return -1;
 
   begin_op();
 
@@ -183,56 +179,56 @@ int open_file(char *path, int omode) {
 //   return ip;
 // }
 
-// Open inode if exists
-// Otherwise create new
-struct inode*
-open_inode(char *name) {
-  struct inode *ip;
+// // Open inode if exists
+// // Otherwise create new
+// struct inode*
+// open_inode(char *name) {
+//   struct inode *ip;
 
-  begin_op();
+//   begin_op();
   
-  ip = namei(name);
-  if (ip)
-    return ip;
+//   ip = namei(name);
+//   if (ip)
+//     return ip;
   
-  ip = create(name, T_FILE, 0, 0);
-  if (!ip) {
-    panic("Unable to create/open inode");
-    end_op();
-    return 0;
-  }
+//   ip = create(name, T_FILE, 0, 0);
+//   if (!ip) {
+//     panic("Unable to create/open inode");
+//     end_op();
+//     return 0;
+//   }
   
-  iunlock(ip);
-  end_op();
-  return ip;
-}
+//   iunlock(ip);
+//   end_op();
+//   return ip;
+// }
 
-// Write / Overwrite contents
-// to opened inode
-int
-write_inode(struct inode *ip, char *addr, int n) {
-  int max = ((MAXOPBLOCKS-1-1-2) / 2) * 512;
-  int i = 0, off = 0, r;
-  while(i < n){
-    int n1 = n - i;
-    if(n1 > max)
-      n1 = max;
+// // Write / Overwrite contents
+// // to opened inode
+// int
+// write_inode(struct inode *ip, char *addr, int n) {
+//   int max = ((MAXOPBLOCKS-1-1-2) / 2) * 512;
+//   int i = 0, off = 0, r;
+//   while(i < n){
+//     int n1 = n - i;
+//     if(n1 > max)
+//       n1 = max;
 
-    begin_op();
-    ilock(ip);
-    if ((r = writei(ip, addr + i, off, n1)) > 0)
-      off += r;
-    iunlock(ip);
-    end_op();
+//     begin_op();
+//     ilock(ip);
+//     if ((r = writei(ip, addr + i, off, n1)) > 0)
+//       off += r;
+//     iunlock(ip);
+//     end_op();
 
-    if(r < 0)
-      break;
-    if(r != n1)
-      panic("short filewrite");
-    i += r;
-  }
-  return i == n ? n : -1;
-}
+//     if(r < 0)
+//       break;
+//     if(r != n1)
+//       panic("short filewrite");
+//     i += r;
+//   }
+//   return i == n ? n : -1;
+// }
 
 // Create name string from
 // PID and VA[32:13]
@@ -244,6 +240,9 @@ get_name(int pid, uint addr, char *name) {
     pid = pid / 10;
   } 
   name[i++] = '_';
+  if(addr==0){
+    name[i++]='0';
+  }
   while (addr) {
     name[i++] = '0' + (addr%10);
     addr = addr / 10;
@@ -260,7 +259,6 @@ int write_page(int pid, uint addr, char *buf){
   
   int fd = open_file(name, O_CREATE|O_WRONLY);
   struct file *f;
-  // if(argfd(0, 0, &f) < 0 || argint(2, &n) < 0 || argptr(1, &p, n) < 0)
   if(fd < 0 || fd >= NOFILE || (f=myproc()->ofile[fd]) == 0){
     cprintf("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFf\n");
     return -1;
@@ -270,8 +268,8 @@ int write_page(int pid, uint addr, char *buf){
     cprintf("Unable to write. Exiting (proc.c::write_page)!!");
   }
 
+  // fileclose(f);
   // myproc()->ofile[fd] = 0;
-  fileclose(f);
 
   return noc;
 }
@@ -331,7 +329,7 @@ int read_page(int pid, uint addr, char *buf){
   char name[14];
 
   get_name(pid, addr, name);
-  int fd = open_file(name, O_CREATE|O_RDONLY);
+  int fd = open_file(name, O_RDONLY);
   struct file *f;
   // if(argfd(0, 0, &f) < 0 || argint(2, &n) < 0 || argptr(1, &p, n) < 0)
   if(fd < 0 || fd >= NOFILE || (f=myproc()->ofile[fd]) == 0){
@@ -343,14 +341,11 @@ int read_page(int pid, uint addr, char *buf){
   if(noc < 0){
     cprintf("Unable to write. Exiting (proc.c::write_page)!!");
   }
-  // openFilecount();
   delete_page(name);
-
+  cprintf("Deleting page file: %s\n", f->name);
   myproc()->ofile[fd] = 0;
   fileclose(f);
 
-  // openFilecount();
-  // openFileCount--;
   return noc;
 }
 // // Write page to disk using
@@ -670,6 +665,8 @@ exit(void)
   if(curproc == initproc)
     panic("init exiting");
 
+  // openFilecount(curproc->pid);
+
   // Close all open files.
   for(fd = 0; fd < NOFILE; fd++){
     if(curproc->ofile[fd]){
@@ -677,6 +674,7 @@ exit(void)
       curproc->ofile[fd] = 0;
     }
   }
+
 
   begin_op();
   iput(curproc->cwd);
@@ -1053,14 +1051,12 @@ int chooseVictim(int pid){
   struct proc* p;
   struct victim victims[4]={{0,0,0},{0,0,0},{0,0,0},{0,0,0}};
   pde_t *pte;
-  // cprintf("chooseVictim begin\n");
-  cprintf("%d\n",victims[0].pte);
+  // cprintf("%d\n",victims[0].pte);
   for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
       if(p->state == UNUSED|| p->state == EMBRYO || p->pid < 5|| p->pid == pid)
         continue;
-      if((uint)p->pgdir < KERNBASE)
-        cprintf("S right\n");
-      for(uint i = PGSIZE; i< p->sz; i += PGSIZE){
+      
+      for(uint i = 0; i< p->sz; i += PGSIZE){
         pte = (pte_t*)getpte(p->pgdir, (void *) i);
         if(!((*pte) & PTE_U)||!((*pte) & PTE_P))
           continue;
@@ -1068,13 +1064,8 @@ int chooseVictim(int pid){
         victims[idx].pte = pte;
         victims[idx].va = i;
         victims[idx].pr = p;
-        // if(idx==0)
-        // cprintf("vic %d %u\n",p->pid,pte);
       }
   }
-    cprintf("nic %x %d\n",victims[0].pte,pid);
-
-  // cprintf("chooseVictim loop end\n");
   for(int i=0;i<4;i++)
   {
     if(victims[i].pte != 0)
@@ -1085,16 +1076,18 @@ int chooseVictim(int pid){
       char* origchan = victims[i].pr->chan;
       victims[i].pr->state = SLEEPING;
       victims[i].pr->chan = 0;
-      // cprintf("Victim begin %d\n",i);
       uint reqpte = *pte;
       *pte = ((*pte)&(~PTE_P));
       *pte = *pte | ((uint)1<<7);
       // *pte=0;
+      if(victims[i].pr->state != ZOMBIE){
         release(&ptable.lock);
         release(&soq.lock);
         write_page(victims[i].pr->pid, (victims[i].va)>>12, (void *)P2V(PTE_ADDR(reqpte)));   
         acquire(&soq.lock);
         acquire(&ptable.lock);
+      }
+        
       
       cprintf("%d Pid:%d %d %d %d\n",i,victims[i].pr->pid,reqpte,(reqpte&(~PTE_P)),victims[i].va);
       // *pte = ((*pte)&(~PTE_P));
@@ -1102,8 +1095,6 @@ int chooseVictim(int pid){
       lcr3(V2P(victims[i].pr->pgdir)); 
       victims[i].pr->state = origstate;
       victims[i].pr->chan = origchan;
-      // *pte = 0;
-      // cprintf("Victim end %d\n",victims[i].pr->pid);
       return 1;
     }
   }
@@ -1111,18 +1102,14 @@ int chooseVictim(int pid){
 }
 
 void swapoutprocess(){
-  cprintf("Sucess\n");
   sleep(soq.qchan, &ptable.lock);
 
   while(1){
-    cprintf("\n\nENtering swapout\n");
-    // cprintf("SOQ1\n");
-    // pushcli();
+    cprintf("\n\nEntering swapout\n");
     acquire(&soq.lock);
     while(soq.size){
-      // struct proc* p=siq.queue[(siq.front + i)%NPROC];
       int g=0;
-      while (openFileCount == NOFILE)
+      while (openFileCount >= NOFILE)
       {
         cprintf("flimit \n");
         if(g==4)
@@ -1134,36 +1121,23 @@ void swapoutprocess(){
         yield();
         acquire(&ptable.lock);
         acquire(&soq.lock);
-        /* code */
       }
       
       struct proc *p = dequeue(&soq);
       
-      cprintf("PID: %d\n", p->pid);
-      // cprintf("PID: %d\n", soq.queue[(soq.front + i)%NPROC]->pid);
-      // ...
-      // int victimframe = choosevictim();
-      // victimframe++;
-      // cprintf("chooseVictim start\n");
-
-      // sti();
+      // cprintf("PID: %d\n", p->pid);
       if(!chooseVictim(p->pid))
       {
-        cprintf("Zlimit \n");
+        // cprintf("Zlimit \n");
         release(&ptable.lock);
         release(&soq.lock);
         yield();
         acquire(&ptable.lock);
         acquire(&soq.lock);
       }
-      // cli();
-
-      // cprintf("chooseVictim end\n");
-
       p->satisfied = 1;
-      // dequeue(&soq);
     }
-    cprintf("\n\n");
+    // cprintf("\n\n");
     // acquire(&soq.lock);
 
     wakeup1(soq.reqchan);
@@ -1178,40 +1152,32 @@ void swapoutprocess(){
 }
 
 void swapinprocess(){
-  cprintf("Sucess\n");
+  // cprintf("Sucess\n");
   sleep(siq.qchan, &ptable.lock);
   while(1){
-    cprintf("\n\nENtering swapin\n");
-    cprintf("SOQ2\n");
+    cprintf("\n\nEntering swapin\n");
     acquire(&siq.lock);
     while(siq.size){
-      // struct proc* p=siq.queue[(siq.front + i)%NPROC];
       struct proc *p = dequeue(&siq);
       openFileCount--;
-      cprintf("PID: %d\n", p->pid);
-      // ...
-      // int victimframe = choosevictim();
-      // victimframe++;
+      // cprintf("PID: %d\n", p->pid);
       release(&ptable.lock);
       release(&siq.lock);
       
       char* mem = kalloc();
-      cprintf("kalloc done\n");
+      // cprintf("kalloc done\n");
       read_page(p->pid,((p->trapva)>>12),mem);
       
       acquire(&siq.lock);
       acquire(&ptable.lock);
-      cprintf("%d %d\n",*getpte(p->pgdir,(void *)p->trapva),p->swapOutCount);
+      // cprintf("%d %d\n",*getpte(p->pgdir,(void *)p->trapva),p->swapOutCount);
       swapInMap(p->pgdir, (void *)PGROUNDDOWN(p->trapva), PGSIZE, V2P(mem));
       p->swapOutCount--;
-      // siq.queue[(siq.front + i)%NPROC]->satisfied = 1;
     }
-    cprintf("\n\n");
+    // cprintf("\n\n");
     wakeup1(siq.reqchan);
     release(&siq.lock);
-    // release(&ptable.lock);
     sleep(siq.qchan, &ptable.lock);
-    // acquire(&ptable.lock);
   }
 
 }
@@ -1321,11 +1287,11 @@ void submitToSwapIn(){
 }
 
 
-void openFilecount()
+void openFilecount2(int pid)
 {
   acquire(&ptable.lock);
   struct proc *p;
-  cprintf("IN OPEN FILE COUNT\n");
+  // cprintf("IN OPEN FILE COUNT\n");
   for(p = ptable.proc; p < &ptable.proc[NPROC]; p++)  
   {
     if(p->state == UNUSED) continue;
@@ -1335,26 +1301,85 @@ void openFilecount()
       for(int fd = 0; fd < NOFILE; fd++){
         if(p->ofile[fd]){
           cnt++;
+          struct file* f;
+          f = p->ofile[fd];
 
-          p->ofile[fd] = 0;
+          if(f->ref < 1) {
+            // cprintf("Deleting file dont: %d %s\n", fd, f->name);
+            p->ofile[fd] = 0;
+            continue;
+          }
+          release(&ptable.lock);
+          char temp[14];
+          get_name(pid, 0, temp);
+          int sz = strlen(temp);
+          int yes = 1;
+          for(int i=0;i<sz;i++){
+            if(temp[i]!=f->name[i]) {
+              yes = 0;break;
+            }
+          }
+          if(yes){
+              cprintf("Deleting page file: %s\n", f->name);
+              delete_page(p->ofile[fd]->name);
+              fileclose(f);
+              p->ofile[fd] = 0;
+          }
 
-          // struct file* f;
-          // f = p->ofile[fd];
-          // if(f->ref < 1) {
-          //   p->ofile[fd] = 0;
-          //   continue;
-          // }
-          // release(&ptable.lock);
-          // delete_page(p->ofile[fd]->name);
+          // cprintf("%d: %s\n", p->pid, f->name);
+
           
-          // p->ofile[fd] = 0;
-          // fileclose(f);
 
-          // acquire(&ptable.lock);
+          acquire(&ptable.lock);
 
         }
       }
-      cprintf("OPEN FILE COUNT PID: %d is %d\n",p->pid,cnt);
+      // cprintf("OPEN FILE COUNT PID: %d is %d\n",p->pid,cnt);
+
+    }
+  }
+
+  release(&ptable.lock);
+}
+
+
+void openFilecount()
+{
+  acquire(&ptable.lock);
+  struct proc *p;
+  // cprintf("IN OPEN FILE COUNT\n");
+  for(p = ptable.proc; p < &ptable.proc[NPROC]; p++)  
+  {
+    if(p->state == UNUSED) continue;
+    int cnt=0;
+    if(p->pid==2||p->pid==3)
+    {
+      for(int fd = 0; fd < NOFILE; fd++){
+        if(p->ofile[fd]){
+          cnt++;
+          struct file* f;
+          f = p->ofile[fd];
+
+          if(f->ref < 1) {
+            // cprintf("Deleting file dont: %d %s\n", fd, f->name);
+            p->ofile[fd] = 0;
+            continue;
+          }
+          release(&ptable.lock);
+          cprintf("Deleting page file: %s\n", f->name);
+          delete_page(p->ofile[fd]->name);
+          fileclose(f);
+          p->ofile[fd] = 0;
+
+          // cprintf("%d: %s\n", p->pid, f->name);
+
+          
+
+          acquire(&ptable.lock);
+
+        }
+      }
+      // cprintf("OPEN FILE COUNT PID: %d is %d\n",p->pid,cnt);
 
     }
   }

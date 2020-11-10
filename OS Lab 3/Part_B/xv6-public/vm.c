@@ -409,6 +409,7 @@ void swapInMap(pde_t *pgdir, void *va, uint size, uint pa){
   if(flags %2 ==1)
     cprintf("Present Set\n");
   flags = flags & (~((uint)1<<7));
+  flags = flags & (~((uint)1<<6));
   *pte = pa | flags | PTE_P;
   // mappages(pgdir, va, size, pa, PTE_W|PTE_U);
 }
