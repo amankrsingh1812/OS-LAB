@@ -142,6 +142,7 @@ int open_file(char *path, int omode) {
   f->off = 0;
   f->readable = !(omode & O_WRONLY);
   f->writable = (omode & O_WRONLY) || (omode & O_RDWR);
+  strncpy(f->name, path, 14);
   return fd;
 }
 
@@ -269,7 +270,9 @@ int write_page(int pid, uint addr, char *buf){
     cprintf("Unable to write. Exiting (proc.c::write_page)!!");
   }
 
+  // myproc()->ofile[fd] = 0;
   fileclose(f);
+
   return noc;
 }
 
@@ -281,21 +284,17 @@ delete_page(char* path)
   char name[DIRSIZ];
   uint off;
 
-
   begin_op();
-  if((dp = nameiparent(path, name)) == 0){
-    end_op();
-    return -1;
-  }
+  dp = nameiparent(path, name);
 
   ilock(dp);
 
   // Cannot unlink "." or "..".
-  // if(namecmp(name, ".") == 0 || namecmp(name, "..") == 0)
-  //   goto bad;
+  if(namecmp(name, ".") == 0 || namecmp(name, "..") == 0)
+    goto bad;
 
-  ip = dirlookup(dp, name, &off);
-    // goto bad;
+  if((ip = dirlookup(dp, name, &off)) == 0)
+    goto bad;
   ilock(ip);
 
   if(ip->nlink < 1)
@@ -322,10 +321,10 @@ delete_page(char* path)
 
   return 0;
 
-// bad:
-//   iunlockput(dp);
-//   end_op();
-//   return -1;
+bad:
+  iunlockput(dp);
+  end_op();
+  return -1;
 }
 
 int read_page(int pid, uint addr, char *buf){
@@ -344,10 +343,13 @@ int read_page(int pid, uint addr, char *buf){
   if(noc < 0){
     cprintf("Unable to write. Exiting (proc.c::write_page)!!");
   }
-  openFilecount();
+  // openFilecount();
   delete_page(name);
+
+  myproc()->ofile[fd] = 0;
   fileclose(f);
-  openFilecount();
+
+  // openFilecount();
   // openFileCount--;
   return noc;
 }
@@ -1088,11 +1090,12 @@ int chooseVictim(int pid){
       *pte = ((*pte)&(~PTE_P));
       *pte = *pte | ((uint)1<<7);
       // *pte=0;
-      release(&ptable.lock);
-      release(&soq.lock);
-      write_page(victims[i].pr->pid, (victims[i].va)>>12, (void *)P2V(PTE_ADDR(reqpte)));   
-      acquire(&soq.lock);
-      acquire(&ptable.lock);
+        release(&ptable.lock);
+        release(&soq.lock);
+        write_page(victims[i].pr->pid, (victims[i].va)>>12, (void *)P2V(PTE_ADDR(reqpte)));   
+        acquire(&soq.lock);
+        acquire(&ptable.lock);
+      
       cprintf("%d Pid:%d %d %d %d\n",i,victims[i].pr->pid,reqpte,(reqpte&(~PTE_P)),victims[i].va);
       // *pte = ((*pte)&(~PTE_P));
       kfree((char *)P2V(PTE_ADDR(reqpte)));
@@ -1322,14 +1325,33 @@ void openFilecount()
 {
   acquire(&ptable.lock);
   struct proc *p;
+  cprintf("IN OPEN FILE COUNT\n");
   for(p = ptable.proc; p < &ptable.proc[NPROC]; p++)  
   {
+    if(p->state == UNUSED) continue;
     int cnt=0;
     if(p->pid==2||p->pid==3)
     {
       for(int fd = 0; fd < NOFILE; fd++){
-        if(p->ofile[fd] != 0){
+        if(p->ofile[fd]){
           cnt++;
+
+          p->ofile[fd] = 0;
+
+          // struct file* f;
+          // f = p->ofile[fd];
+          // if(f->ref < 1) {
+          //   p->ofile[fd] = 0;
+          //   continue;
+          // }
+          // release(&ptable.lock);
+          // delete_page(p->ofile[fd]->name);
+          
+          // p->ofile[fd] = 0;
+          // fileclose(f);
+
+          // acquire(&ptable.lock);
+
         }
       }
       cprintf("OPEN FILE COUNT PID: %d is %d\n",p->pid,cnt);
