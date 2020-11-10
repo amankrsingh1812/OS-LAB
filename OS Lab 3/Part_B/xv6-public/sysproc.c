@@ -95,3 +95,9 @@ int sys_ps(void)
   ps();
   return 0;
 }
+
+int sys_openFilecount()
+{
+  openFilecount();
+  return 0;
+}

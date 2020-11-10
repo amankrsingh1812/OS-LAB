@@ -344,8 +344,10 @@ int read_page(int pid, uint addr, char *buf){
   if(noc < 0){
     cprintf("Unable to write. Exiting (proc.c::write_page)!!");
   }
-  fileclose(f);
+  openFilecount();
   delete_page(name);
+  fileclose(f);
+  openFilecount();
   // openFileCount--;
   return noc;
 }
@@ -1083,7 +1085,9 @@ int chooseVictim(int pid){
       victims[i].pr->chan = 0;
       // cprintf("Victim begin %d\n",i);
       uint reqpte = *pte;
-      *pte=0;
+      *pte = ((*pte)&(~PTE_P));
+      *pte = *pte | ((uint)1<<7);
+      // *pte=0;
       release(&ptable.lock);
       release(&soq.lock);
       write_page(victims[i].pr->pid, (victims[i].va)>>12, (void *)P2V(PTE_ADDR(reqpte)));   
@@ -1314,3 +1318,24 @@ void submitToSwapIn(){
 }
 
 
+void openFilecount()
+{
+  acquire(&ptable.lock);
+  struct proc *p;
+  for(p = ptable.proc; p < &ptable.proc[NPROC]; p++)  
+  {
+    int cnt=0;
+    if(p->pid==2||p->pid==3)
+    {
+      for(int fd = 0; fd < NOFILE; fd++){
+        if(p->ofile[fd] != 0){
+          cnt++;
+        }
+      }
+      cprintf("OPEN FILE COUNT PID: %d is %d\n",p->pid,cnt);
+
+    }
+  }
+
+  release(&ptable.lock);
+}

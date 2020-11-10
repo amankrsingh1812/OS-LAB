@@ -404,7 +404,13 @@ pte_t* getpte(pde_t *pgdir, const void *va){
 
 void swapInMap(pde_t *pgdir, void *va, uint size, uint pa){
   cprintf("swapINMAP: %d\n",PGROUNDDOWN((uint)va));
-  mappages(pgdir, va, size, pa, PTE_W|PTE_U);
+  pte_t *pte=walkpgdir(pgdir,va,0);
+  uint flags = PTE_FLAGS(*pte);
+  if(flags %2 ==1)
+    cprintf("Present Set\n");
+  flags = flags & (~((uint)1<<7));
+  *pte = pa | flags | PTE_P;
+  // mappages(pgdir, va, size, pa, PTE_W|PTE_U);
 }
 //PAGEBREAK!
 // Blank page.
