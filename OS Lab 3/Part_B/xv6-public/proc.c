@@ -1188,13 +1188,16 @@ void submitToSwapOut(){
   struct proc* p = myproc();
   cprintf("submitToSwapOut %d\n",p->pid);
 
-  acquire(&soq.lock);
   acquire(&ptable.lock);
   p->satisfied = 0;
+  release(&ptable.lock);
+
+  acquire(&soq.lock);
   enqueue(&soq, p);
-  wakeup1(soq.qchan);
   release(&soq.lock);
 
+  acquire(&ptable.lock);
+  wakeup1(soq.qchan);
   while(p->satisfied==0)
     sleep(soq.reqchan, &ptable.lock);
   release(&ptable.lock);
@@ -1207,11 +1210,11 @@ void submitToSwapIn(){
   cprintf("submitToSwapIn %d\n",p->trapva);
 
   acquire(&siq.lock);
-  acquire(&ptable.lock);
-    enqueue(&siq, p);
-    wakeup1(siq.qchan);
+  enqueue(&siq, p);
   release(&siq.lock);
   
+  acquire(&ptable.lock);
+  wakeup1(siq.qchan);
   sleep((char *)p->pid, &ptable.lock);
   release(&ptable.lock);
   return;
