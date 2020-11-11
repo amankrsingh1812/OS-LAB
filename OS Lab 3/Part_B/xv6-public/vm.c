@@ -403,7 +403,6 @@ pte_t* getpte(pde_t *pgdir, const void *va){
 }
 
 void swapInMap(pde_t *pgdir, void *va, uint size, uint pa){
-  cprintf("swapINMAP: %d\n",PGROUNDDOWN((uint)va));
   pte_t *pte=walkpgdir(pgdir,va,0);
   uint flags = PTE_FLAGS(*pte);
   if(flags %2 ==1)

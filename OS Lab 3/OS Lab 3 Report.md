@@ -4,6 +4,8 @@ We started Part A with the patch provided which just tricks the process into bel
 
 This means that any access to the above requested memory results in a page fault as in reality no such memory has been provided and hence, it is an illegal reference. Our lazy allocator in such cases of page faults allocates one page from the free physical memory available to the process and also updates the page table about this new allocation. 
 
+![](parta1.png)
+
 #### Handling the Page Fault
 
 Since xv6 does not handle page faults by default, we added the case when trap caused is due to a page fault and called our handler function `allocSinglePg(...)` which actually performs the task of allocation, with the required paramenters.
@@ -52,7 +54,8 @@ The allocation of page and updation the page table is done in `allocSinglePg(...
 - Finally, `mappages(...)` is called which uses `pgdir` to locate (and create, if required) the page table contained the corresponding virtual address `a` and creating a corresponding page table entry (only a single entry in our case as we want `PGSIZE` amount of memory) having physical address `P2V(mem)`, as obtained above with the permissions set to writable(`PTE_W`) and user process accessible(`PTE_U`).
 - In case of failure in `mappages(...)`, aquired memory `mem` is freed using `kfree(mem)`.
 
-#### Sample output
+<!-- #### Sample output -->
+![](parta2.png)
 
 ## **Part B**: 
 
@@ -349,12 +352,14 @@ The `write_page()` is used to write the victim frame content in the disk . The f
 
 #### Task 3: swapping in mechanism:
 
-**Swap-in Process** -  The entrypoint of Swapin process is `swapinprocess()`. Whenever there are requests for swap in the `swapinprocess` process is woken up. 
+**Swap-in Process** -  
+- The entrypoint of Swapin process is `swapinprocess()`. Whenever there are requests for swap in the `swapinprocess` process is woken up. 
 
-It then iterates in the Swapin queue and one-by-one satisfies the requests. It first calls `kalloc()` to get a free-frame page in the physical memory. Then it reads the swapped-out page from the disk into the free-frame. Then `swapInMap()` is called, which updates the flags and Physical Page Number (PPN) in the appropriate `Page Table Entry (PTE)`. Then the corresponding process it woken up.
+- It then iterates in the Swapin queue and one-by-one satisfies the requests. It first calls `kalloc()` to get a free-frame page in the physical memory. Then it reads the swapped-out page from the disk into the free-frame. Then `swapInMap()` is called, which updates the flags and Physical Page Number (PPN) in the appropriate `Page Table Entry (PTE)`. Then the corresponding process it woken up.
 
-After satisfying all the requests in its queue, the Swapin Process goes into SLEEPING state. While doing all this, appropriate `locks` are acquired and released, so as handle synchronous requests.
+- After satisfying all the requests in its queue, the Swapin Process goes into SLEEPING state. While doing all this, appropriate `locks` are acquired and released, so as handle synchronous requests.
 
+- `read_page()` reads the swapped out page file of the corresponding process's PTE into the buffer `mem`. It first computes the corresponding file and then calls the inbuilt `fileread()` function to read the contents of the file.
 
 ```c
 void swapinprocess(){
@@ -381,7 +386,7 @@ void swapinprocess(){
 }
 ```
 
-Whenever a `page fault` occurs, we are checking if it has occurred due of an earlier swapping out of its page, and then we are calling the function `submitToSwapIn()`. This function first acquires the appropriate locks. Then enqueues the current process in the Swapin queue, wakes up the Swapin process and finally suspends the current process.
+Whenever a `page fault` occurs, we are checking if it has occurred due to an earlier swapping out of its page, and then we are calling the function `submitToSwapIn()`. It enqueues the current process in the Swapin queue, wakes up the Swapin process and finally suspends the current process. While doing this, appropriate locks are acquired and released.
 
 ```c
 void submitToSwapIn(){
@@ -445,7 +450,7 @@ void deleteExtraPages()
 
 Our user program `memtest.c` creates *20 child processes*, each of which *iterates 20 times*, and each time *requests 4096 Bytes* using `malloc()`.
 
-For the ***i****th child process*, in the ***j****th iteration*, the ***k****th byte* is set with the following function:
+For the *i<sup>th</sup> child process*, in the *j<sup>th</sup> iteration*, the *k<sup>th</sup> byte* is set with the following function:
 
 ```c
   child_iter_byte[i][j][k] = ( i + j*k ) % 128
@@ -453,5 +458,8 @@ For the ***i****th child process*, in the ***j****th iteration*, the ***k****th 
 
 Every child process first iterates 20 times setting the byte values, after which it again iterates 20 times, comparing the stored value with the expected value, again computed using the above function.
 
-Note: Each child is iterating 20 times in place of 10 times (as mentioned in assignment), because iterating for 10 times, doesn't cause the complete main memory to be used up. This main memory limit, set with `KERNBASE` cannot be set below `4MB` (due to initialisation requirements of the kernel), at which we need to iterate for more than 10 times for each child process to actually test the correctness of our swapper.
+*Note:* Each child is iterating 20 times in place of 10 times (as mentioned in assignment), because iterating for 10 times, doesn't cause the complete main memory to be used up. This main memory limit, set with `KERNBASE` cannot be set below `4MB` (due to initialisation requirements of the kernel), at which we need to iterate for more than 10 times for each child process to actually test the correctness of our swapper.
 
+**Sample Output :**
+
+![](partb.png)
