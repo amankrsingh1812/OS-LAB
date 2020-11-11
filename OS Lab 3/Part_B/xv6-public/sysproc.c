@@ -96,8 +96,8 @@ int sys_ps(void)
   return 0;
 }
 
-int sys_openFilecount()
+int sys_deleteExtraPages()
 {
-  openFilecount();
+  deleteExtraPages();
   return 0;
 }

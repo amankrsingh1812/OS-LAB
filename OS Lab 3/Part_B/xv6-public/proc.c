@@ -33,7 +33,7 @@ struct victim
   struct proc* pr;
   uint va; 
 };
-int openFileCount = 2;
+int flimit = 2;
 
 // ----------------------------------------
 
@@ -252,7 +252,7 @@ get_name(int pid, uint addr, char *name) {
 
 
 int write_page(int pid, uint addr, char *buf){
-  openFileCount++;
+  flimit++;
   char name[14];
 
   get_name(pid, addr, name);
@@ -665,7 +665,7 @@ exit(void)
   if(curproc == initproc)
     panic("init exiting");
 
-  // openFilecount(curproc->pid);
+  // deleteExtraPages(curproc->pid);
 
   // Close all open files.
   for(fd = 0; fd < NOFILE; fd++){
@@ -972,12 +972,6 @@ procdump(void)
   }
 }
 
-// End a kernel process
-void kernexit()
-{
-  exit();
-}
-
 // This function create a kernel process and add it to the processes queue.
 void create_kernel_process(const char *name, void (*entrypoint)())
 {
@@ -1013,7 +1007,7 @@ found:
   // Set up new context to start executing at forkret,
   // which returns to trapret.
   sp -= 4;
-  *(uint*)sp = (uint)kernexit;
+  *(uint*)sp = (uint)exit; // end the kernel process upon return from entrypoint()
 
   sp -= sizeof *p->context;
   p->context = (struct context*)sp;
@@ -1053,10 +1047,10 @@ int chooseVictim(int pid){
   pde_t *pte;
   // cprintf("%d\n",victims[0].pte);
   for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
-      if(p->state == UNUSED|| p->state == EMBRYO || p->pid < 5|| p->pid == pid)
+      if(p->state == UNUSED|| p->state == EMBRYO || p->state == RUNNING || p->pid < 5|| p->pid == pid)
         continue;
       
-      for(uint i = 0; i< p->sz; i += PGSIZE){
+      for(uint i = PGSIZE; i< p->sz; i += PGSIZE){
         pte = (pte_t*)getpte(p->pgdir, (void *) i);
         if(!((*pte) & PTE_U)||!((*pte) & PTE_P))
           continue;
@@ -1108,7 +1102,7 @@ void swapoutprocess(){
     cprintf("\n\nEntering swapout\n");
     acquire(&soq.lock);
     while(soq.size){
-      while (openFileCount >= NOFILE)
+      while (flimit >= NOFILE)
       {
         cprintf("flimit \n");
         wakeup1(soq.reqchan);
@@ -1125,6 +1119,7 @@ void swapoutprocess(){
       if(!chooseVictim(p->pid))
       {
         // cprintf("Zlimit \n");
+        wakeup1(soq.reqchan);
         release(&soq.lock);
         release(&ptable.lock);
         yield();
@@ -1149,7 +1144,7 @@ void swapinprocess(){
     acquire(&siq.lock);
     while(siq.size){
       struct proc *p = dequeue(&siq);
-      openFileCount--;
+      flimit--;
       // cprintf("PID: %d\n", p->pid);
       release(&siq.lock);
       release(&ptable.lock);
@@ -1218,7 +1213,7 @@ void submitToSwapIn(){
 }
 
 
-void openFilecount()
+void deleteExtraPages()
 {
   acquire(&ptable.lock);
   struct proc *p;
@@ -1244,6 +1239,7 @@ void openFilecount()
           cprintf("Deleting page file: %s\n", f->name);
           delete_page(p->ofile[fd]->name);
           fileclose(f);
+          flimit--;
           p->ofile[fd] = 0;
 
           // cprintf("%d: %s\n", p->pid, f->name);
