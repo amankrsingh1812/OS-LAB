@@ -247,7 +247,7 @@ int read_page(int pid, uint addr, char *buf){
     cprintf("Unable to write. Exiting (proc.c::write_page)!!");
   }
   delete_page(name);
-  cprintf("Deleting page file: %s\n", f->name);
+  // cprintf("Deleting page file: %s\n", f->name);
   myproc()->ofile[fd] = 0;
   fileclose(f);
 
@@ -319,7 +319,7 @@ int chooseVictimAndEvict(int pid){
       }
         
       
-      cprintf("%d Pid:%d %d %d %d\n",i,victims[i].pr->pid,reqpte,(reqpte&(~PTE_P)),victims[i].va);
+      // cprintf("%d Pid:%d %d %d %d\n",i,victims[i].pr->pid,reqpte,(reqpte&(~PTE_P)),victims[i].va);
       // *pte = ((*pte)&(~PTE_P));
       kfree((char *)P2V(PTE_ADDR(reqpte)));
       lcr3(V2P(victims[i].pr->pgdir)); 
@@ -455,7 +455,7 @@ void deleteExtraPages()
             continue;
           }
           release(&ptable.lock);
-          cprintf("Deleting page file: %s\n", f->name);
+          if(f->ref == 1) cprintf("Deleting page file: %s\n", f->name);
           delete_page(p->ofile[fd]->name);
           fileclose(f);
           flimit--;

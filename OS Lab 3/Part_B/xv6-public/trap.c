@@ -81,7 +81,7 @@ trap(struct trapframe *tf)
   case T_PGFLT:
     pte = *getpte(myproc()->pgdir,(void *)rcr2());
     // pte = (pte & PTE_P);
-    cprintf("page fault %d %d %d\n",rcr2(),pte,myproc()->pid);
+    cprintf("page fault PID: %d, VA: %d\n",myproc()->pid, rcr2());
     myproc()->trapva=rcr2();
     if(myproc()->trapva < myproc()->sz && (pte&((uint)1<<7)) != 0)
     {
