@@ -1055,6 +1055,8 @@ int chooseVictim(int pid){
         if(!((*pte) & PTE_U)||!((*pte) & PTE_P))
           continue;
         int idx =(((*pte)&(uint)96)>>5);
+        if(victims[idx].pr!=0)
+          continue;
         victims[idx].pte = pte;
         victims[idx].va = i;
         victims[idx].pr = p;
