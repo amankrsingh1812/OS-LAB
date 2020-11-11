@@ -143,93 +143,6 @@ int open_file(char *path, int omode) {
 }
 
 
-// static struct inode*
-// create(char *path, short type, short major, short minor)
-// {
-//   struct inode *ip, *dp;
-//   char name[DIRSIZ];
-
-//   if((dp = nameiparent(path, name)) == 0)
-//     return 0;
-//   ilock(dp);
-
-//   if((ip = dirlookup(dp, name, 0)) != 0){
-//     iunlockput(dp);
-//     ilock(ip);
-//     if(type == T_FILE && ip->type == T_FILE)
-//       return ip;
-//     iunlockput(ip);
-//     return 0;
-//   }
-
-//   if((ip = ialloc(dp->dev, type)) == 0)
-//     panic("create: ialloc");
-
-//   ilock(ip);
-//   ip->major = major;
-//   ip->minor = minor;
-//   ip->nlink = 1;
-//   iupdate(ip);
-
-//   if(dirlink(dp, name, ip->inum) < 0)
-//     panic("create: dirlink");
-
-//   iunlockput(dp);
-
-//   return ip;
-// }
-
-// // Open inode if exists
-// // Otherwise create new
-// struct inode*
-// open_inode(char *name) {
-//   struct inode *ip;
-
-//   begin_op();
-  
-//   ip = namei(name);
-//   if (ip)
-//     return ip;
-  
-//   ip = create(name, T_FILE, 0, 0);
-//   if (!ip) {
-//     panic("Unable to create/open inode");
-//     end_op();
-//     return 0;
-//   }
-  
-//   iunlock(ip);
-//   end_op();
-//   return ip;
-// }
-
-// // Write / Overwrite contents
-// // to opened inode
-// int
-// write_inode(struct inode *ip, char *addr, int n) {
-//   int max = ((MAXOPBLOCKS-1-1-2) / 2) * 512;
-//   int i = 0, off = 0, r;
-//   while(i < n){
-//     int n1 = n - i;
-//     if(n1 > max)
-//       n1 = max;
-
-//     begin_op();
-//     ilock(ip);
-//     if ((r = writei(ip, addr + i, off, n1)) > 0)
-//       off += r;
-//     iunlock(ip);
-//     end_op();
-
-//     if(r < 0)
-//       break;
-//     if(r != n1)
-//       panic("short filewrite");
-//     i += r;
-//   }
-//   return i == n ? n : -1;
-// }
-
 // Create name string from
 // PID and VA[32:13]
 void
@@ -348,60 +261,7 @@ int read_page(int pid, uint addr, char *buf){
 
   return noc;
 }
-// // Write page to disk using
-// // PID, 20MSBs of VA, buffer
-// void 
-// write_page(int pid, uint addr, char *buf) {
-//   // cprintf("Write start\n");
-//   struct inode *ip;
-//   char name[14];
 
-//   get_name(pid, addr, name);
-//   // cprintf("Write open\n");
-//   ip = open_inode(name);
-
-//   int bytesTranfer = write_inode(ip, buf, 4096);
-//   if (bytesTranfer < 0) {
-//     cprintf("Unable to write. Exiting (proc.c::write_page)!!");
-//     return;
-//   }
-//   // cprintf("Write complete\n");
-// }
-
-// // Read one page from disk
-// // for given PID, 20MSBs of VA
-// // to buffer
-// // Returns number of bytes read
-// int 
-// read_page(int pid, uint addr, char *buf) {
-//   struct inode *ip;
-//   char name[14];
-
-//   get_name(pid, addr, name);
-//   ip = open_inode(name);
-
-//   ilock(ip);
-//   int bytesTranfer = readi(ip, buf, 0, 4096);
-//   iunlock(ip);
-
-//   if (bytesTranfer < 0) {
-//     cprintf("Unable to read. Exiting (proc.c::read_page)!!");
-//     return -1;
-//   }
-//   cprintf("Read complete\n");
-//   return bytesTranfer;
-// }
-
-// ----------------------------------------------
-// struct frame{
-//   struct proc* pr;
-//   int empty;
-//   pte_t* pte; 
-// } frames[PHYSTOP/PGSIZE+1];
-
-// void insertIntoFrames(uint pa, pte_t* pte, struct proc* pr){
-
-// }
 
 void enqueue(struct swapqueue* sq, struct proc* np){
   if(sq->size == NPROC) return; 
@@ -1065,7 +925,6 @@ int chooseVictim(int pid){
     if(victims[i].pte != 0)
     {
       pte = victims[i].pte;
-      victims[i].pr->swapOutCount++;
       int origstate = victims[i].pr->state;
       char* origchan = victims[i].pr->chan;
       victims[i].pr->state = SLEEPING;
@@ -1155,9 +1014,7 @@ void swapinprocess(){
       
       acquire(&siq.lock);
       acquire(&ptable.lock);
-      // cprintf("%d %d\n",*getpte(p->pgdir,(void *)p->trapva),p->swapOutCount);
       swapInMap(p->pgdir, (void *)PGROUNDDOWN(p->trapva), PGSIZE, V2P(mem));
-      p->swapOutCount--;
       wakeup1(p->chan);
     }
     // cprintf("\n\n");
