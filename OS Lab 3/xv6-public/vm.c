@@ -257,9 +257,16 @@ allocSinglePg(pde_t *pgdir, uint va)
   a = PGROUNDDOWN(va);
   
   mem = kalloc();
+  if(mem == 0){
+    cprintf("allocuvm out of memory (3)\n");
+    return;
+  }
+  
   memset(mem, 0, PGSIZE);
-  mappages(pgdir, (char*)a, PGSIZE, V2P(mem), PTE_W|PTE_U);
-  return;
+  if(mappages(pgdir, (char*)a, PGSIZE, V2P(mem), PTE_W|PTE_U) < 0){
+    cprintf("allocuvm out of memory (4)\n");
+    kfree(mem);
+  }
 }
 
 
