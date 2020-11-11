@@ -225,6 +225,98 @@ The `entrypoint` of `swapoutprocess` is `swapoutprocess()` which sleeps whenever
 
 #### Task 3: swapping in mechanism:
 
+**Swap-in Process** -  The entrypoint of Swapin process is `swapinprocess()`. Whenever there are requests for swap in the `swapinprocess` process is woken up. 
+
+It then iterates in the Swapin queue and one-by-one satisfies the requests. It first calls `kalloc()` to get a free-frame page in the physical memory. Then it reads the swapped-out page from the disk into the free-frame. Then `swapInMap()` is called, which updates the flags and Physical Page Number (PPN) in the appropriate `Page Table Entry (PTE)`. Then the corresponding process it woken up.
+
+After satisfying all the requests in its queue, the Swapin Process goes into SLEEPING state. While doing all this, appropriate `locks` are acquired and released, so as handle synchronous requests.
+
+
+```c
+void swapinprocess(){
+  sleep(siq.qchan, &ptable.lock);
+  while(1){
+    acquire(&siq.lock);
+    while(siq.size){
+      struct proc *p = dequeue(&siq);  // request at the front of the Swapin queue
+      release(&siq.lock);
+      release(&ptable.lock);
+      
+      char* mem = kalloc();           // free physical frame page is obtained
+      read_page(p->pid,((p->trapva)>>12),mem);  // Read the page into it
+      
+      acquire(&siq.lock);
+      acquire(&ptable.lock);
+      swapInMap(p->pgdir, (void *)PGROUNDDOWN(p->trapva), PGSIZE, V2P(mem));  // Update the PTE
+      wakeup1(p->chan);
+    }
+    release(&siq.lock);
+    sleep(siq.qchan, &ptable.lock);
+  }
+
+}
+```
+
+Whenever a `page fault` occurs, we are checking if it has occurred due of an earlier swapping out of its page, and then we are calling the function `submitToSwapIn()`. This function first acquires the appropriate locks. Then enqueues the current process in the Swapin queue, wakes up the Swapin process and finally suspends the current process.
+
+```c
+void submitToSwapIn(){
+  struct proc* p = myproc();
+  cprintf("submitToSwapIn %d\n",p->trapva);
+
+  acquire(&siq.lock); 
+  acquire(&ptable.lock);
+    enqueue(&siq, p);   // Enqueues the current process in the Swapin queue
+    wakeup1(siq.qchan); // Wake up the Swapin process
+  release(&siq.lock);
+  
+  sleep((char *)p->pid, &ptable.lock);  // Suspend the current process
+  release(&ptable.lock);
+  return;
+}
+```
+
+
+When a process exits, we make sure that the Swapout pages written on the disk are deleted. To do this, we have called `deleteExtraPages()`.
+**deleteExtraPages** - It iterates through the files list of the swapoutprocess, and if the file is not already deleted, it deletes it. While doing this, appropriate locks are acquired and released.
+```c
+void deleteExtraPages()
+{
+  acquire(&ptable.lock);
+  struct proc *p;
+  for(p = ptable.proc; p < &ptable.proc[NPROC]; p++)  
+  {
+    if(p->state == UNUSED) continue;
+    int cnt=0;
+    if(p->pid==2||p->pid==3)
+    {
+      for(int fd = 0; fd < NOFILE; fd++){   // Iterating through the files list
+        if(p->ofile[fd]){
+          cnt++;
+          struct file* f;
+          f = p->ofile[fd];
+
+          if(f->ref < 1) {    // Checking if the file is already deleted
+            p->ofile[fd] = 0;
+            continue;
+          }
+          release(&ptable.lock);
+          cprintf("Deleting page file: %s\n", f->name);
+          delete_page(p->ofile[fd]->name);  // Deleting the file
+          fileclose(f);
+          flimit--;
+          p->ofile[fd] = 0;
+
+          acquire(&ptable.lock);
+        }
+      }
+    }
+  }
+  release(&ptable.lock);
+}
+```
+
+
 #### Task 4: Sanity Test
 
 Our user program `memtest.c` creates *20 child processes*, each of which *iterates 20 times*, and each time *requests 4096 Bytes* using `malloc()`.
