@@ -78,9 +78,9 @@ trap(struct trapframe *tf)
     lapiceoi();
     break;
   case T_PGFLT:
-    // cprintf("page fault %x\n",rcr2());
     allocSinglePg(myproc()->pgdir, rcr2());
     break;
+    
   //PAGEBREAK: 13
   default:
     if(myproc() == 0 || (tf->cs&3) == 0){
