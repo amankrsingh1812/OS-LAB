@@ -535,6 +535,9 @@ exit(void)
     }
   }
 
+  if(curproc->parent && curproc->parent->pid == 4){ // process run on sh
+    deleteExtraPages();
+  }
 
   begin_op();
   iput(curproc->cwd);
@@ -1058,10 +1061,10 @@ void submitToSwapIn(){
   struct proc* p = myproc();
   cprintf("submitToSwapIn %d\n",p->trapva);
 
-  acquire(&siq.lock);
+  acquire(&siq.lock); 
   acquire(&ptable.lock);
-    enqueue(&siq, p);
-    wakeup1(siq.qchan);
+    enqueue(&siq, p);   // Enqueues the process in the Swapin queue
+    wakeup1(siq.qchan); // Wake up the Swapin process
   release(&siq.lock);
   
   sleep((char *)p->pid, &ptable.lock);
@@ -1074,21 +1077,17 @@ void deleteExtraPages()
 {
   acquire(&ptable.lock);
   struct proc *p;
-  // cprintf("IN OPEN FILE COUNT\n");
   for(p = ptable.proc; p < &ptable.proc[NPROC]; p++)  
   {
     if(p->state == UNUSED) continue;
-    int cnt=0;
     if(p->pid==2||p->pid==3)
     {
       for(int fd = 0; fd < NOFILE; fd++){
         if(p->ofile[fd]){
-          cnt++;
           struct file* f;
           f = p->ofile[fd];
 
           if(f->ref < 1) {
-            // cprintf("Deleting file dont: %d %s\n", fd, f->name);
             p->ofile[fd] = 0;
             continue;
           }
@@ -1099,11 +1098,9 @@ void deleteExtraPages()
           flimit--;
           p->ofile[fd] = 0;
 
-          // cprintf("%d: %s\n", p->pid, f->name);
           acquire(&ptable.lock);
         }
       }
-      // cprintf("OPEN FILE COUNT PID: %d is %d\n",p->pid,cnt);
     }
   }
   release(&ptable.lock);
