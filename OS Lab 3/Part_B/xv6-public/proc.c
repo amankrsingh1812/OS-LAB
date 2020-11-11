@@ -535,6 +535,9 @@ exit(void)
     }
   }
 
+  if(curproc->parent && curproc->parent->pid == 4){ // process run on sh
+    deleteExtraPages();
+  }
 
   begin_op();
   iput(curproc->cwd);
