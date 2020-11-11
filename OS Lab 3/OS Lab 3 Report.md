@@ -2,8 +2,7 @@
 
 We started Part A with the patch provided which just tricks the process into believing that it has the memory which it requested by updating the value of `proc->sz` (the size of the process) while not actually allocating any physical memory by commenting the call to `groproc(n)` in `sysproc.c`.
 
-This means that any access to the above requested memory results in a page fault as in reality no such memory has been provided and hence, it is an illegal reference.
-Our lazy allocator in such cases of page faults allocates one page from the free physical memory available to the process and also updates the page table about this new allocation. 
+This means that any access to the above requested memory results in a page fault as in reality no such memory has been provided and hence, it is an illegal reference. Our lazy allocator in such cases of page faults allocates one page from the free physical memory available to the process and also updates the page table about this new allocation. 
 
 #### Handling the Page Fault
 
@@ -221,7 +220,132 @@ void submitToSwapOut(){
 }
 ```
 
-The `entrypoint` of `swapoutprocess` is `swapoutprocess()` which sleeps whenever the size of request queue is zero. Whenever there are requests for swap out the `swapoutprocess` process wakes up and iterates over the requests treating them one by one and upon freeing the required number of physical pages the `swapoutproces` wakes all the requesting processes. The function `chooseVictimAndEvict()` is used to select victim frame using pseudo `LRU` replacement policy. The `swapoutprocess()` contains check on number of files created and yields the processor when the number reaches the upper bound so that in the mean time some files can be deleted by `swapinprocess` . The case when no victim
+The `entrypoint` of `swapoutprocess` is `swapoutprocess()` which sleeps whenever the size of request queue is zero. Whenever there are requests for swap out the `swapoutprocess` process wakes up and iterates over the requests treating them one by one and upon freeing the required number of physical pages the `swapoutproces` wakes all the requesting processes. The function `chooseVictimAndEvict()` is used to select victim frame using pseudo `LRU` replacement policy. The `swapoutprocess()` contains check on number of files created and yields the processor when the number reaches the upper bound so that in the mean time some files can be deleted by `swapinprocess` . It also handles the edge case when no victim frame could be evicted by temporarily yielding the processor.
+
+```c
+void swapoutprocess(){
+  sleep(soq.qchan, &ptable.lock);
+
+  while(1){
+    cprintf("\n\nEntering swapout\n");
+    acquire(&soq.lock);
+    while(soq.size){
+      while (flimit >= NOFILE)
+      {
+        cprintf("flimit \n");
+        wakeup1(soq.reqchan);
+        release(&soq.lock);
+        release(&ptable.lock);
+        yield();
+        acquire(&soq.lock);
+        acquire(&ptable.lock);
+      }
+      
+      struct proc *p = dequeue(&soq);
+      
+      if(!chooseVictimAndEvict(p->pid))
+      {
+        wakeup1(soq.reqchan);
+        release(&soq.lock);
+        release(&ptable.lock);
+        yield();
+        acquire(&soq.lock);
+        acquire(&ptable.lock);
+      }
+      p->satisfied = 1;
+    }
+
+    wakeup1(soq.reqchan);
+    release(&soq.lock);
+    sleep(soq.qchan, &ptable.lock);
+  }
+
+}
+```
+
+In the function `chooseVictimAndEvict()` we iterate over address space of all the user processes currently present in the `ptable` in multiples of page size so as to visit each page of all user processes once.
+
+**Pseudo LRU** replacement policy is used for selecting the victim frame. For each page table entry the dirty bit and accessed bit are concatenated to form an integer, the victim frame is selected based on the integer form and preference order is as 0(00) < 1(01) < 2(10) < 3(11). Once a victim frame is chosen, the present bit is turned off for the corresponding page table entry and the corresponding process is made to sleep until writing on disk is complete. The seventh bit(initially unused) of the page table entry is also turned on which indicates thats the required frame has been swapped out. Upon successful eviction of victim frame value 1 is  return else 0 is returned .
+
+```c
+int chooseVictimAndEvict(int pid){
+  
+  struct proc* p;
+  struct victim victims[4]={{0,0,0},{0,0,0},{0,0,0},{0,0,0}};
+  pde_t *pte;
+  // cprintf("%d\n",victims[0].pte);
+  for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
+      if(p->state == UNUSED|| p->state == EMBRYO || p->pid < 5|| p->pid == pid)
+        continue;
+      
+      for(uint i = 0; i< p->sz; i += PGSIZE){
+        pte = (pte_t*)getpte(p->pgdir, (void *) i);
+        if(!((*pte) & PTE_U)||!((*pte) & PTE_P))
+          continue;
+        int idx =(((*pte)&(uint)96)>>5);
+        victims[idx].pte = pte;
+        victims[idx].va = i;
+        victims[idx].pr = p;
+      }
+  }
+  for(int i=0;i<4;i++)
+  {
+    if(victims[i].pte != 0)
+    {
+      pte = victims[i].pte;
+      int origstate = victims[i].pr->state;
+      char* origchan = victims[i].pr->chan;
+      victims[i].pr->state = SLEEPING;
+      victims[i].pr->chan = 0;
+      uint reqpte = *pte;
+      *pte = ((*pte)&(~PTE_P));
+      *pte = *pte | ((uint)1<<7);
+      
+      if(victims[i].pr->state != ZOMBIE){
+        release(&soq.lock);
+        release(&ptable.lock);
+        write_page(victims[i].pr->pid, (victims[i].va)>>12, (void *)P2V(PTE_ADDR(reqpte)));   
+        acquire(&soq.lock);
+        acquire(&ptable.lock);
+      }
+        
+      
+      cprintf("%d Pid:%d %d %d %d\n",i,victims[i].pr->pid,reqpte,(reqpte&(~PTE_P)),victims[i].va);
+      // *pte = ((*pte)&(~PTE_P));
+      kfree((char *)P2V(PTE_ADDR(reqpte)));
+      lcr3(V2P(victims[i].pr->pgdir)); 
+      victims[i].pr->state = origstate;
+      victims[i].pr->chan = origchan;
+      return 1;
+    }
+  }
+  return 0;
+}
+```
+
+The `kalloc()` function which is used to allocate one 4096-byte page of physical memory is changed to meet demand swapping . The function `submitToSwapOut()` is called inside a loop until a free page of physical memory is obtained.
+
+```c
+char*
+kalloc(void)
+{
+  //...
+  while(!r)
+  {
+    if(kmem.use_lock)
+      release(&kmem.lock);
+    submitToSwapOut();
+    if(kmem.use_lock)
+      acquire(&kmem.lock);
+    r = kmem.freelist;
+  }
+  ...//
+}
+```
+
+
+
+The `write_page()` is used to write the victim frame content in the disk . The file name is chosen as `pid_va` where pid is process(whose page is chosen as victim) id and va is the virtual address corresponding to the evicted page. The `wirte_page()` function uses `open_file()` (its exactly same as open system call) to open/create files and `filewrite()` (its exactly same as write system call) to write the content in the given file.
 
 #### Task 3: swapping in mechanism:
 
