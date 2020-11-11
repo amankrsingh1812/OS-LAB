@@ -150,6 +150,16 @@ forkret(void)
 
 #### Task 2: swapping out mechanism:
 
+Two new elements are added to the process structure to store swapping meta data. The variable `trapva` stores the virtual address where page fault has occurred for the given process. The variable `satisfied` is used as indication whether a swap out request has been satisfied for the given process.
+
+```c
+struct proc {
+  ///...
+  int satisfied;
+  uint trapva;
+};
+```
+
 The newly created kernel process `swapoutprocess` is responsible for swapping out of pages on demand. The `swappoutprocess` supports a request queue for the swapping requests which is created from the `struct swapqueue` .
 
 ```c
@@ -164,7 +174,7 @@ struct swapqueue{
 }
 ```
 
-The `enqueue()` and `dequeue()` for the `swapqueue` are implemented as shown below:
+An instance `siq` of the `struct swapqueue` is used as a request queue for the `swapoutprocess` . Any access to the `swapqueue` is protected by a `spinlock` . The `enqueue()` and `dequeue()` for the `swapqueue` are implemented as shown below:
 
 ```c
 void enqueue(struct swapqueue* sq, struct proc* np){
@@ -189,7 +199,29 @@ struct proc* dequeue(struct swapqueue* sq){
 }
 ```
 
-An instance `siq` of the `struct swapqueue` is used as a request queue for the `swapoutprocess` . Any access to the `swapqueue` is protected by a `spinlock` .    
+The request to swap out a page is submitted by calling `submitToSwapIn()` function which adds the process structure pointer of the requesting process to the `siq` queue, wakes the `swapoutprocess` and makes the current (requesting) process to sleep until its `satisfied` bit is turned on ie suspends its from execution.  
+
+```c
+void submitToSwapOut(){
+  struct proc* p = myproc();
+  cprintf("submitToSwapOut %d\n",p->pid);
+
+  acquire(&soq.lock);
+  acquire(&ptable.lock);
+  p->satisfied = 0;
+  enqueue(&soq, p);
+  wakeup1(soq.qchan);
+  release(&soq.lock);
+
+  while(p->satisfied==0)
+    sleep(soq.reqchan, &ptable.lock);
+  release(&ptable.lock);
+  return;
+
+}
+```
+
+The `entrypoint` of `swapoutprocess` is `swapoutprocess()` which sleeps whenever the size of request queue is zero. Whenever there are requests for swap out the `swapoutprocess` process wakes up and iterates over the requests treating them one by one and upon freeing the required number of physical pages the `swapoutproces` wakes all the requesting processes. The function `chooseVictimAndEvict()` is used to select victim frame using pseudo `LRU` replacement policy. The `swapoutprocess()` contains check on number of files created and yields the processor when the number reaches the upper bound so that in the mean time some files can be deleted by `swapinprocess` . The case when no victim
 
 #### Task 3: swapping in mechanism:
 

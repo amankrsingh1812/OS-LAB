@@ -900,7 +900,7 @@ found:
 //   return;
 // }
 
-int chooseVictim(int pid){
+int chooseVictimAndEvict(int pid){
   
   struct proc* p;
   struct victim victims[4]={{0,0,0},{0,0,0},{0,0,0},{0,0,0}};
@@ -975,7 +975,7 @@ void swapoutprocess(){
       struct proc *p = dequeue(&soq);
       
       // cprintf("PID: %d\n", p->pid);
-      if(!chooseVictim(p->pid))
+      if(!chooseVictimAndEvict(p->pid))
       {
         // cprintf("Zlimit \n");
         wakeup1(soq.reqchan);

@@ -196,6 +196,5 @@ void            clearpteu(pde_t *pgdir, char *uva);
 uint*           getpte(pde_t *pgdir, const void *va);
 void            swapInMap(pde_t *pgdir, void *va, uint size, uint pa);
 
-// void            chooseVictim();
 // number of elements in fixed-size array
 #define NELEM(x) (sizeof(x)/sizeof((x)[0]))
