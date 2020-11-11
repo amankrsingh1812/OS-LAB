@@ -1047,16 +1047,14 @@ int chooseVictim(int pid){
   pde_t *pte;
   // cprintf("%d\n",victims[0].pte);
   for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
-      if(p->state == UNUSED|| p->state == EMBRYO || p->state == RUNNING || p->pid < 5|| p->pid == pid)
+      if(p->state == UNUSED|| p->state == EMBRYO || p->pid < 5|| p->pid == pid)
         continue;
       
-      for(uint i = PGSIZE; i< p->sz; i += PGSIZE){
+      for(uint i = 0; i< p->sz; i += PGSIZE){
         pte = (pte_t*)getpte(p->pgdir, (void *) i);
         if(!((*pte) & PTE_U)||!((*pte) & PTE_P))
           continue;
         int idx =(((*pte)&(uint)96)>>5);
-        if(victims[idx].pr!=0)
-          continue;
         victims[idx].pte = pte;
         victims[idx].va = i;
         victims[idx].pr = p;
