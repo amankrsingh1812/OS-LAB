@@ -1079,10 +1079,10 @@ int chooseVictim(int pid){
       uint reqpte = *pte;
       *pte = ((*pte)&(~PTE_P));
       *pte = *pte | ((uint)1<<7);
-      // *pte=0;
+      
       if(victims[i].pr->state != ZOMBIE){
-        release(&ptable.lock);
         release(&soq.lock);
+        release(&ptable.lock);
         write_page(victims[i].pr->pid, (victims[i].va)>>12, (void *)P2V(PTE_ADDR(reqpte)));   
         acquire(&soq.lock);
         acquire(&ptable.lock);
@@ -1108,19 +1108,15 @@ void swapoutprocess(){
     cprintf("\n\nEntering swapout\n");
     acquire(&soq.lock);
     while(soq.size){
-      int g=0;
       while (openFileCount >= NOFILE)
       {
         cprintf("flimit \n");
-        if(g==4)
-          while(1);
-        g++;
         wakeup1(soq.reqchan);
-        release(&ptable.lock);
         release(&soq.lock);
+        release(&ptable.lock);
         yield();
-        acquire(&ptable.lock);
         acquire(&soq.lock);
+        acquire(&ptable.lock);
       }
       
       struct proc *p = dequeue(&soq);
@@ -1129,24 +1125,18 @@ void swapoutprocess(){
       if(!chooseVictim(p->pid))
       {
         // cprintf("Zlimit \n");
-        release(&ptable.lock);
         release(&soq.lock);
+        release(&ptable.lock);
         yield();
-        acquire(&ptable.lock);
         acquire(&soq.lock);
+        acquire(&ptable.lock);
       }
       p->satisfied = 1;
     }
-    // cprintf("\n\n");
-    // acquire(&soq.lock);
 
     wakeup1(soq.reqchan);
     release(&soq.lock);
-      // acquire(&ptable.lock);
-    // popcli();
     sleep(soq.qchan, &ptable.lock);
-    // release(&soq.lock);
-    // acquire(&ptable.lock);
   }
 
 }
@@ -1161,8 +1151,8 @@ void swapinprocess(){
       struct proc *p = dequeue(&siq);
       openFileCount--;
       // cprintf("PID: %d\n", p->pid);
-      release(&ptable.lock);
       release(&siq.lock);
+      release(&ptable.lock);
       
       char* mem = kalloc();
       // cprintf("kalloc done\n");
@@ -1173,9 +1163,9 @@ void swapinprocess(){
       // cprintf("%d %d\n",*getpte(p->pgdir,(void *)p->trapva),p->swapOutCount);
       swapInMap(p->pgdir, (void *)PGROUNDDOWN(p->trapva), PGSIZE, V2P(mem));
       p->swapOutCount--;
+      wakeup1(p->chan);
     }
     // cprintf("\n\n");
-    wakeup1(siq.reqchan);
     release(&siq.lock);
     sleep(siq.qchan, &ptable.lock);
   }
@@ -1185,7 +1175,6 @@ void swapinprocess(){
 void ps()
 {
   struct proc *p;
-    cprintf("PT1\n");
   acquire(&ptable.lock);
     for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
       if(p->state == UNUSED)
@@ -1195,151 +1184,37 @@ void ps()
   release(&ptable.lock);
 }
 
-
-// void insertq(struct swapqueue* sq, struct proc* p){
-  
-//   return;
-// }
-
-// Atomically release lock and sleep on chan.
-// Reacquires lock when awakened.
-// void
-// sleep2(void *chan)
-// {
-//   struct proc *p = myproc();
-  
-//   if(p == 0)
-//     panic("sleep");
-  
-//   acquire(&ptable.lock);  //DOC: sleeplock1
-  
-//   // Go to sleep.
-//   p->chan = chan;
-//   p->state = SLEEPING;
-  
-//   sched();
-
-//   // Tidy up.
-//   p->chan = 0;
-
-//   // Reacquire original lock.
-//   release(&ptable.lock);
-// }
-
-// void deq(){
-//   acquire(&ptable.lock);
-
-//   sleep(0001, &ptable.lock);
-
-//   release(&ptable.lock);
-// }
-
-
-
-
-
 void submitToSwapOut(){
   struct proc* p = myproc();
-  // pushcli();
-  // cli();
   cprintf("submitToSwapOut %d\n",p->pid);
-  acquire(&ptable.lock);
-  p->satisfied = 0;
 
   acquire(&soq.lock);
+  acquire(&ptable.lock);
+  p->satisfied = 0;
   enqueue(&soq, p);
   wakeup1(soq.qchan);
   release(&soq.lock);
 
-  // sti();
-  // popcli();
   while(p->satisfied==0)
     sleep(soq.reqchan, &ptable.lock);
-  // cli();
   release(&ptable.lock);
-  // sti();
-  // popcli();
-
   return;
 
 }
 
 void submitToSwapIn(){
   struct proc* p = myproc();
-  
-  // cli();
-  // uint g=*getpte(p->pgdir,(void *)rcr2());
   cprintf("submitToSwapIn %d\n",p->trapva);
-  acquire(&ptable.lock);
 
   acquire(&siq.lock);
+  acquire(&ptable.lock);
     enqueue(&siq, p);
     wakeup1(siq.qchan);
   release(&siq.lock);
   
-  sleep(siq.reqchan, &ptable.lock);
-  
+  sleep((char *)p->pid, &ptable.lock);
   release(&ptable.lock);
-  // sti();
-
   return;
-
-}
-
-
-void openFilecount2(int pid)
-{
-  acquire(&ptable.lock);
-  struct proc *p;
-  // cprintf("IN OPEN FILE COUNT\n");
-  for(p = ptable.proc; p < &ptable.proc[NPROC]; p++)  
-  {
-    if(p->state == UNUSED) continue;
-    int cnt=0;
-    if(p->pid==2||p->pid==3)
-    {
-      for(int fd = 0; fd < NOFILE; fd++){
-        if(p->ofile[fd]){
-          cnt++;
-          struct file* f;
-          f = p->ofile[fd];
-
-          if(f->ref < 1) {
-            // cprintf("Deleting file dont: %d %s\n", fd, f->name);
-            p->ofile[fd] = 0;
-            continue;
-          }
-          release(&ptable.lock);
-          char temp[14];
-          get_name(pid, 0, temp);
-          int sz = strlen(temp);
-          int yes = 1;
-          for(int i=0;i<sz;i++){
-            if(temp[i]!=f->name[i]) {
-              yes = 0;break;
-            }
-          }
-          if(yes){
-              cprintf("Deleting page file: %s\n", f->name);
-              delete_page(p->ofile[fd]->name);
-              fileclose(f);
-              p->ofile[fd] = 0;
-          }
-
-          // cprintf("%d: %s\n", p->pid, f->name);
-
-          
-
-          acquire(&ptable.lock);
-
-        }
-      }
-      // cprintf("OPEN FILE COUNT PID: %d is %d\n",p->pid,cnt);
-
-    }
-  }
-
-  release(&ptable.lock);
 }
 
 
@@ -1372,17 +1247,11 @@ void openFilecount()
           p->ofile[fd] = 0;
 
           // cprintf("%d: %s\n", p->pid, f->name);
-
-          
-
           acquire(&ptable.lock);
-
         }
       }
       // cprintf("OPEN FILE COUNT PID: %d is %d\n",p->pid,cnt);
-
     }
   }
-
   release(&ptable.lock);
 }
