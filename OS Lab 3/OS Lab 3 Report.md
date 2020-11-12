@@ -354,4 +354,4 @@ Every child process first iterates 20 times setting the byte values, after which
 
 ### Sample Output :
 
-<img src="partb2.png" height="650px"/>
+<img src="partb4.png" height="650px"/>
