@@ -426,8 +426,8 @@ void submitToSwapOut(){
   struct proc* p = myproc();
   cprintf("submitToSwapOut %d\n",p->pid);
 
-  acquire(&soq.lock);
   acquire(&ptable.lock);
+  acquire(&soq.lock);
   p->satisfied = 0;
   enqueue(&soq, p);
   wakeup1(soq.qchan);
@@ -444,8 +444,8 @@ void submitToSwapIn(){
   struct proc* p = myproc();
   cprintf("submitToSwapIn %d\n",p->pid);
 
-  acquire(&siq.lock); 
   acquire(&ptable.lock);
+  acquire(&siq.lock); 
     enqueue(&siq, p);   // Enqueues the process in the Swapin queue
     wakeup1(siq.qchan); // Wake up the Swapin process
   release(&siq.lock);
