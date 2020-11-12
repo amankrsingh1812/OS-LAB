@@ -59,6 +59,7 @@ Refer the patch files in `Patch/PartB/`. The main code for this part is in files
 Function `create_kernel_process()` is defined in `proc.c` which creates a kernel process and add it to the processes queue. The function first finds an empty slot in the process table and assigns it to the newly created process. Then it allocates kernel stack for the process, sets up `trapframe` ,  puts the `exit()`function which will be called upon return from context after `trapframe` in stack , sets up context and its `eip` is made equal to `entrypoint` function. Then the page table for the new process is created by calling `setupkvm()` , the name of the process is set as the input argument `name`  and `intproc` is made as its parent. Finally the state of process is changed to `RUNNABLE` .
 
 ```c
+// proc.c
 void create_kernel_process(const char *name, void (*entrypoint)()) {
   struct proc *p;
   char *sp;
