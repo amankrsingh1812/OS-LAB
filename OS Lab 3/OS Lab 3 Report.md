@@ -17,9 +17,8 @@ Since xv6 does not handle page faults by default, we added the case when trap ca
     break;
 ```
 
-- `myproc()->pgdir` returns a pointer to the page directory of the process
+- `myproc()->pgdir` returns a pointer to the page directory of the process which is outer level of the 2-level page table in xv6 .
 - The function `rcr2()` returns the the virtual address which caused the page fault.
-- Note: Page directory is the outer level of the 2-level page table in xv6 .
 
 #### Allocating a new page
 
@@ -27,19 +26,11 @@ The allocation of page and updation the page table is done in `allocSinglePg(...
 
 ```c
   // vm.c
-  void						// line 252
-  allocSinglePg(pde_t *pgdir, uint va)
-  {
-    char *mem;
-    uint a;
-    a = PGROUNDDOWN(va);
+  void allocSinglePg(pde_t *pgdir, uint va) { // line 252
+    uint a = PGROUNDDOWN(va);
+    char *mem = kalloc();
+    // ...
     
-    mem = kalloc();
-    if(mem == 0){
-      cprintf("allocuvm out of memory (3)\n");
-      return;
-    }
-
     memset(mem, 0, PGSIZE);
     if(mappages(pgdir, (char*)a, PGSIZE, V2P(mem), PTE_W|PTE_U) < 0){
       cprintf("allocuvm out of memory (4)\n");
@@ -66,21 +57,13 @@ Refer the patch files in `Patch/PartB/`
 Function `create_kernel_process()` is defined in `proc.c` which creates a kernel process and add it to the processes queue. The function first finds an empty slot in the process table and assigns it to the newly created process. Then it allocates kernel stack for the process, sets up `trapframe` ,  puts the `exit()`function which will be called upon return from context after `trapframe` in stack , sets up context and its `eip` is made equal to `entrypoint` function. Then the page table for the new process is created by calling `setupkvm()` , the name of the process is set as the input argument `name`  and `intproc` is made as its parent. Finally the state of process is changed to `RUNNABLE` .
 
 ```c
-void create_kernel_process(const char *name, void (*entrypoint)())
-{
+void create_kernel_process(const char *name, void (*entrypoint)()) {
   struct proc *p;
   char *sp;
-
-  acquire(&ptable.lock);
-
-  for(p = ptable.proc; p < &ptable.proc[NPROC]; p++)
-    if(p->state == UNUSED)
-      goto found;
-
-  release(&ptable.lock);
-  return;
-
-found:
+	acquire(&ptable.lock);
+  
+  //... find empty slot in ptable
+  
   p->state = EMBRYO;
   p->pid = nextpid++;
 
@@ -97,8 +80,7 @@ found:
   sp -= sizeof *p->tf;
   p->tf = (struct trapframe*)sp;
 
-  // Set up new context to start executing at entrypoint,
-  // which returns to kernexit.
+  // Set up new context to start executing at entrypoint, which returns to kernexit.
   sp -= 4;
   *(uint*)sp = (uint)exit;		 // end the kernel process upon return from entrypoint()
 
@@ -107,46 +89,29 @@ found:
   memset(p->context, 0, sizeof *p->context);
   p->context->eip = (uint)entrypoint;
 
-  if((p->pgdir = setupkvm()) == 0)
-    panic("kernel process: out of memory?");
+  if((p->pgdir = setupkvm()) == 0) panic("kernel process: out of memory?");
 
   p->sz = PGSIZE;
   p->parent = initproc;
   p->cwd = idup(initproc->cwd);
-  // cprintf("%s %d\n",name,sizeof(p->name));
   safestrcpy(p->name, name, sizeof(p->name));
 
   acquire(&ptable.lock);
-
   p->state = RUNNABLE;
-
   release(&ptable.lock);
-
-  return;
 }
 ```
 
 Upon return from the `entrypoint()` .The `exit()` function will terminate the process and thereby preventing it to return to `user mode` from `kernel mode` . The `create_kernel_process()` function is called in `forkret` (only when `forket` is called from `initprocess`) to create two `kernel processes` namely `swapoutprocess` and `swapinprocess` .
 
 ```c
-void
-forkret(void)
-{
-  static int first = 1;
-  // Still holding ptable.lock from scheduler.
-  release(&ptable.lock);
-
+void forkret(void) {
+	// ...
   if (first) {
-    // Some initialization functions must be run in the context
-    // of a regular process (e.g., they call sleep), and thus cannot
-    // be run from main().
-    first = 0;
-    iinit(ROOTDEV);
-    initlog(ROOTDEV);
+    // ...
     create_kernel_process("swapoutprocess",swapoutprocess);
-    create_kernel_process("swapinprocess",swapinprocess);
+    create_kernel_process("swapinprocess" ,swapinprocess);
   }
-
 }
 ```
 
@@ -157,12 +122,12 @@ Two new elements are added to the process structure to store swapping meta data.
 ```c
 struct proc {
   ///...
-  int satisfied;
-  uint trapva;
+  int satisfied;               // If zero, page request not satisifed
+  uint trapva;                 // VA at which pagefault occurred
 };
 ```
 
-The newly created kernel process `swapoutprocess` is responsible for swapping out of pages on demand. The `swappoutprocess` supports a request queue for the swapping requests which is created from the `struct swapqueue` .
+The newly created kernel process `swapoutprocess` is responsible for swapping out of pages on demand.  `swappoutprocess` supports a request queue for the swapping requests which is created from the `struct swapqueue` .
 
 ```c
 struct swapqueue{
@@ -173,32 +138,14 @@ struct swapqueue{
   int rear; 
   int size;  
   struct proc* queue[NPROC+1];
-}
+};
 ```
 
-An instance `siq` of the `struct swapqueue` is used as a request queue for the `swapoutprocess` . Any access to the `swapqueue` is protected by a `spinlock` . The `enqueue()` and `dequeue()` for the `swapqueue` are implemented as shown below:
+An instance `soq` of the `struct swapqueue` is used as a request queue for the `swapoutprocess` . Any access to the `swapqueue` is protected by a `spinlock` . The `enqueue()` and `dequeue()` for the `swapqueue` are implemented as shown below:
 
 ```c
-void enqueue(struct swapqueue* sq, struct proc* np){
-  if(sq->size == NPROC) return; 
-  sq->rear = (sq->rear + 1) % NPROC;
-  sq->queue[sq->rear] = np; 
-  sq->size++;  
-}
-
-struct proc* dequeue(struct swapqueue* sq){
-  if (sq->size == 0) return 0; 
-  struct proc* next = sq->queue[sq->front]; 
-  sq->front = (sq->front + 1) % NPROC; 
-  sq->size = sq->size - 1; 
-
-  if(sq->size == 0){
-    sq->front = 0;
-    sq->rear = NPROC - 1;
-  }
-
-  return next; 
-}
+void enqueue(struct swapqueue* sq, struct proc* np); // insert process at rear of queue
+struct proc* dequeue(struct swapqueue* sq);					 // take out process from front of queue
 ```
 
 The request to swap out a page is submitted by calling `submitToSwapIn()` function which adds the process structure pointer of the requesting process to the `siq` queue, wakes the `swapoutprocess` and makes the current (requesting) process to sleep until its `satisfied` bit is turned on ie suspends its from execution.  
@@ -206,20 +153,17 @@ The request to swap out a page is submitted by calling `submitToSwapIn()` functi
 ```c
 void submitToSwapOut(){
   struct proc* p = myproc();
-  cprintf("submitToSwapOut %d\n",p->pid);
-
-  acquire(&soq.lock);
+  
   acquire(&ptable.lock);
-  p->satisfied = 0;
-  enqueue(&soq, p);
-  wakeup1(soq.qchan);
+  acquire(&soq.lock);
+  p->satisfied = 0;   
+  enqueue(&soq, p);   // Enqueues the process in the Swapout queue
+  wakeup1(soq.qchan); // Wakes up the Swapout process
   release(&soq.lock);
 
-  while(p->satisfied==0)
+  while(p->satisfied==0)  // Sleep process till not satisfied 
     sleep(soq.reqchan, &ptable.lock);
   release(&ptable.lock);
-  return;
-
 }
 ```
 
@@ -230,95 +174,53 @@ void swapoutprocess(){
   sleep(soq.qchan, &ptable.lock);
 
   while(1){
-    cprintf("\n\nEntering swapout\n");
     acquire(&soq.lock);
     while(soq.size){
-      while (flimit >= NOFILE)
-      {
-        cprintf("flimit \n");
-        wakeup1(soq.reqchan);
-        release(&soq.lock);
-        release(&ptable.lock);
-        yield();
-        acquire(&soq.lock);
-        acquire(&ptable.lock);
-      }
+      // ...Edge case handling
+      struct proc *p = dequeue(&soq); // Dequeue process from queue
       
-      struct proc *p = dequeue(&soq);
-      
-      if(!chooseVictimAndEvict(p->pid))
-      {
-        wakeup1(soq.reqchan);
-        release(&soq.lock);
-        release(&ptable.lock);
-        yield();
-        acquire(&soq.lock);
-        acquire(&ptable.lock);
+      if(!chooseVictimAndEvict(p->pid)){
+         // ...Edge case handling
       }
-      p->satisfied = 1;
+      p->satisfied = 1;     // When frame found set satified to true
     }
 
-    wakeup1(soq.reqchan);
+    wakeup1(soq.reqchan);   // Wake the corresponding process
     release(&soq.lock);
     sleep(soq.qchan, &ptable.lock);
   }
-
 }
 ```
 
 In the function `chooseVictimAndEvict()` we iterate over address space of all the user processes currently present in the `ptable` in multiples of page size so as to visit each page of all user processes once.
 
-**Pseudo LRU** replacement policy is used for selecting the victim frame. For each page table entry the accessed bit and dirty bit are concatenated to form an integer, the victim frame is selected based on the integer form and preference order is as 0(00) < 1(01) < 2(10) < 3(11). Once a victim frame is chosen, the present bit is turned off for the corresponding page table entry and the corresponding process is made to sleep until writing on disk is complete. The seventh bit(initially unused) of the page table entry is also turned on which indicates thats the required frame has been swapped out. Upon successful eviction of victim frame value 1 is  return else 0 is returned .
+**Pseudo LRU** replacement policy is used for selecting the victim frame. For each page table entry the accessed bit and dirty bit are concatenated to form an integer, the victim frame is selected based on the integer and preference order is as 0(00) < 1(01) < 2(10) < 3(11). Once a victim frame is chosen, the present bit is turned off for the corresponding page table entry and the corresponding process is made to sleep until writing on disk is complete. The 7<sup>th</sup> bit(initially unused) of the page table entry is also turned on which indicates that the required frame has been swapped out. Upon successful eviction of victim frame, value 1 is returned else 0 is returned.
 
 ```c
 int chooseVictimAndEvict(int pid){
-  
   struct proc* p;
   struct victim victims[4]={{0,0,0},{0,0,0},{0,0,0},{0,0,0}};
   pde_t *pte;
-  // cprintf("%d\n",victims[0].pte);
   for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
-      if(p->state == UNUSED|| p->state == EMBRYO || p->pid < 5|| p->pid == pid)
+      if(p->state == UNUSED|| p->state == EMBRYO || p->state == RUNNING || p->pid < 5|| p->pid == pid)
         continue;
-      
-      for(uint i = 0; i< p->sz; i += PGSIZE){
-        pte = (pte_t*)getpte(p->pgdir, (void *) i);
-        if(!((*pte) & PTE_U)||!((*pte) & PTE_P))
-          continue;
-        int idx =(((*pte)&(uint)96)>>5);
-        victims[idx].pte = pte;
-        victims[idx].va = i;
-        victims[idx].pr = p;
-      }
+    
+     // ...Finding victim frame
   }
-  for(int i=0;i<4;i++)
-  {
-    if(victims[i].pte != 0)
-    {
-      pte = victims[i].pte;
-      int origstate = victims[i].pr->state;
-      char* origchan = victims[i].pr->chan;
-      victims[i].pr->state = SLEEPING;
-      victims[i].pr->chan = 0;
-      uint reqpte = *pte;
-      *pte = ((*pte)&(~PTE_P));
-      *pte = *pte | ((uint)1<<7);
+  
+  for(int i=0;i<4;i++){
+    if(victims[i].pte != 0){
+      // ...Update flags in victim's PTE
       
       if(victims[i].pr->state != ZOMBIE){
         release(&soq.lock);
         release(&ptable.lock);
-        write_page(victims[i].pr->pid, (victims[i].va)>>12, (void *)P2V(PTE_ADDR(reqpte)));   
+        write_page(victims[i].pr->pid, (victims[i].va)>>12, (void *)P2V(PTE_ADDR(reqpte)));   // swap out victim's frame
         acquire(&soq.lock);
         acquire(&ptable.lock);
       }
-        
-      
-      cprintf("%d Pid:%d %d %d %d\n",i,victims[i].pr->pid,reqpte,(reqpte&(~PTE_P)),victims[i].va);
-      // *pte = ((*pte)&(~PTE_P));
-      kfree((char *)P2V(PTE_ADDR(reqpte)));
-      lcr3(V2P(victims[i].pr->pgdir)); 
-      victims[i].pr->state = origstate;
-      victims[i].pr->chan = origchan;
+      kfree((char *)P2V(PTE_ADDR(reqpte))); // Add freed frame to freelist
+      //...
       return 1;
     }
   }
@@ -329,37 +231,34 @@ int chooseVictimAndEvict(int pid){
 The `kalloc()` function which is used to allocate one 4096-byte page of physical memory is changed to meet demand swapping . The function `submitToSwapOut()` is called inside a loop until a free page of physical memory is obtained.
 
 ```c
-char*
-kalloc(void)
-{
-  //...
-  while(!r)
-  {
-    if(kmem.use_lock)
-      release(&kmem.lock);
+char* kalloc(void) {
+  // ...
+  while(!r) {
+    if(kmem.use_lock) release(&kmem.lock);
     submitToSwapOut();
-    if(kmem.use_lock)
-      acquire(&kmem.lock);
+    if(kmem.use_lock) acquire(&kmem.lock);
     r = kmem.freelist;
   }
-  ...//
+  // ...
 }
 ```
 
+`write_page()` is used to write the victim frame content in the disk . The file name is chosen as *PID_VA.swp* where PID is of the process whose page is chosen as victim and VA is higher 20 bits of virtual address corresponding to the evicted page.  `write_page()` uses `open_file()` to open/create files and `filewrite()`  to write the content in the given file.
+
+---
 
 
-The `write_page()` is used to write the victim frame content in the disk . The file name is chosen as *PID_VA* where PID if of the process whose page is chosen as victim and VA is the virtual address corresponding to the evicted page. The `wirte_page()` function uses `open_file()` (its exactly same as open system call) to open/create files and `filewrite()` (its exactly same as write system call) to write the content in the given file.
-
-#### Task 3: swapping in mechanism:
+#### Task 3: Swapping in Mechanism:
 
 **Swap-in Process** -  
-- The entrypoint of Swapin process is `swapinprocess()`. Whenever there are requests for swap in the `swapinprocess` process is woken up. 
 
-- It then iterates in the Swapin queue and one-by-one satisfies the requests. It first calls `kalloc()` to get a free-frame page in the physical memory. Then it reads the swapped-out page from the disk into the free-frame. Then `swapInMap()` is called, which updates the flags and Physical Page Number (PPN) in the appropriate `Page Table Entry (PTE)`. Then the corresponding process it woken up.
+- The entrypoint of Swap-in Process is `swapinprocess()`. Whenever there are requests for swaping in pages, the Swap-in Process is woken up. 
 
-- After satisfying all the requests in its queue, the Swapin Process goes into SLEEPING state. While doing all this, appropriate `locks` are acquired and released, so as handle synchronous requests.
+- It then iterates in the Swapin queue and one-by-one satisfies the requests. It first calls `kalloc()` to get a free frame in the physical memory. Then it reads the swapped-out page from the disk into the free frame. Then `swapInMap()` is called, which updates the flags and Physical Page Number (PPN) in the appropriate `Page Table Entry (PTE)`. Then the corresponding process is woken up.
 
-- `read_page()` reads the swapped out page file of the corresponding process's PTE into the buffer `mem`. It first computes the corresponding file and then calls the inbuilt `fileread()` function to read the contents of the file.
+- After satisfying all the requests in its queue, the Swap-in Process goes into SLEEPING state. While doing all this, appropriate `locks` are acquired and released, so as to handle synchronization issues.
+
+- `read_page()` reads the file corresponding to swapped out page of the respective process's PTE into the buffer `mem`. It first computes the filename and then calls the inbuilt function `fileread()` to read the contents of the file.
 
 ```c
 void swapinprocess(){
@@ -367,12 +266,12 @@ void swapinprocess(){
   while(1){
     acquire(&siq.lock);
     while(siq.size){
-      struct proc *p = dequeue(&siq);  // request at the front of the Swapin queue
+      struct proc *p = dequeue(&siq); // request at the front of the Swapin queue
       release(&siq.lock);
       release(&ptable.lock);
       
-      char* mem = kalloc();           // free physical frame page is obtained
-      read_page(p->pid,((p->trapva)>>12),mem);  // Read the page into it
+      char* mem = kalloc();	 				  // free physical frame is obtained
+      read_page(p->pid,((p->trapva)>>12),mem); // Read the page into it
       
       acquire(&siq.lock);
       acquire(&ptable.lock);
@@ -382,8 +281,8 @@ void swapinprocess(){
     release(&siq.lock);
     sleep(siq.qchan, &ptable.lock);
   }
-
 }
+
 ```
 
 Whenever a `page fault` occurs, we are checking if it has occurred due to an earlier swapping out of its page, and then we are calling the function `submitToSwapIn()`. It enqueues the current process in the Swapin queue, wakes up the Swapin process and finally suspends the current process. While doing this, appropriate locks are acquired and released.
@@ -395,8 +294,8 @@ void submitToSwapIn(){
 
   acquire(&siq.lock); 
   acquire(&ptable.lock);
-    enqueue(&siq, p);   // Enqueues the current process in the Swapin queue
-    wakeup1(siq.qchan); // Wake up the Swapin process
+  enqueue(&siq, p);   // Enqueues the current process in the Swapin queue
+  wakeup1(siq.qchan); // Wake up the Swapin process
   release(&siq.lock);
   
   sleep((char *)p->pid, &ptable.lock);  // Suspend the current process
