@@ -160,6 +160,8 @@ struct proc* dequeue(struct swapqueue* sq);					 // take out process from front 
 
 The request to swap out a page is submitted by calling `submitToSwapIn()` function which adds the process structure pointer of the requesting process to the `siq` queue, wakes the `swapoutprocess` and makes the current (requesting) process to sleep until its `satisfied` bit is turned on ie suspends its from execution.  
 
+<div style="page-break-after: always;"></div>
+
 ```c
 // paging.c
 void submitToSwapOut(){
@@ -178,7 +180,10 @@ void submitToSwapOut(){
 }
 ```
 
-The `entrypoint` of `swapoutprocess` is `swapoutprocess()` which sleeps whenever the size of request queue is zero. Whenever there are requests for swap out the `swapoutprocess` process wakes up and iterates over the requests treating them one by one and upon freeing the required number of physical pages the `swapoutproces` wakes all the requesting processes. The function `chooseVictimAndEvict()` is used to select victim frame using pseudo `LRU` replacement policy. The `swapoutprocess()` contains check on number of files created and yields the processor when the number reaches the upper bound so that in the mean time some files can be deleted by `swapinprocess` . It also handles the edge case when no victim frame could be evicted by temporarily yielding the processor.
+The `entrypoint` of `swapoutprocess` is `swapoutprocess()` which sleeps whenever the size of request queue is zero. Whenever there are requests for swap out the `swapoutprocess` process wakes up and iterates over the requests treating them one by one and upon freeing the required number of physical pages the `swapoutproces` wakes all the requesting processes. The function `chooseVictimAndEvict()` is used to select victim frame using pseudo `LRU` replacement policy. The `swapoutprocess()` contains check on number of files created and yields the processor when the number reaches the upper bound so that in the mean time some files can be deleted by `swapinprocess` . It also handles the edge case when no victim frame could be evicted by temporarily yielding the processor. While doing all this, appropriate `locks` are acquired and released, so as to handle synchronization issues.
+
+
+
 
 ```c
 // paging.c
@@ -243,6 +248,8 @@ int chooseVictimAndEvict(int pid){
 
 The `kalloc()` function which is used to allocate one 4096-byte page of physical memory is changed to meet demand swapping . The function `submitToSwapOut()` is called inside a loop until a free page of physical memory is obtained.
 
+<div style="page-break-after: always;"></div>
+
 ```c
 // kalloc.c
 char* kalloc(void) {
@@ -259,7 +266,6 @@ char* kalloc(void) {
 
 `write_page()` is used to write the victim frame content in the disk . The file name is chosen as *PID_VA.swp* where PID is of the process whose page is chosen as victim and VA is higher 20 bits of virtual address corresponding to the evicted page.  `write_page()` uses `open_file()` to open/create files and `filewrite()`  to write the content in the given file.
 
-<div style="page-break-after: always;"></div>
 
 ---
 #### Task 3: Swapping in Mechanism:
@@ -323,6 +329,8 @@ void submitToSwapIn(){
 When the process exits, we make sure that the Swapout pages written on the disk are deleted. To do this, we have called `deletePageFiles()`.
 **deletePageFiles** - It iterates through the files list of the `swapoutprocess`, and if the file is not already deleted, it deletes it. While doing this, appropriate locks are acquired and released.
 
+<div style="page-break-after: always;"></div>
+
 ```c
 // paging.c
 void deletePageFiles(){
@@ -365,6 +373,9 @@ For the *i<sup>th</sup> child process*, in the *j<sup>th</sup> iteration*, the *
 Every child process first iterates 20 times setting the byte values, after which it again iterates 20 times, comparing the stored value with the expected value, again computed using the above function.
 
 *Note:* Each child is iterating 20 times in place of 10 times (as mentioned in assignment), because iterating for 10 times, doesn't cause the complete main memory to be used up. This main memory limit, set with `PHYSTOP` cannot be set below `4MB` (due to initialisation requirements of the kernel), at which we need to iterate for more than 10 times for each child process to actually test the correctness of our swapper.
+
+<div style="page-break-after: always;"></div>
+
 
 ### **Sample Output :**
 
