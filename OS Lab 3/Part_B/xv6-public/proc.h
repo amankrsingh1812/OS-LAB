@@ -48,9 +48,10 @@ struct proc {
   int killed;                  // If non-zero, have been killed
   struct file *ofile[NOFILE];  // Open files
   struct inode *cwd;           // Current directory
-  char name[16];               // Process name (debugging)
-  int satisfied;
-  uint trapva;
+
+  char name[16];               // Process name
+  int satisfied;               // If zero, page request not satisifed
+  uint trapva;                 // VA at which pagefault occurred
 };
 
 // extern void wakeup1(void *chan);

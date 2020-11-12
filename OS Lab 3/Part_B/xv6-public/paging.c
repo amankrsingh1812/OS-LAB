@@ -1,11 +1,3 @@
-// #include "defs.h"
-// #include "param.h"
-// #include "memlayout.h"
-// #include "spinlock.h"
-// #include "proc.h"
-// #include "ptable.h"
-// #include "paging.h"
-
 #include "types.h"
 #include "defs.h"
 #include "param.h"
@@ -91,7 +83,6 @@ create(char *path, short type, short major, short minor)
 
 // Inbuilt function to open a file
 int open_file(char *path, int omode) {  
-  // char *path;
   int fd;
   struct file *f;
   struct inode *ip;
@@ -138,7 +129,8 @@ int open_file(char *path, int omode) {
 
 
 // Create name string from
-// PID and VA[32:13]
+// PID and VA[32:13].
+// Will return PID_VA[32:13] as the name
 void
 get_name(int pid, uint addr, char *name) { 
   int i = 0;
@@ -181,21 +173,20 @@ int write_page(int pid, uint addr, char *buf){
 
   get_name(pid, addr, name);
   
-  int fd = open_file(name, O_CREATE|O_WRONLY);
+  int fd = open_file(name, O_CREATE|O_WRONLY);  // Open + create file 
   struct file *f;
-  if(fd < 0 || fd >= NOFILE || (f=myproc()->ofile[fd]) == 0){
-    cprintf("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFf\n");
+  if(fd < 0 || fd >= NOFILE || (f=myproc()->ofile[fd]) == 0)
     return -1;
-  }
+  
   cprintf("Creating page file: %s\n", name);
-  int noc = filewrite(f, buf, 4096);
+  int noc = filewrite(f, buf, 4096);          // Write the page in the file
   if(noc < 0){
     cprintf("Unable to write. Exiting (proc.c::write_page)!!");
   }
   return noc;
 }
 
-// Deletes swapout file with the given path
+// Deletes swapout file with the given filename
 int
 delete_page(char* path)
 {
@@ -209,7 +200,6 @@ delete_page(char* path)
 
   ilock(dp);
 
-  // Cannot unlink "." or "..".
   if(namecmp(name, ".") == 0 || namecmp(name, "..") == 0)
     goto bad;
 
@@ -219,10 +209,6 @@ delete_page(char* path)
 
   if(ip->nlink < 1)
     panic("unlink: nlink < 1");
-  // if(ip->type == T_DIR && !isdirempty(ip)){
-  //   iunlockput(ip);
-  //   goto bad;
-  // }
 
   memset(&de, 0, sizeof(de));
   if(writei(dp, (char*)&de, off, sizeof(de)) != sizeof(de))
@@ -252,20 +238,15 @@ int read_page(int pid, uint addr, char *buf){
   char name[14];
 
   get_name(pid, addr, name);
-  int fd = open_file(name, O_RDONLY);
+  int fd = open_file(name, O_RDONLY);   // Open swapout page file
   struct file *f;
-  // if(argfd(0, 0, &f) < 0 || argint(2, &n) < 0 || argptr(1, &p, n) < 0)
-  if(fd < 0 || fd >= NOFILE || (f=myproc()->ofile[fd]) == 0){
-    if(fd >= NOFILE)
-    cprintf("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFf\n");
+  if(fd < 0 || fd >= NOFILE || (f=myproc()->ofile[fd]) == 0)
     return -1;
-  }
-  int noc = fileread(f, buf, 4096);
+  int noc = fileread(f, buf, 4096);     // Read the page into the buffer
   if(noc < 0){
     cprintf("Unable to write. Exiting (proc.c::write_page)!!");
   }
   delete_page(name);
-  // cprintf("Deleting page file: %s\n", f->name);
   myproc()->ofile[fd] = 0;
   fileclose(f);
 
@@ -301,7 +282,6 @@ int chooseVictimAndEvict(int pid){
   struct proc* p;
   struct victim victims[4]={{0,0,0},{0,0,0},{0,0,0},{0,0,0}};
   pde_t *pte;
-  // cprintf("%d\n",victims[0].pte);
   for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
       if(p->state == UNUSED|| p->state == EMBRYO || p->state == RUNNING || p->pid < 5|| p->pid == pid)
         continue;
@@ -338,10 +318,6 @@ int chooseVictimAndEvict(int pid){
         acquire(&soq.lock);
         acquire(&ptable.lock);
       }
-        
-      
-      // cprintf("%d Pid:%d %d %d %d\n",i,victims[i].pr->pid,reqpte,(reqpte&(~PTE_P)),victims[i].va);
-      // *pte = ((*pte)&(~PTE_P));
       kfree((char *)P2V(PTE_ADDR(reqpte)));
       lcr3(V2P(victims[i].pr->pgdir)); 
       victims[i].pr->state = origstate;
@@ -360,7 +336,7 @@ void swapoutprocess(){
     cprintf("\n\nEntering swapout\n");
     acquire(&soq.lock);
     while(soq.size){
-      while (flimit >= NOFILE)
+      while (flimit >= NOFILE)    // Edge case handling
       {
         cprintf("flimit \n");
         wakeup1(soq.reqchan);
@@ -371,12 +347,10 @@ void swapoutprocess(){
         acquire(&ptable.lock);
       }
       
-      struct proc *p = dequeue(&soq);
+      struct proc *p = dequeue(&soq); // Dequeue process from queue
       
-      // cprintf("PID: %d\n", p->pid);
-      if(!chooseVictimAndEvict(p->pid))
+      if(!chooseVictimAndEvict(p->pid)) // Edge case handling
       {
-        // cprintf("Zlimit \n");
         wakeup1(soq.reqchan);
         release(&soq.lock);
         release(&ptable.lock);
@@ -384,10 +358,10 @@ void swapoutprocess(){
         acquire(&soq.lock);
         acquire(&ptable.lock);
       }
-      p->satisfied = 1;
+      p->satisfied = 1;     // When frame found set satified to true
     }
 
-    wakeup1(soq.reqchan);
+    wakeup1(soq.reqchan);   // The the corresponding process
     release(&soq.lock);
     sleep(soq.qchan, &ptable.lock);
   }
@@ -396,7 +370,6 @@ void swapoutprocess(){
 
 // Entry point of the swapin process
 void swapinprocess(){
-  // cprintf("Sucess\n");
   sleep(siq.qchan, &ptable.lock);
   while(1){
     cprintf("\n\nEntering swapin\n");
@@ -404,12 +377,10 @@ void swapinprocess(){
     while(siq.size){
       struct proc *p = dequeue(&siq);
       flimit--;
-      // cprintf("PID: %d\n", p->pid);
       release(&siq.lock);
       release(&ptable.lock);
       
       char* mem = kalloc();
-      // cprintf("kalloc done\n");
       read_page(p->pid,((p->trapva)>>12),mem);
       
       acquire(&siq.lock);
@@ -432,12 +403,12 @@ void submitToSwapOut(){
 
   acquire(&ptable.lock);
   acquire(&soq.lock);
-  p->satisfied = 0;
-  enqueue(&soq, p);
-  wakeup1(soq.qchan);
+  p->satisfied = 0;   
+  enqueue(&soq, p);   // Enqueues the process in the Swapout queue
+  wakeup1(soq.qchan); // Wakes up the Swapout process
   release(&soq.lock);
 
-  while(p->satisfied==0)
+  while(p->satisfied==0)  // Sleep process till not satisfied 
     sleep(soq.reqchan, &ptable.lock);
   release(&ptable.lock);
   return;
@@ -455,7 +426,7 @@ void submitToSwapIn(){
     wakeup1(siq.qchan); // Wake up the Swapin process
   release(&siq.lock);
   
-  sleep((char *)p->pid, &ptable.lock);
+  sleep((char *)p->pid, &ptable.lock);  // Suspend the process
   release(&ptable.lock);
   return;
 }
