@@ -46,8 +46,11 @@ The allocation of page and updation the page table is done in `allocSinglePg(...
 - In case of failure in `mappages(...)`, aquired memory `mem` is freed using `kfree(mem)`.
 
 #### Sample output 
-![](parta2.png)
+<img src="parta2.png" height="150px"/>
 
+
+
+---
 ## **Part B**: 
 
 Refer the patch files in `Patch/PartB/`
@@ -114,7 +117,7 @@ void forkret(void) {
   }
 }
 ```
-
+---
 #### Task 2: swapping out mechanism:
 
 Two new elements are added to the process structure to store swapping meta data. The variable `trapva` stores the virtual address where page fault has occurred for the given process. The variable `satisfied` is used as indication whether a swap out request has been satisfied for the given process.
@@ -304,37 +307,26 @@ void submitToSwapIn(){
 }
 ```
 
-When a process exits, we make sure that the Swapout pages written on the disk are deleted. To do this, we have called `deletePageFiles()`.
+When the process exits, we make sure that the Swapout pages written on the disk are deleted. To do this, we have called `deletePageFiles()`.
 **deletePageFiles** - It iterates through the files list of the `swapoutprocess`, and if the file is not already deleted, it deletes it. While doing this, appropriate locks are acquired and released.
 
 ```c
-void deletePageFiles()
-{
+void deletePageFiles(){
   acquire(&ptable.lock);
   struct proc *p;
-  for(p = ptable.proc; p < &ptable.proc[NPROC]; p++)  
-  {
+  for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
     if(p->state == UNUSED) continue;
-    int cnt=0;
-    if(p->pid==2||p->pid==3)
-    {
-      for(int fd = 0; fd < NOFILE; fd++){   // Iterating through the files list
+    if(p->pid==2||p->pid==3) {
+      for(int fd = 0; fd < NOFILE; fd++){ // Iterating through the files list
         if(p->ofile[fd]){
-          cnt++;
-          struct file* f;
-          f = p->ofile[fd];
+          struct file* f = p->ofile[fd];
 
-          if(f->ref < 1) {    // Checking if the file is already deleted
-            p->ofile[fd] = 0;
-            continue;
-          }
+          // ...Check if the file is already deleted
+          
           release(&ptable.lock);
-          cprintf("Deleting page file: %s\n", f->name);
-          delete_page(p->ofile[fd]->name);  // Deleting the file
+          delete_page(p->ofile[fd]->name); // Deleting the file
           fileclose(f);
-          flimit--;
           p->ofile[fd] = 0;
-
           acquire(&ptable.lock);
         }
       }
@@ -344,10 +336,11 @@ void deletePageFiles()
 }
 ```
 
+---
 
 #### Task 4: Sanity Test
 
-Our user program `memtest.c` creates *20 child processes*, each of which *iterates 20 times*, and each time *requests 4096 Bytes* using `malloc()`.
+Our user program `memtest.c` forks *20 child processes*, each of which *iterates 20 times*, and each time *requests 4096 Bytes* using `malloc()`.
 
 For the *i<sup>th</sup> child process*, in the *j<sup>th</sup> iteration*, the *k<sup>th</sup> byte* is set with the following function:
 
@@ -357,10 +350,8 @@ For the *i<sup>th</sup> child process*, in the *j<sup>th</sup> iteration*, the *
 
 Every child process first iterates 20 times setting the byte values, after which it again iterates 20 times, comparing the stored value with the expected value, again computed using the above function.
 
-*Note:* Each child is iterating 20 times in place of 10 times (as mentioned in assignment), because iterating for 10 times, doesn't cause the complete main memory to be used up. This main memory limit, set with `KERNBASE` cannot be set below `4MB` (due to initialisation requirements of the kernel), at which we need to iterate for more than 10 times for each child process to actually test the correctness of our swapper.
+*Note:* Each child is iterating 20 times in place of 10 times (as mentioned in assignment), because iterating for 10 times, doesn't cause the complete main memory to be used up. This main memory limit, set with `PHYSTOP` cannot be set below `4MB` (due to initialisation requirements of the kernel), at which we need to iterate for more than 10 times for each child process to actually test the correctness of our swapper.
 
 ### Sample Output :
 
-
-
-![](partb2.png)
+<img src="partb2.png" height="650px"/>
