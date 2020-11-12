@@ -302,10 +302,10 @@ int chooseVictimAndEvict(int pid){
   pde_t *pte;
   // cprintf("%d\n",victims[0].pte);
   for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
-      if(p->state == UNUSED|| p->state == EMBRYO || p->pid < 5|| p->pid == pid)
+      if(p->state == UNUSED|| p->state == EMBRYO || p->state == RUNNING || p->pid < 5|| p->pid == pid)
         continue;
       
-      for(uint i = 0; i< p->sz; i += PGSIZE){
+      for(uint i = PGSIZE; i< p->sz; i += PGSIZE){
         pte = (pte_t*)getpte(p->pgdir, (void *) i);
         if(!((*pte) & PTE_U)||!((*pte) & PTE_P))
           continue;
@@ -442,7 +442,7 @@ void submitToSwapOut(){
 
 void submitToSwapIn(){
   struct proc* p = myproc();
-  cprintf("submitToSwapIn %d\n",p->trapva);
+  cprintf("submitToSwapIn %d\n",p->pid);
 
   acquire(&siq.lock); 
   acquire(&ptable.lock);
