@@ -292,6 +292,8 @@ int chooseVictimAndEvict(int pid){
         if(!((*pte) & PTE_U)||!((*pte) & PTE_P))
           continue;
         int idx =(((*pte)&(uint)96)>>5);
+        if(idx>0&&idx<3)
+          idx=3-idx;
         victims[idx].pte = pte;
         victims[idx].va = i;
         victims[idx].pr = p;

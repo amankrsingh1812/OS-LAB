@@ -265,7 +265,7 @@ void swapoutprocess(){
 
 In the function `chooseVictimAndEvict()` we iterate over address space of all the user processes currently present in the `ptable` in multiples of page size so as to visit each page of all user processes once.
 
-**Pseudo LRU** replacement policy is used for selecting the victim frame. For each page table entry the dirty bit and accessed bit are concatenated to form an integer, the victim frame is selected based on the integer form and preference order is as 0(00) < 1(01) < 2(10) < 3(11). Once a victim frame is chosen, the present bit is turned off for the corresponding page table entry and the corresponding process is made to sleep until writing on disk is complete. The seventh bit(initially unused) of the page table entry is also turned on which indicates thats the required frame has been swapped out. Upon successful eviction of victim frame value 1 is  return else 0 is returned .
+**Pseudo LRU** replacement policy is used for selecting the victim frame. For each page table entry the accessed bit and dirty bit are concatenated to form an integer, the victim frame is selected based on the integer form and preference order is as 0(00) < 1(01) < 2(10) < 3(11). Once a victim frame is chosen, the present bit is turned off for the corresponding page table entry and the corresponding process is made to sleep until writing on disk is complete. The seventh bit(initially unused) of the page table entry is also turned on which indicates thats the required frame has been swapped out. Upon successful eviction of victim frame value 1 is  return else 0 is returned .
 
 ```c
 int chooseVictimAndEvict(int pid){
