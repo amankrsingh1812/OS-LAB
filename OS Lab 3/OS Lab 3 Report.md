@@ -48,7 +48,6 @@ The allocation of page and updation the page table is done in `allocSinglePg(...
 #### Sample output 
 <img src="parta2.png" height="150px"/>
 
-<div style="page-break-after: always;"></div>
 
 ---
 ## **Part B**: 
