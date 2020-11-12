@@ -95,9 +95,3 @@ int sys_ps(void)
   ps();
   return 0;
 }
-
-int sys_deleteExtraPages()
-{
-  deleteExtraPages();
-  return 0;
-}

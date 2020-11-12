@@ -127,7 +127,7 @@ void            submitToSwapIn(void);
 void            submitToSwapOut(void);
 void            swapoutprocess();
 void            swapinprocess();
-void            deleteExtraPages();
+void            deletePageFiles();
 
 // swtch.S
 void            swtch(struct context**, struct context*);

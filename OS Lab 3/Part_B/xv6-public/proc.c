@@ -254,7 +254,7 @@ exit(void)
   if(curproc == initproc)
     panic("init exiting");
 
-  // deleteExtraPages(curproc->pid);
+  // deletePageFiles(curproc->pid);
 
   // Close all open files.
   for(fd = 0; fd < NOFILE; fd++){
@@ -265,7 +265,7 @@ exit(void)
   }
 
   if(curproc->parent && curproc->parent->pid == 4){ // process run on sh
-    deleteExtraPages();
+    deletePageFiles();
   }
 
   begin_op();

@@ -23,7 +23,7 @@ int getpid(void);
 char* sbrk(int);
 int sleep(int);
 int uptime(void);
-void deleteExtraPages(void);
+void deletePageFiles(void);
 
 // ulib.c
 int stat(const char*, struct stat*);

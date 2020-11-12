@@ -405,11 +405,11 @@ void submitToSwapIn(){
 }
 ```
 
-When a process exits, we make sure that the Swapout pages written on the disk are deleted. To do this, we have called `deleteExtraPages()`.
-**deleteExtraPages** - It iterates through the files list of the `swapoutprocess`, and if the file is not already deleted, it deletes it. While doing this, appropriate locks are acquired and released.
+When a process exits, we make sure that the Swapout pages written on the disk are deleted. To do this, we have called `deletePageFiles()`.
+**deletePageFiles** - It iterates through the files list of the `swapoutprocess`, and if the file is not already deleted, it deletes it. While doing this, appropriate locks are acquired and released.
 
 ```c
-void deleteExtraPages()
+void deletePageFiles()
 {
   acquire(&ptable.lock);
   struct proc *p;

@@ -25,12 +25,12 @@
 extern struct ptable_t ptable;
 extern void wakeup1(void *chan);
 
-struct swapqueue soq, siq;
+struct swapqueue soq, siq;  // Queue for swapout and swapin resp.
 int flimit = 2; 
 
-
+// Inbuilt function to allocate fd
 int
-fdalloc(struct file *f)
+fdalloc(struct file *f)   
 {
   int fd;
   struct proc *curproc = myproc();
@@ -44,8 +44,9 @@ fdalloc(struct file *f)
   return -1;
 }
 
+// Inbuilt function to create a file with given name
 struct inode*
-create(char *path, short type, short major, short minor)
+create(char *path, short type, short major, short minor)  
 {
   struct inode *ip, *dp;
   char name[DIRSIZ];
@@ -88,7 +89,8 @@ create(char *path, short type, short major, short minor)
   return ip;
 }
 
-int open_file(char *path, int omode) {
+// Inbuilt function to open a file
+int open_file(char *path, int omode) {  
   // char *path;
   int fd;
   struct file *f;
@@ -138,7 +140,7 @@ int open_file(char *path, int omode) {
 // Create name string from
 // PID and VA[32:13]
 void
-get_name(int pid, uint addr, char *name) {
+get_name(int pid, uint addr, char *name) { 
   int i = 0;
   while (pid) {
     name[i++] = '0' + (pid%10);
@@ -172,7 +174,7 @@ get_name(int pid, uint addr, char *name) {
   }
 }
 
-
+// Writes a page into the swapout file
 int write_page(int pid, uint addr, char *buf){
   flimit++;
   char name[14];
@@ -190,13 +192,10 @@ int write_page(int pid, uint addr, char *buf){
   if(noc < 0){
     cprintf("Unable to write. Exiting (proc.c::write_page)!!");
   }
-
-  // fileclose(f);
-  // myproc()->ofile[fd] = 0;
-
   return noc;
 }
 
+// Deletes swapout file with the given path
 int
 delete_page(char* path)
 {
@@ -248,6 +247,7 @@ bad:
   return -1;
 }
 
+// Reads the swapout file into the buffer 
 int read_page(int pid, uint addr, char *buf){
   char name[14];
 
@@ -272,7 +272,7 @@ int read_page(int pid, uint addr, char *buf){
   return noc;
 }
 
-
+// Enqueue function for the queues
 void enqueue(struct swapqueue* sq, struct proc* np){
   if(sq->size == NPROC) return; 
   sq->rear = (sq->rear + 1) % NPROC;
@@ -280,6 +280,7 @@ void enqueue(struct swapqueue* sq, struct proc* np){
   sq->size++;  
 }
 
+// Dequeue function for the queues
 struct proc* dequeue(struct swapqueue* sq){
   if (sq->size == 0) return 0; 
   struct proc* next = sq->queue[sq->front]; 
@@ -294,7 +295,7 @@ struct proc* dequeue(struct swapqueue* sq){
   return next; 
 }
 
-
+// Chooses a victim frame using LRU and evicts it 
 int chooseVictimAndEvict(int pid){
   
   struct proc* p;
@@ -351,6 +352,7 @@ int chooseVictimAndEvict(int pid){
   return 0;
 }
 
+// Entry point of the swapout process
 void swapoutprocess(){
   sleep(soq.qchan, &ptable.lock);
 
@@ -392,6 +394,7 @@ void swapoutprocess(){
 
 }
 
+// Entry point of the swapin process
 void swapinprocess(){
   // cprintf("Sucess\n");
   sleep(siq.qchan, &ptable.lock);
@@ -422,6 +425,7 @@ void swapinprocess(){
 }
 
 
+// Submits a request for a free page to the swapout process
 void submitToSwapOut(){
   struct proc* p = myproc();
   cprintf("submitToSwapOut %d\n",p->pid);
@@ -440,6 +444,7 @@ void submitToSwapOut(){
 
 }
 
+// Submits a request to the swapin process
 void submitToSwapIn(){
   struct proc* p = myproc();
   cprintf("submitToSwapIn %d\n",p->pid);
@@ -455,8 +460,8 @@ void submitToSwapIn(){
   return;
 }
 
-
-void deleteExtraPages()
+// On exit delete the swapout page-files created 
+void deletePageFiles()
 {
   acquire(&ptable.lock);
   struct proc *p;

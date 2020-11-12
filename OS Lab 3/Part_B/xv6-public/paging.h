@@ -43,4 +43,4 @@ void swapinprocess();
 void submitToSwapOut();
 void submitToSwapIn();
 
-void deleteExtraPages();
+void deletePageFiles();
