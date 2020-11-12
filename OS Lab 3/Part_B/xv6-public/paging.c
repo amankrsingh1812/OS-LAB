@@ -19,6 +19,7 @@ extern void wakeup1(void *chan);
 
 struct swapqueue soq, siq;  // Queue for swapout and swapin resp.
 int flimit = 2; 
+int swapoutcount, swapincount;
 
 // Inbuilt function to allocate fd
 int
@@ -181,8 +182,9 @@ int write_page(int pid, uint addr, char *buf){
   cprintf("Creating page file: %s\n", name);
   int noc = filewrite(f, buf, 4096);          // Write the page in the file
   if(noc < 0){
-    cprintf("Unable to write. Exiting (proc.c::write_page)!!");
+    cprintf("Unable to write. Exiting (paging.c::write_page)!!");
   }
+  swapoutcount++;
   return noc;
 }
 
@@ -244,8 +246,9 @@ int read_page(int pid, uint addr, char *buf){
     return -1;
   int noc = fileread(f, buf, 4096);     // Read the page into the buffer
   if(noc < 0){
-    cprintf("Unable to write. Exiting (proc.c::write_page)!!");
+    cprintf("Unable to write. Exiting (paging.c::read_page)!!");
   }
+  swapincount++;
   delete_page(name);
   myproc()->ofile[fd] = 0;
   fileclose(f);
@@ -462,5 +465,7 @@ void deletePageFiles()
       }
     }
   }
+  cprintf("\nTotal no. of Swap in: %d\nTotal no. of Swap out: %d\n\n", swapincount, swapoutcount);
+  swapincount = swapoutcount = 0;
   release(&ptable.lock);
 }
