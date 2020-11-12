@@ -153,6 +153,23 @@ get_name(int pid, uint addr, char *name) {
     addr = addr / 10;
   }
   name[i] = 0;
+  int mi = -1;
+  for(int j=0;j<i;j++){
+    if(name[j]=='_') {
+      mi=j;break;
+    }
+  }
+  char temp;
+  for(int j=0;j<mi/2;j++){
+    temp = name[j];
+    name[j] = name[mi-j-1];
+    name[mi-j-1] = temp;
+  }
+  for(int j=mi+1, k=i-1;j<k;j++,k--){
+    temp = name[j];
+    name[j] = name[k];
+    name[k] = temp;
+  }
 }
 
 
@@ -168,6 +185,7 @@ int write_page(int pid, uint addr, char *buf){
     cprintf("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFf\n");
     return -1;
   }
+  cprintf("Creating page file: %s\n", name);
   int noc = filewrite(f, buf, 4096);
   if(noc < 0){
     cprintf("Unable to write. Exiting (proc.c::write_page)!!");

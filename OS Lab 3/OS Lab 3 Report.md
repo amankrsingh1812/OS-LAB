@@ -348,7 +348,7 @@ kalloc(void)
 
 
 
-The `write_page()` is used to write the victim frame content in the disk . The file name is chosen as `pid_va` where pid is process(whose page is chosen as victim) id and va is the virtual address corresponding to the evicted page. The `wirte_page()` function uses `open_file()` (its exactly same as open system call) to open/create files and `filewrite()` (its exactly same as write system call) to write the content in the given file.
+The `write_page()` is used to write the victim frame content in the disk . The file name is chosen as *PID_VA* where PID if of the process whose page is chosen as victim and VA is the virtual address corresponding to the evicted page. The `wirte_page()` function uses `open_file()` (its exactly same as open system call) to open/create files and `filewrite()` (its exactly same as write system call) to write the content in the given file.
 
 #### Task 3: swapping in mechanism:
 
@@ -464,4 +464,4 @@ Every child process first iterates 20 times setting the byte values, after which
 
 
 
-![](partb.png)
+![](partb2.png)
