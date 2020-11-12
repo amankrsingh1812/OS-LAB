@@ -53,7 +53,7 @@ The allocation of page and updation the page table is done in `allocSinglePg(...
 ---
 ## **Part B**: 
 
-Refer the patch files in `Patch/PartB/`
+Refer the patch files in `Patch/PartB/`. The main code for this part is in files `paging.h` and `paging.c`
 
 #### Task 1: kernel processes:
 
@@ -108,6 +108,7 @@ void create_kernel_process(const char *name, void (*entrypoint)()) {
 Upon return from the `entrypoint()` .The `exit()` function will terminate the process and thereby preventing it to return to `user mode` from `kernel mode` . The `create_kernel_process()` function is called in `forkret` (only when `forket` is called from `initprocess`) to create two `kernel processes` namely `swapoutprocess` and `swapinprocess` .
 
 ```c
+// proc.c
 void forkret(void) {
 	// ...
   if (first) {
@@ -123,6 +124,7 @@ void forkret(void) {
 Two new elements are added to the process structure to store swapping meta data. The variable `trapva` stores the virtual address where page fault has occurred for the given process. The variable `satisfied` is used as indication whether a swap out request has been satisfied for the given process.
 
 ```c
+// proc.h
 struct proc {
   ///...
   int satisfied;               // If zero, page request not satisifed
@@ -133,6 +135,7 @@ struct proc {
 The newly created kernel process `swapoutprocess` is responsible for swapping out of pages on demand.  `swappoutprocess` supports a request queue for the swapping requests which is created from the `struct swapqueue` .
 
 ```c
+// paging.h
 struct swapqueue{
   struct spinlock lock;
   char* qchan;
@@ -144,9 +147,10 @@ struct swapqueue{
 };
 ```
 
-An instance `soq` of the `struct swapqueue` is used as a request queue for the `swapoutprocess` . Any access to the `swapqueue` is protected by a `spinlock` . The `enqueue()` and `dequeue()` for the `swapqueue` are implemented as shown below:
+An instance `soq` of the `struct swapqueue` is used as a request queue for the `swapoutprocess` . Any access to the `swapqueue` is protected by a `spinlock` . The `enqueue()` and `dequeue()` for the `swapqueue` are also created.
 
 ```c
+// paging.c
 void enqueue(struct swapqueue* sq, struct proc* np); // insert process at rear of queue
 struct proc* dequeue(struct swapqueue* sq);					 // take out process from front of queue
 ```
@@ -154,6 +158,7 @@ struct proc* dequeue(struct swapqueue* sq);					 // take out process from front 
 The request to swap out a page is submitted by calling `submitToSwapIn()` function which adds the process structure pointer of the requesting process to the `siq` queue, wakes the `swapoutprocess` and makes the current (requesting) process to sleep until its `satisfied` bit is turned on ie suspends its from execution.  
 
 ```c
+// paging.c
 void submitToSwapOut(){
   struct proc* p = myproc();
   
@@ -173,6 +178,7 @@ void submitToSwapOut(){
 The `entrypoint` of `swapoutprocess` is `swapoutprocess()` which sleeps whenever the size of request queue is zero. Whenever there are requests for swap out the `swapoutprocess` process wakes up and iterates over the requests treating them one by one and upon freeing the required number of physical pages the `swapoutproces` wakes all the requesting processes. The function `chooseVictimAndEvict()` is used to select victim frame using pseudo `LRU` replacement policy. The `swapoutprocess()` contains check on number of files created and yields the processor when the number reaches the upper bound so that in the mean time some files can be deleted by `swapinprocess` . It also handles the edge case when no victim frame could be evicted by temporarily yielding the processor.
 
 ```c
+// paging.c
 void swapoutprocess(){
   sleep(soq.qchan, &ptable.lock);
 
@@ -200,6 +206,7 @@ In the function `chooseVictimAndEvict()` we iterate over address space of all th
 **Pseudo LRU** replacement policy is used for selecting the victim frame. For each page table entry the accessed bit and dirty bit are concatenated to form an integer, the victim frame is selected based on the integer and preference order is as 0(00) < 1(01) < 2(10) < 3(11). Once a victim frame is chosen, the present bit is turned off for the corresponding page table entry and the corresponding process is made to sleep until writing on disk is complete. The 7<sup>th</sup> bit(initially unused) of the page table entry is also turned on which indicates that the required frame has been swapped out. Upon successful eviction of victim frame, value 1 is returned else 0 is returned.
 
 ```c
+// paging.c
 int chooseVictimAndEvict(int pid){
   struct proc* p;
   struct victim victims[4]={{0,0,0},{0,0,0},{0,0,0},{0,0,0}};
@@ -234,6 +241,7 @@ int chooseVictimAndEvict(int pid){
 The `kalloc()` function which is used to allocate one 4096-byte page of physical memory is changed to meet demand swapping . The function `submitToSwapOut()` is called inside a loop until a free page of physical memory is obtained.
 
 ```c
+// kalloc.c
 char* kalloc(void) {
   // ...
   while(!r) {
@@ -264,6 +272,7 @@ char* kalloc(void) {
 - `read_page()` reads the file corresponding to swapped out page of the respective process's PTE into the buffer `mem`. It first computes the filename and then calls the inbuilt function `fileread()` to read the contents of the file.
 
 ```c
+// paging.c
 void swapinprocess(){
   sleep(siq.qchan, &ptable.lock);
   while(1){
@@ -291,6 +300,7 @@ void swapinprocess(){
 Whenever a `page fault` occurs, we are checking if it has occurred due to an earlier swapping out of its page, and then we are calling the function `submitToSwapIn()`. It enqueues the current process in the Swapin queue, wakes up the Swapin process and finally suspends the current process. While doing this, appropriate locks are acquired and released.
 
 ```c
+// paging.c
 void submitToSwapIn(){
   struct proc* p = myproc();
   cprintf("submitToSwapIn %d\n",p->trapva);
@@ -311,6 +321,7 @@ When the process exits, we make sure that the Swapout pages written on the disk 
 **deletePageFiles** - It iterates through the files list of the `swapoutprocess`, and if the file is not already deleted, it deletes it. While doing this, appropriate locks are acquired and released.
 
 ```c
+// paging.c
 void deletePageFiles(){
   acquire(&ptable.lock);
   struct proc *p;
