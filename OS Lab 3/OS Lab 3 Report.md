@@ -1,4 +1,4 @@
-### Part A: Lazy Allocation
+### **Part A: Lazy Allocation**
 
 We started Part A with the patch provided which just tricks the process into believing that it has the memory which it requested by updating the value of `proc->sz` (the size of the process) while not actually allocating any physical memory by commenting the call to `groproc(n)` in `sysproc.c`.
 
@@ -47,7 +47,6 @@ The allocation of page and updation the page table is done in `allocSinglePg(...
 
 #### Sample output 
 <img src="parta2.png" height="150px"/>
-
 
 
 ---
@@ -118,6 +117,9 @@ void forkret(void) {
   }
 }
 ```
+
+<div style="page-break-after: always;"></div>
+
 ---
 #### Task 2: swapping out mechanism:
 
@@ -256,9 +258,9 @@ char* kalloc(void) {
 
 `write_page()` is used to write the victim frame content in the disk . The file name is chosen as *PID_VA.swp* where PID is of the process whose page is chosen as victim and VA is higher 20 bits of virtual address corresponding to the evicted page.  `write_page()` uses `open_file()` to open/create files and `filewrite()`  to write the content in the given file.
 
+<div style="page-break-after: always;"></div>
+
 ---
-
-
 #### Task 3: Swapping in Mechanism:
 
 **Swap-in Process** -  
@@ -363,6 +365,6 @@ Every child process first iterates 20 times setting the byte values, after which
 
 *Note:* Each child is iterating 20 times in place of 10 times (as mentioned in assignment), because iterating for 10 times, doesn't cause the complete main memory to be used up. This main memory limit, set with `PHYSTOP` cannot be set below `4MB` (due to initialisation requirements of the kernel), at which we need to iterate for more than 10 times for each child process to actually test the correctness of our swapper.
 
-### Sample Output :
+### **Sample Output :**
 
 <img src="partb4.png" height="650px"/>
