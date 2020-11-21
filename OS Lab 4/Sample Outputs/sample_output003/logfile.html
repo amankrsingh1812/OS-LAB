@@ -1,0 +1,55 @@
+<title>Vdbench sample_output003/logfile.html</title><pre>
+Copyright (c) 2000, 2018, Oracle and/or its affiliates. All rights reserved.
+Vdbench distribution: vdbench50407
+
+19:22:13.812 input argument scanned: '-fsample_test.conf'
+19:22:13.814 input argument scanned: '-osample_output+'
+19:22:13.816 java.vendor                   Private Build
+19:22:13.816 java.home                     /usr/lib/jvm/java-8-openjdk-amd64/jre
+19:22:13.816 java.vm.specification.version 1.8
+19:22:13.816 java.vm.version               25.275-b01
+19:22:13.816 java.vm.vendor                Private Build
+19:22:13.816 java.specification.version    1.8
+19:22:13.816 java.class.version            52.0
+19:22:13.816 user.name                     root
+19:22:13.816 user.dir                      /home/yogesh
+19:22:13.816 java.io.tmpdir                /tmp
+19:22:13.816 java.class.path               ./:./classes:./vdbench.jar
+19:22:13.816 os.name                       Linux
+19:22:13.816 os.arch                       amd64
+19:22:13.817 os.version                    5.4.0-52-generic
+19:22:13.817 sun.arch.data.model           64
+19:22:13.821 Flushing all reports
+19:22:14.100 Starting slave: /home/yogesh/vdbench SlaveJvm -m localhost -n localhost-10-201121-19.22.13.725 -l localhost-0 -p 5570   
+19:22:14.538 Slave localhost-0 (pid   9820) connected to master 9799
+19:22:14.568 All slaves are now connected
+19:22:14.722 sd=sd1,lun=/dev/sda5 lun size: 16,639,852,544 bytes; 15.4971 GB (1024**3); 16.6399 GB (1000**3)
+
+Link to Run Definitions:         <A HREF="#_1607460018">run1 For loops: None</A>
+
+19:22:14.823 Flushing all reports
+19:22:14.895 Waiting for synchronization of all slaves
+19:22:15.400 Synchronization of all slaves complete
+
+<a name="_1607460018"></a><i><b>19:22:16.005 Starting RD=run1; I/O rate: 100; elapsed=10; For loops: None</b></i>
+
+
+Nov 21, 2020    interval        i/o   MB/sec   bytes   read     resp     read    write     read    write     resp  queue  cpu%  cpu%
+                               rate  1024**2     i/o    pct     time     resp     resp      max      max   stddev  depth sys+u   sys
+19:22:17.102           1      119.0     0.46    4096 100.00    0.876    0.876    0.000     5.41     0.00    0.832    0.1  19.9   3.3
+19:22:18.045           2       87.0     0.34    4096 100.00    1.042    1.042    0.000     5.71     0.00    0.995    0.1  11.0   2.6
+19:22:19.018           3       88.0     0.34    4096 100.00    0.922    0.922    0.000     3.63     0.00    0.876    0.1   7.9   1.1
+19:22:20.014           4      109.0     0.43    4096 100.00    0.829    0.829    0.000     4.84     0.00    0.745    0.1   7.7   2.1
+19:22:21.009           5      107.0     0.42    4096 100.00    0.857    0.857    0.000     6.62     0.00    0.872    0.1   8.2   2.1
+19:22:22.013           6       97.0     0.38    4096 100.00    0.708    0.708    0.000     4.15     0.00    0.703    0.1   5.7   1.0
+19:22:23.022           7       98.0     0.38    4096 100.00    0.670    0.670    0.000     3.46     0.00    0.667    0.1   7.1   1.5
+19:22:24.013           8      100.0     0.39    4096 100.00    0.783    0.783    0.000     3.91     0.00    0.700    0.1   6.3   1.6
+19:22:25.005           9       81.0     0.32    4096 100.00    0.712    0.712    0.000     2.67     0.00    0.571    0.1   4.2   0.5
+19:22:26.029          10       97.0     0.38    4096 100.00    1.018    1.018    0.000     7.92     0.00    1.243    0.1   7.1   1.5
+19:22:26.037    avg_2-10       96.0     0.38    4096 100.00    0.837    0.837    0.000     7.92     0.00    0.847    0.1   7.2   1.5
+19:22:26.292 Flushing all reports
+19:22:26.293 Java Heap in MB. max:  455.500; current:   61.500; used:   28.788; free:   32.712
+19:22:26.334 Ending Reporter
+19:22:26.851 Vdbench execution completed successfully. Output directory: /home/yogesh/sample_output003 
+
+19:22:27.899 Java Heap in MB. max:  455.500; current:   77.500; used:   17.774; free:   59.726
