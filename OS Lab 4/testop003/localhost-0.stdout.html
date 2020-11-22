@@ -1,0 +1,101 @@
+<title>Vdbench testop003/localhost-0.stdout.html</title><pre>
+stdout/stderr for slave=localhost-0
+
+13:33:34.451 13:33:34.444 SlaveJvm execution parameter:  '-m localhost'
+13:33:34.454 13:33:34.446 SlaveJvm execution parameter:  '-n localhost-10-201122-13.33.33.709'
+13:33:34.454 13:33:34.446 SlaveJvm execution parameter:  '-l localhost-0'
+13:33:34.455 13:33:34.446 SlaveJvm execution parameter:  '-p 5570'
+13:33:34.455 13:33:34.446 SlaveJvm positional parameter: 'SlaveJvm'
+13:33:34.628 13:33:34.627 successfully connected to master localhost
+13:33:34.628 13:33:34.628 Connection to localhost using port 5570 successful
+13:33:34.929 13:33:34.928 ticks_per_second: 100
+13:33:34.970 13:33:34.970 execute(): ls -l /mnt/btrfs_compress
+13:33:34.987 13:33:34.987 Configuration interpretation took 0.06 seconds
+
+Link to Run Definitions:         <A HREF="#_914424520">format_for_rd1 For loops: None</A>
+                                 <A HREF="#_110718392">rd1 For loops: None</A>
+
+13:33:35.244 13:33:35.244 File '/var/log/messages' does not exist. Monitoring bypassed
+13:33:35.245 13:33:35.245 File '/var/log/messages.1' does not exist. Monitoring bypassed
+13:33:35.245 13:33:35.245 Beginning of run setup
+13:33:35.246 13:33:35.245 **********************
+13:33:35.246 
+13:33:35.246 
+13:33:35.326 13:33:35.326 Deleting old file structure.
+13:33:35.328 13:33:35.328 Starting initializeFileAnchor for rd=format_for_rd1 For loops: None anchor=fsd1
+13:33:35.332 13:33:35.331 Completed the creation of the directory list for /mnt/btrfs_compress: 6 directories.
+13:33:35.333 13:33:35.332 Generated 8 file names; total anchor size: 128m (134,217,728)
+13:33:35.334 13:33:35.333 Writing control file for anchor=/mnt/btrfs_compress at start of run.
+13:33:35.358 13:33:35.355 Completed control file for anchor=/mnt/btrfs_compress at start of run.  dirs: 6/0 files: 8/0 sizes: 128m/0/0/0
+13:33:35.364 13:33:35.363 Completed initializeFileAnchor for fsd1: 0.04
+13:33:35.402 13:33:35.402 Started 8 threads for fwd=format,fsd=fsd1
+13:33:35.403 13:33:35.402 Started 8 FwgThreads for rd=format_for_rd1 For loops: None
+13:33:35.403 13:33:35.402 Waiting for task synchronization
+13:33:35.405 13:33:35.402 task_wait_start_complete: FwgThread OpFormat /mnt/btrfs_compress 1
+13:33:35.614 13:33:35.612 Requesting full garbage collection
+13:33:35.615 13:33:35.613 GcTracker: cum:   1 intv:  1 ms:      11 mss:  0.00% Heap_MB max:   911 curr:   123 used:    18 free:   105 
+13:33:35.641 13:33:35.640 GcTracker: cum:   3 intv:  2 ms:      24 mss:  0.00% Heap_MB max:   911 curr:   123 used:    16 free:   107 
+13:33:35.641 13:33:35.640 task_wait_start_complete() end
+
+<a name="_914424520"></a><i><b>13:33:36.007 Starting RD=format_for_rd1</b></i>
+
+13:33:36.009 13:33:36.009 task_run_all(): 9 tasks
+13:33:36.407 13:33:36.406 Message to master: anchor=/mnt/btrfs_compress mkdir complete.
+13:33:36.570 13:33:36.569 Message to master: anchor=/mnt/btrfs_compress create complete.
+13:33:36.695 13:33:36.695 
+13:33:36.698 13:33:36.697 Miscellaneous statistics:
+13:33:36.706 13:33:36.705 FILE_CREATES        Files created:                                    8
+13:33:36.706 13:33:36.706 DIRECTORY_CREATES   Directories created:                              6
+13:33:36.718 13:33:36.709 WRITE_OPENS         Files opened for write activity:                  8
+13:33:36.720 13:33:36.720 DIR_BUSY_MKDIR      Directory busy (mkdir):                           1
+13:33:36.721 13:33:36.721 DIR_EXISTS          Directory may not exist (yet):                    5
+13:33:36.734 13:33:36.725 FILE_CLOSES         Close requests:                                   8
+13:33:36.742 13:33:36.741 
+13:33:36.751 13:33:36.750 Java Heap in MB. max:  910.500; current:  123.000; used:   22.788; free:  100.212
+13:33:36.752 13:33:36.752 Maximum native memory allocation:    1,048,576; Current allocation:    1,048,576
+13:33:38.012 13:33:38.011 Writing control file for anchor=/mnt/btrfs_compress at end of run.
+13:33:38.095 13:33:38.078 Completed control file for anchor=/mnt/btrfs_compress at end of run.  dirs: 6/6 files: 8/8 sizes: 128m/128m/8/128m
+13:33:38.095 13:33:38.079 End of run
+13:33:38.095 13:33:38.079 **********
+13:33:38.095 
+13:33:38.095 
+13:33:38.376 13:33:38.375 Beginning of run setup
+13:33:38.376 13:33:38.375 **********************
+13:33:38.376 
+13:33:38.376 
+13:33:38.522 13:33:38.521 Starting initializeFileAnchor for rd=rd1 For loops: None anchor=fsd1
+13:33:38.523 13:33:38.523 Reading control file for anchor=/mnt/btrfs_compress
+13:33:38.525 13:33:38.525 Completed reading control file.
+13:33:38.527 13:33:38.527 Completed the creation of the directory list for /mnt/btrfs_compress: 6 directories.
+13:33:38.527 13:33:38.527 Generated 8 file names; total anchor size: 128m (134,217,728)
+13:33:38.527 13:33:38.527 No deletes and creates. Control file not cleared.
+13:33:38.528 13:33:38.528 During anchor creation for anchor=/mnt/btrfs_compress there were 6 directories and 8 files
+13:33:38.529 13:33:38.528 Completed initializeFileAnchor for fsd1: 0.01
+13:33:38.542 13:33:38.538 Started 2 threads for fwd=fwd1,fsd=fsd1,operation=read
+13:33:38.543 13:33:38.542 Started 2 FwgThreads for rd=rd1 For loops: None
+13:33:38.544 13:33:38.542 Waiting for task synchronization
+13:33:38.544 13:33:38.542 task_wait_start_complete: FwgThread read /mnt/btrfs_compress 1
+13:33:38.747 13:33:38.747 Requesting full garbage collection
+13:33:38.748 13:33:38.748 GcTracker: cum:   3 intv:  0 ms:       0 mss:  0.00% Heap_MB max:   911 curr:   123 used:    26 free:    97 
+13:33:38.771 13:33:38.770 GcTracker: cum:   5 intv:  2 ms:      20 mss:  0.00% Heap_MB max:   911 curr:   123 used:    16 free:   107 
+13:33:38.771 13:33:38.770 task_wait_start_complete() end
+
+<a name="_110718392"></a><i><b>13:33:39.003 Starting RD=rd1; elapsed=10; fwdrate=100; For loops: None</b></i>
+
+13:33:39.007 13:33:39.006 task_run_all(): 3 tasks
+13:33:49.373 13:33:49.368 
+13:33:49.373 13:33:49.369 Miscellaneous statistics:
+13:33:49.373 13:33:49.369 READ_OPENS          Files opened for read activity:                  17
+13:33:49.373 13:33:49.369 FILE_BUSY           File busy:                                        4
+13:33:49.373 13:33:49.369 FILE_CLOSES         Close requests:                                  17
+13:33:49.373 13:33:49.369 
+13:33:49.373 13:33:49.369 Java Heap in MB. max:  910.500; current:  123.000; used:   20.097; free:  102.903
+13:33:49.373 13:33:49.369 Maximum native memory allocation:    1,572,864; Current allocation:      524,288
+13:33:49.383 13:33:49.381 Writing control file for anchor=/mnt/btrfs_compress at end of run.
+13:33:49.422 13:33:49.421 Completed control file for anchor=/mnt/btrfs_compress at end of run.  dirs: 6/6 files: 8/8 sizes: 128m/128m/7/112m
+13:33:49.423 13:33:49.423 End of run
+13:33:49.430 13:33:49.423 **********
+13:33:49.430 
+13:33:49.430 
+13:33:50.366 13:33:50.365 Master is requesting slave shutdown
+13:33:50.366 13:33:50.366 Java Heap in MB. max:  910.500; current:  123.000; used:   21.213; free:  101.787

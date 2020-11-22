@@ -1,0 +1,94 @@
+<title>Vdbench testop003/logfile.html</title><pre>
+Copyright (c) 2000, 2018, Oracle and/or its affiliates. All rights reserved.
+Vdbench distribution: vdbench50407
+
+13:33:33.781 input argument scanned: '-ftest.conf'
+13:33:33.782 input argument scanned: '-otestop+'
+13:33:33.787 java.vendor                   Private Build
+13:33:33.787 java.home                     /usr/lib/jvm/java-8-openjdk-amd64/jre
+13:33:33.788 java.vm.specification.version 1.8
+13:33:33.788 java.vm.version               25.275-b01
+13:33:33.788 java.vm.vendor                Private Build
+13:33:33.788 java.specification.version    1.8
+13:33:33.788 java.class.version            52.0
+13:33:33.788 user.name                     root
+13:33:33.788 user.dir                      /home/yogesh/vdbench/vdbench
+13:33:33.788 java.io.tmpdir                /tmp
+13:33:33.789 java.class.path               ./:./classes:./vdbench.jar
+13:33:33.789 os.name                       Linux
+13:33:33.790 os.arch                       amd64
+13:33:33.790 os.version                    5.4.0-52-generic
+13:33:33.790 sun.arch.data.model           64
+13:33:33.795 Flushing all reports
+13:33:33.903 Creating anchor for /mnt/btrfs_compress,fsd=fsd1
+13:33:33.957 rd1 fsd to format: fsd1
+13:33:33.958 rd1 format on host: localhost
+13:33:33.961 Anchor size: anchor=/mnt/btrfs_compress: dirs:            6; files:            8; bytes:   128.000m (134,217,728)
+13:33:34.185 Starting slave: /home/yogesh/vdbench/vdbench/vdbench SlaveJvm -m localhost -n localhost-10-201122-13.33.33.709 -l localhost-0 -p 5570   
+13:33:34.671 Slave localhost-0 (pid   3933) connected to master 3907
+13:33:34.814 All slaves are now connected
+
+Link to Run Definitions:         <A HREF="#_914424520">format_for_rd1 For loops: None</A>
+                                 <A HREF="#_110718392">rd1 For loops: None</A>
+
+13:33:35.124 Flushing all reports
+13:33:35.125 slv=localhost-0 fwd=format fsd=fsd1 anchor=/mnt/btrfs_compress threads= 8 skew= 0.00 operation=read 
+13:33:35.170 Waiting for synchronization of all slaves
+13:33:35.686 Synchronization of all slaves complete
+
+<a name="_914424520"></a><i><b>13:33:36.007 Starting RD=format_for_rd1</b></i>
+
+13:33:36.408 localhost-0: anchor=/mnt/btrfs_compress mkdir complete.
+13:33:36.571 localhost-0: anchor=/mnt/btrfs_compress create complete.
+Nov 22, 2020 ..Interval.. .ReqstdOps... ...cpu%...  read ....read..... ....write.... ..mb/sec... mb/sec .xfer.. ...mkdir.... ...rmdir.... ...create... ....open.... ...close.... ...delete...
+                            rate   resp total  sys   pct   rate   resp   rate   resp  read write  total    size  rate   resp  rate   resp  rate   resp  rate   resp  rate   resp  rate   resp
+13:33:37.357            1 1024.0  0.750  48.6 27.9   0.0    0.0  0.000 1024.0  0.750  0.00 128.0 128.00  131072   6.0  0.511   0.0  0.000   8.0 137.17   8.0  0.823   8.0  0.062   0.0  0.000
+13:33:37.740      avg_2-1    NaN  0.000   NaN  NaN   0.0    NaN  0.000    NaN  0.000   NaN   NaN    NaN       0   NaN  0.000   NaN  0.000   NaN  0.000   NaN  0.000   NaN  0.000   NaN  0.000
+13:33:37.761      std_2-1                                                                                                                                                                    
+13:33:37.767      max_2-1                                                                                                                                                                    
+13:33:38.150 
+13:33:38.150 Miscellaneous statistics:
+13:33:38.150 (These statistics do not include activity between the last reported interval and shutdown.)
+13:33:38.151 FILE_CREATES        Files created:                                    8          8/sec
+13:33:38.151 DIRECTORY_CREATES   Directories created:                              6          6/sec
+13:33:38.151 WRITE_OPENS         Files opened for write activity:                  8          8/sec
+13:33:38.152 DIR_BUSY_MKDIR      Directory busy (mkdir):                           1          1/sec
+13:33:38.152 DIR_EXISTS          Directory may not exist (yet):                    5          5/sec
+13:33:38.152 FILE_CLOSES         Close requests:                                   8          8/sec
+13:33:38.152 
+13:33:38.152 Flushing all reports
+13:33:38.153 Java Heap in MB. max:  455.500; current:   77.500; used:   19.443; free:   58.057
+13:33:38.306 slv=localhost-0 fwd=fwd1 fsd=fsd1 anchor=/mnt/btrfs_compress threads= 2 skew= 0.00 operation=read 
+13:33:38.357 Waiting for synchronization of all slaves
+13:33:38.784 Synchronization of all slaves complete
+
+<a name="_110718392"></a><i><b>13:33:39.003 Starting RD=rd1; elapsed=10; fwdrate=100; For loops: None</b></i>
+
+Nov 22, 2020 ..Interval.. .ReqstdOps... ...cpu%...  read ....read..... ....write.... ..mb/sec... mb/sec .xfer.. ...mkdir.... ...rmdir.... ...create... ....open.... ...close.... ...delete...
+                            rate   resp total  sys   pct   rate   resp   rate   resp  read write  total    size  rate   resp  rate   resp  rate   resp  rate   resp  rate   resp  rate   resp
+13:33:40.035            1  112.0  0.141  52.8 39.2 100.0  112.0  0.141    0.0  0.000 28.00  0.00  28.00  262144   0.0  0.000   0.0  0.000   0.0  0.000   2.0  0.204   0.0  0.000   0.0  0.000
+13:33:41.021            2  104.0  0.118   9.7 1.53 100.0  104.0  0.118    0.0  0.000 26.00  0.00  26.00  262144   0.0  0.000   0.0  0.000   0.0  0.000   2.0  0.259   2.0  0.029   0.0  0.000
+13:33:42.028            3  105.0  0.213  19.4 4.48 100.0  105.0  0.213    0.0  0.000 26.25  0.00  26.25  262144   0.0  0.000   0.0  0.000   0.0  0.000   2.0  0.185   2.0  0.040   0.0  0.000
+13:33:43.014            4  105.0  0.128   7.1 1.02 100.0  105.0  0.128    0.0  0.000 26.25  0.00  26.25  262144   0.0  0.000   0.0  0.000   0.0  0.000   2.0  0.244   2.0  0.040   0.0  0.000
+13:33:44.051            5   98.0  0.111  50.5 38.5 100.0   98.0  0.111    0.0  0.000 24.50  0.00  24.50  262144   0.0  0.000   0.0  0.000   0.0  0.000   1.0  0.164   1.0  0.032   0.0  0.000
+13:33:45.018            6   95.0  0.095  99.0 92.9 100.0   95.0  0.095    0.0  0.000 23.75  0.00  23.75  262144   0.0  0.000   0.0  0.000   0.0  0.000   1.0  0.180   1.0  0.034   0.0  0.000
+13:33:46.029            7  104.0  0.081  28.2 17.8 100.0  104.0  0.081    0.0  0.000 26.00  0.00  26.00  262144   0.0  0.000   0.0  0.000   0.0  0.000   2.0  2.888   2.0  0.042   0.0  0.000
+13:33:47.010            8  102.0  0.083   5.8 1.06 100.0  102.0  0.083    0.0  0.000 25.50  0.00  25.50  262144   0.0  0.000   0.0  0.000   0.0  0.000   2.0  0.189   2.0  0.040   0.0  0.000
+13:33:48.011            9   84.0  0.105   9.5 2.49 100.0   84.0  0.105    0.0  0.000 21.00  0.00  21.00  262144   0.0  0.000   0.0  0.000   0.0  0.000   1.0  0.570   1.0  0.033   0.0  0.000
+13:33:49.030           10   95.0  0.114   6.5 1.01 100.0   95.0  0.114    0.0  0.000 23.75  0.00  23.75  262144   0.0  0.000   0.0  0.000   0.0  0.000   2.0  0.203   2.0  0.030   0.0  0.000
+13:33:49.056     avg_2-10   99.1  0.117  26.4 18.0 100.0   99.1  0.117    0.0  0.000 24.78  0.00  24.78  262144   0.0  0.000   0.0  0.000   0.0  0.000   1.7  0.590   1.7  0.036   0.0  0.000
+13:33:49.059     std_2-10    7.0  0.384                     7.0  0.384                                                                                   0.5  1.367   0.5  0.006             
+13:33:49.090     max_2-10  105.0 10.553                   105.0 10.553                                                                                   2.0  5.517   2.0  0.047             
+13:33:49.483 
+13:33:49.483 Miscellaneous statistics:
+13:33:49.484 (These statistics do not include activity between the last reported interval and shutdown.)
+13:33:49.484 READ_OPENS          Files opened for read activity:                  17          1/sec
+13:33:49.485 FILE_BUSY           File busy:                                        4          0/sec
+13:33:49.487 FILE_CLOSES         Close requests:                                  15          1/sec
+13:33:49.488 
+13:33:49.488 Flushing all reports
+13:33:49.491 Java Heap in MB. max:  455.500; current:   77.500; used:   40.936; free:   36.564
+13:33:49.647 Ending Reporter
+13:33:50.465 Vdbench execution completed successfully. Output directory: /home/yogesh/vdbench/vdbench/testop003 
+
+13:33:51.431 Java Heap in MB. max:  455.500; current:   77.500; used:   16.594; free:   60.906
