@@ -1,20 +1,27 @@
+**Important Note -** Imitation of the following experiments requires an environment with *JRE* support and preferably the latest updated and upgraded kernel support for *ZFS* installation.
+
 ## Feature 1
-The first feature that we have chosen is `compression`
+
+The first feature that we have chosen is `compression`. It compresses your files on the fly and therefore lets you store more data using limited storage.
 
 And we have chosen 2 instances of `ZFS` file system for evaluation:
 - *with* Compression
 - *without* Compression 
 
-### Implementation of compression
-In ZFS compression is implemented by the ... algorithm
+### Implementation of Compression
+In ZFS uses the `LZ4` compression algorithm.
 
-### Benefits of compression (Yahan output ko analyse karna hai. Heading change kardena is section ka)
+LZ4 is lossless compression algorithm, providing compression speed greater than 500 MB/s per core  (>0.15 Bytes/cycle).  It features an extremely fast decoder, with speed in multiple GB/s per core (~1 Byte/cycle).      
 
-**Note -** To run the testing code, use the bash script `test.sh`. This will automatically install the filesystems with the appropriate parameters, run `vdbench` on them, and also provide the respective outputs for each instance
+The LZ4 algorithm represents the data as a series of sequences. Each  sequence begins with a one-byte token that is broken into two 4-bit  fields. The first field represents the number of literal bytes that are  to be copied to the output. The second field represents the number of  bytes to copy from the already decoded output buffer (with 0  representing the minimum match length of 4 bytes). A value of 15 in  either of the bitfields indicates that the length is larger and there is an extra byte of data that is to be added to the length. A value of 255 in these extra bytes indicates that yet another byte to be added. Hence arbitrary lengths are represented by a series of extra bytes containing the value 255. The string of literals comes after the token and any  extra bytes needed to indicate string length. This is followed by an  offset that indicates how far back in the output buffer to begin  copying. The extra bytes (if any) of the match-length come at the end of the sequence.
+
+### Analysing the Benefits of Compression
+
+**Note -** To run the testing code, use the bash script `test.sh`. This will automatically install the file systems with the appropriate parameters, run `vdbench` on them, and also provide the respective outputs for each instance
 
 To quantify the benefits we have used the following workload - 
 ```
-Code of the workload
+Code of the workload <test.conf ?>
 ```
 The workload does the following -
 1. Turn the compression ON. 
@@ -24,29 +31,30 @@ The workload does the following -
 5. Read the files from the disk  
 6. Delete the directory structure
 
-Then for same workload is run again, but with compression ON
+Then for same workload is run again, but with compression ON.
 
-The following benefits of compression were observed in `ZFS` - 
-- The space utilised in less. This can be seen by this metric ...
+<u>The following benefits of compression were observed in `ZFS`</u> - 
+
+- The space utilised for the same amount of information is less. This can be seen by this metric ...
 
 <!-- Insert screenshot here -->
 
-- Aur koi benefit hai compression ka??
+- Space occupied is inversely proportional to both the cost of storage as well as the time required to transfer such files. Hence compression leads to lower costs and faster transfers.
 
 
-### Disadvantages of compression
+### Disadvantages of Compression
 
 - *More CPU usage* - Higher CPU usage was observed during reading and writing with compression ON. This is because 
-    - While writing, the data has to be compressed by the ... compression algorithm. This requires more computation power than write without compression
-    - While Reading, the data has to be uncompressed. This requires computation power than read without compression
+    - While writing, the data has to be compressed by the LZ4 compression algorithm. This requires more computation power than write without compression.
+    - While Reading, the data has to be uncompressed. This requires computation power than read without compression.
     This can be seen by this metric ... 
 
-Insert screenshot here
+<!-- Insert screenshot here -->
 
 
 - *More Time* - It takes more time to read and write with compression ON. This is because 
-    - While writing, the data has to be compressed by the ... compression algorithm. Some additional time gets utilized for running the algorithm
-    - While Reading, the data has to be uncompressed. Some additional time gets utilized for running the algorithm 
+    - While writing, the data has to be compressed by the LZ4 compression algorithm. Some additional time gets utilised for running the algorithm.
+    - While reading, the data has to be uncompressed. Some additional time gets utilised for running the algorithm.
     This can be seen by this metric ... 
 
 <!-- Insert screenshot here -->
