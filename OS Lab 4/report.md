@@ -60,6 +60,15 @@ rd=rd2,fwd=fwd2,fwdrate=100,format=yes,elapsed=10,interval=1	#Testing on virtual
 
 <!-- Insert screenshot here -->
 
+
+
+|                   | Disk Usage | Read Response Time | Read CPU Usage | Write Response Time | Write CPU usage |
+| ----------------- | ---------- | ------------------ | -------------- | ------------------- | --------------- |
+| Compression - ON  | 26 MB      | 0.576 ms           | 49.3%          | 10.616 ms           | 75.8%           |
+| Compression - OFF | 65 MB      | 0.261 ms           | 13.5%          | 9.037 ms            | 32.6%           |
+
+
+
 - Space occupied is inversely proportional to both the cost of storage as well as the time required to transfer such files. Hence compression leads to lower costs and faster transfers.
 
 
