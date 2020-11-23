@@ -101,11 +101,12 @@ rd=read_uncompressed,fwd=fwd2_2,fwdrate=100,format=no,elapsed=10,interval=1
 | Compression - ON  | 26 MB      | 0.576 ms           | 49.3%          | 10.616 ms           | 75.8%           |
 | Compression - OFF | 65 MB      | 0.261 ms           | 13.5%          | 9.037 ms            | 32.6%           |
 
+<img src="c_du.png" width="600px" />
 
-![](c_du.png)
-![](c_rt.png)
-![](c_cu.png)
-
+<p float="left">
+<img src="c_rt.png" width="600px" />
+<img src="c_cu.png" width="600px" />
+</p>
 
 
 **Important Note -** Imitation of the following experiments requires an environment with *JRE* support and preferably the latest updated and upgraded kernel support for *ZFS* installation.
@@ -204,5 +205,8 @@ rd=read_unencrypted,fwd=fwd2_2,fwdrate=100,format=no,elapsed=10,interval=1
 | Encryption - ON  | 0.616 ms           | 40.2 %         | 17.522 ms           | 79.2 %          |
 | Encryption - OFF | 0.228 ms           | 8.8 %          | 8.958 ms            | 27.9 %          |
 
-![](e_rt.png)
-![](e_cu.png)
+<p float="left">
+<img src="e_rt.png" width="600px" />
+<img src="e_cu.png" width="600px" />
+</p>
+
