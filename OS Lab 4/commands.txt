@@ -25,3 +25,6 @@ zpool create test ~/test.img
 echo "12345678" | sudo zfs create -o encryption=on -o keyformat=passphrase test/encrypted
 
 // use test/encrypted in anchor in config file
+
+sudo add-apt-repository ppa:jonathonf/zfs
+sudo apt-get update
