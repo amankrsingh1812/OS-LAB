@@ -63,9 +63,36 @@ rd=read_uncompressed,fwd=fwd2_2,fwdrate=100,format=no,elapsed=10,interval=1
 ```
 <u>The following benefits of compression were observed in `ZFS`</u> - 
 
-- The space utilised for the same amount of information is less. This can be seen by disk utilization matrix.
+- The space utilised for the same amount of information is less. This can be seen by `Disk Usage` column in table and the terminal output below.
 
-<!-- Insert screenshot here -->
+- Space occupied is inversely proportional to the cost of storage. Hence, compression leads to lower costs of storage.
+
+- Space occupied is inversely proportional to the file transfer time. Hence, compression leads to faster file transfers.
+
+  
+
+  <img src="./Compression_Output.png">
+
+  
+
+
+### Disadvantages of Compression
+
+- *More CPU usage* - Higher CPU usage was observed during reading and writing with compression ON. This is because 
+    - While writing, the data has to be compressed by the LZ4 compression algorithm. This requires more computation power than write without compression.
+    - While reading, the data has to be uncompressed. This requires more computation power than read without compression.
+    
+    These effects can be observed in `Read CPU Usage` and `Write CPU usage` in table below.
+
+
+
+- *More Time* - It takes more time to read and write with compression ON. This is because 
+
+    - While writing, the data has to be compressed by the LZ4 compression algorithm. Some additional time gets utilised for running the algorithm.
+    - While reading, the data has to be uncompressed. Some additional time gets utilised for running the algorithm.
+
+    These  effects can be observed in `Read Response Time` and `Write Response Time` in table below.
+
 
 
 
@@ -76,25 +103,7 @@ rd=read_uncompressed,fwd=fwd2_2,fwdrate=100,format=no,elapsed=10,interval=1
 
 
 
-- Space occupied is inversely proportional to both the cost of storage as well as the time required to transfer such files. Hence compression leads to lower costs and faster transfers.
 
-
-### Disadvantages of Compression
-
-- *More CPU usage* - Higher CPU usage was observed during reading and writing with compression ON. This is because 
-    - While writing, the data has to be compressed by the LZ4 compression algorithm. This requires more computation power than write without compression.
-    - While reading, the data has to be uncompressed. This requires computation power than read without compression.
-    This can be seen by this metric ... 
-
-<!-- Insert screenshot here -->
-
-
-- *More Time* - It takes more time to read and write with compression ON. This is because 
-    - While writing, the data has to be compressed by the LZ4 compression algorithm. Some additional time gets utilised for running the algorithm.
-    - While reading, the data has to be uncompressed. Some additional time gets utilised for running the algorithm.
-    This can be seen by this metric ... 
-
-<!-- Insert screenshot here -->
 
 **Important Note -** Imitation of the following experiments requires an environment with *JRE* support and preferably the latest updated and upgraded kernel support for *ZFS* installation.
 
@@ -162,31 +171,28 @@ rd=read_unencrypted,fwd=fwd2_2,fwdrate=100,format=no,elapsed=10,interval=1
 ```
 <u>The following benefits of encryption were observed in `ZFS`</u> - 
 
-- The space utilised for the same amount of information is less. This can be seen by this metric ...
-
-<!-- Insert screenshot here -->
-
-- Space occupied is inversely proportional to both the cost of storage as well as the time required to transfer such files. Hence compression leads to lower costs and faster transfers.
+- It provides the ability to prevent unauthorized users from accessing certain files  on networks or shared computers.
+- This happens without barring those users from accessing other files on the disk.
 
 
 ### Disadvantages of Encryption
 
-- *More CPU usage* - Higher CPU usage was observed during reading and writing with encryption ON. This is because 
-    - While writing, the data has to be encrypted by the AES-GCM encryption algorithm. This requires more computation power than write without encryption.
-    - While reading, the data has to be decrypted. This requires computation power than read without decryption.
-    This can be seen by this metric ... 
-
-<!-- Insert screenshot here -->
+- *More CPU usage* - Much higher CPU usage was observed during reading and writing with encryption ON. This is because 
+  
+    - While writing, the data has to be encrypted by the AES-GCM encryption algorithm. This requires much more computation power than write without encryption.
+    - While reading, the data has to be decrypted. This requires much more computation power than read without decryption.
+    
+    These effects can be observed in `Read CPU Usage` and `Write CPU usage` in table below.
+    
+    
 
 
 - *More Time* - It takes more time to read and write with encryption ON. This is because 
-    - While writing, the data has to be compressed by the AES-GCM encryption algorithm. Some additional time gets utilised for running the algorithm.
-    - While reading, the data has to be decrypted. Some additional time gets utilised for running the algorithm.
-    This can be seen by this metric ... 
-
-<!-- Insert screenshot here -->
-
-
+  
+    - While writing, the data has to be encrypted by the AES-GCM encryption algorithm. Some additional time gets utilised for running the computationally heavy algorithm.
+    - While reading, the data has to be decrypted. Some additional time gets utilised for running the decryption algorithm.
+    
+    These  effects can be observed in `Read Response Time` and `Write Response Time` in table below.
 
 
 
