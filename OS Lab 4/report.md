@@ -24,23 +24,39 @@ LZ4 is lossless compression algorithm, providing compression speed greater than 
 
 **Note -** To run the testing code, use the bash script `test.sh`. This will automatically install the file systems with the appropriate parameters, run `vdbench` on them, and also provide the respective outputs for each instance
 
+Given script was used to create two virtual disk images (one with compression enabled and one with disabled)
+
+```sh
+truncate -s 256M ~/zfs_compress.img
+truncate -s 256M ~/zfs_nocompress.img
+
+sudo zpool create zfs_compress ~/zfs_compress.img
+sudo zfs set compression=lz4 zfs_compress				#Compression algorithm used is lz4
+sudo zpool create zfs_nocompress ~/zfs_nocompress.img
+sudo zfs set compression=off zfs_nocompress				#Compression disabled
+```
+
 To quantify the benefits we have used the following workload - 
-```
-Code of the workload <test.conf ?>
-```
-The workload does the following -
-1. Turn the compression ON. 
-2. Create the directory structure with `depth=2` and `width=2` 
-3. Create 2 files into each directory.
-4. Write `8MB` of data in each file. 
-5. Read the files from the disk  
-6. Delete the directory structure
+```sh
+compratio=2.5
+fsd=fsd1,anchor=/zfs_compress,depth=2,width=2,files=2,size=8M		#Create the directory structure with depth=2 and width=2
+fsd=fsd2,anchor=/zfs_nocompress,depth=2,width=2,files=2,size=8M		#and Create 2 files(8 MB each) into each directory.
 
-Then for same workload is run again, but with compression ON.
+#For each virtual disks creates a disk read workload which read files from the disk in chunks of 256KB
 
+#Workload for compression enabled virtual disk
+fwd=fwd1,fsd=fsd1,operation=read,xfersize=256k,fileio=sequential,fileselect=random,threads=2
+
+#Workload for compression disabled virtual disk
+fwd=fwd2,fsd=fsd2,operation=read,xfersize=256k,fileio=sequential,fileselect=random,threads=2
+
+#Run each workload for 10 secs at rate of 100
+rd=rd1,fwd=fwd1,fwdrate=100,format=yes,elapsed=10,interval=1	#Testing on virtual disk images with compression enabled
+rd=rd2,fwd=fwd2,fwdrate=100,format=yes,elapsed=10,interval=1	#Testing on virtual disk images with compression disabled
+```
 <u>The following benefits of compression were observed in `ZFS`</u> - 
 
-- The space utilised for the same amount of information is less. This can be seen by this metric ...
+- The space utilised for the same amount of information is less. This can be seen by disk utilization matrix.
 
 <!-- Insert screenshot here -->
 
@@ -94,19 +110,40 @@ The data is considered as a series of blocks of size 128 bits. Blocks are number
 
 ### Analysing the Benefits of Encryption
 
+Given script was used to create two virtual disk images (one with encryption enabled and one with disabled)
+
+```sh
+truncate -s 256M ~/zfs_encrypt.img
+truncate -s 256M ~/zfs_noencrypt.img
+
+sudo zpool create zfs_noencrypt ~/zfs_noencrypt.img														#Encryption disabled
+
+sudo zpool create zfs_encrypt ~/zfs_encrypt.img
+echo "12345678" | sudo zfs create -o encryption=on -o keyformat=passphrase zfs_encrypt/encrypted		#Encryption enabled
+```
+
 To quantify the benefits we have used the following workload - 
 ```shell
+fsd=fsd1,anchor=/zfs_encrypt/encrypted,depth=1,width=1,files=8,size=8M		#Creates 8 files each of size 8MB on both the virtual
+fsd=fsd2,anchor=/zfs_noencrypt,depth=1,width=1,files=8,size=8M				#disks. Single directory used
 
+#For each virtual disks creates a disk write workload and a disk read workload
+#Each workload uses files created above
+
+#Workload for encryption enabled virtual disk
+fwd=fwd1_1,fsd=fsd1,operation=write,xfersize=256k,fileio=sequential,fileselect=random,threads=2	#Writes in chunks of 256KB
+fwd=fwd1_2,fsd=fsd1,operation=read,xfersize=256k,fileio=sequential,fileselect=random,threads=2	#Reads in chunks of 256KB
+
+#Workload for encryption disabled virtual disk
+fwd=fwd2_1,fsd=fsd2,operation=write,xfersize=256k,fileio=sequential,fileselect=random,threads=2	
+fwd=fwd2_2,fsd=fsd2,operation=read,xfersize=256k,fileio=sequential,fileselect=random,threads=2
+
+#Run each workload for 10 secs at rate of 100
+rd=rd1_1,fwd=fwd1_1,fwdrate=100,format=yes,elapsed=10,interval=1	
+rd=rd1_2,fwd=fwd1_2,fwdrate=100,format=no,elapsed=10,interval=1
+rd=rd2_1,fwd=fwd2_1,fwdrate=100,format=yes,elapsed=10,interval=1
+rd=rd2_2,fwd=fwd2_2,fwdrate=100,format=no,elapsed=10,interval=1
 ```
-The workload does the following -
-2. Create the directory structure with `depth=2` and `width=2` 
-3. Create 2 files into each directory.
-4. Write `8MB` of data in each file. 
-5. Read the files from the disk  
-6. Delete the directory structure
-
-Then for same workload is run twice, once each on the file system with encryption enabled and encryption disabled ZFS.
-
 <u>The following benefits of encryption were observed in `ZFS`</u> - 
 
 - The space utilised for the same amount of information is less. This can be seen by this metric ...
