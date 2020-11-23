@@ -181,3 +181,10 @@ rd=rd2_2,fwd=fwd2_2,fwdrate=100,format=no,elapsed=10,interval=1
 
 
 
+
+
+|                  | Read Response Time | Read CPU Usage | Write Response Time | Write CPU usage |
+| ---------------- | ------------------ | -------------- | ------------------- | --------------- |
+| Encryption - ON  | 0.616 ms           | 40.2 %         | 17.522 ms           | 79.2 %          |
+| Encryption - OFF | 0.228 ms           | 8.8 %          | 8.958 ms            | 27.9 %          |
+
