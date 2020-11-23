@@ -1,33 +1,33 @@
-<title>Vdbench compressionTestOutput001/config.html</title><pre>
+<title>Vdbench compressionTestOutput005/config.html</title><pre>
 Output from script /home/yogesh/vdbench/vdbench/linux/config.sh: 
 
-Monday 23 November 2020 07:27:25 PM IST
+Monday 23 November 2020 07:55:09 PM IST
 >>>>>uname -a
 Linux yogesh-VirtualBox 5.4.0-52-generic #57-Ubuntu SMP Thu Oct 15 10:57:00 UTC 2020 x86_64 x86_64 x86_64 GNU/Linux
-Monday 23 November 2020 07:27:25 PM IST
+Monday 23 November 2020 07:55:09 PM IST
 >>>>>ifconfig -a
 enp0s3: flags=4163<UP,BROADCAST,RUNNING,MULTICAST>  mtu 1500
         inet 192.168.0.103  netmask 255.255.255.0  broadcast 192.168.0.255
         inet6 fe80::5666:48e7:df60:4a37  prefixlen 64  scopeid 0x20<link>
         ether 08:00:27:70:a9:3b  txqueuelen 1000  (Ethernet)
-        RX packets 24601  bytes 14898887 (14.8 MB)
-        RX errors 0  dropped 15  overruns 0  frame 0
-        TX packets 11780  bytes 1263626 (1.2 MB)
+        RX packets 26702  bytes 15671781 (15.6 MB)
+        RX errors 0  dropped 18  overruns 0  frame 0
+        TX packets 13463  bytes 1570292 (1.5 MB)
         TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
 
 lo: flags=73<UP,LOOPBACK,RUNNING>  mtu 65536
         inet 127.0.0.1  netmask 255.0.0.0
         inet6 ::1  prefixlen 128  scopeid 0x10<host>
         loop  txqueuelen 1000  (Local Loopback)
-        RX packets 14250  bytes 1816418 (1.8 MB)
+        RX packets 19692  bytes 2493565 (2.4 MB)
         RX errors 0  dropped 0  overruns 0  frame 0
-        TX packets 14250  bytes 1816418 (1.8 MB)
+        TX packets 19692  bytes 2493565 (2.4 MB)
         TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
 
-Monday 23 November 2020 07:27:25 PM IST
+Monday 23 November 2020 07:55:09 PM IST
 >>>>>id
 uid=0(root) gid=0(root) groups=0(root)
-Monday 23 November 2020 07:27:25 PM IST
+Monday 23 November 2020 07:55:09 PM IST
 >>>>>mount
 sysfs on /sys type sysfs (rw,nosuid,nodev,noexec,relatime)
 proc on /proc type proc (rw,nosuid,nodev,noexec,relatime)
@@ -75,42 +75,42 @@ tmpfs on /run/user/1000 type tmpfs (rw,nosuid,nodev,relatime,size=203528k,mode=7
 gvfsd-fuse on /run/user/1000/gvfs type fuse.gvfsd-fuse (rw,nosuid,nodev,relatime,user_id=1000,group_id=1000)
 zfs_compress on /zfs_compress type zfs (rw,xattr,noacl)
 zfs_nocompress on /zfs_nocompress type zfs (rw,xattr,noacl)
-Monday 23 November 2020 07:27:25 PM IST
+Monday 23 November 2020 07:55:09 PM IST
 >>>>>memory
 MemTotal:        2035284 kB
-MemFree:          300072 kB
-MemAvailable:     602808 kB
-Buffers:           38728 kB
-Cached:           444912 kB
-SwapCached:         2596 kB
-Active:           720612 kB
-Inactive:         787792 kB
-Active(anon):     491708 kB
-Inactive(anon):   604120 kB
-Active(file):     228904 kB
-Inactive(file):   183672 kB
+MemFree:          580752 kB
+MemAvailable:     957432 kB
+Buffers:           50524 kB
+Cached:           466104 kB
+SwapCached:         4148 kB
+Active:           807960 kB
+Inactive:         428756 kB
+Active(anon):     404016 kB
+Inactive(anon):   346348 kB
+Active(file):     403944 kB
+Inactive(file):    82408 kB
 Unevictable:          96 kB
 Mlocked:              96 kB
 SwapTotal:        752960 kB
-SwapFree:         566848 kB
-Dirty:              1248 kB
+SwapFree:         543552 kB
+Dirty:              1944 kB
 Writeback:             0 kB
-AnonPages:       1023080 kB
-Mapped:           226232 kB
-Shmem:             72176 kB
-KReclaimable:      43412 kB
-Slab:             128308 kB
-SReclaimable:      43412 kB
-SUnreclaim:        84896 kB
-KernelStack:       12072 kB
-PageTables:        17120 kB
+AnonPages:        716880 kB
+Mapped:           185724 kB
+Shmem:             31228 kB
+KReclaimable:      43748 kB
+Slab:             127444 kB
+SReclaimable:      43748 kB
+SUnreclaim:        83696 kB
+KernelStack:       10272 kB
+PageTables:        14060 kB
 NFS_Unstable:          0 kB
 Bounce:                0 kB
 WritebackTmp:          0 kB
 CommitLimit:     1770600 kB
-Committed_AS:    4958096 kB
+Committed_AS:    4406660 kB
 VmallocTotal:   34359738367 kB
-VmallocUsed:       67584 kB
+VmallocUsed:       62340 kB
 VmallocChunk:          0 kB
 Percpu:             1416 kB
 HardwareCorrupted:     0 kB
@@ -127,21 +127,20 @@ HugePages_Rsvd:        0
 HugePages_Surp:        0
 Hugepagesize:       2048 kB
 Hugetlb:               0 kB
-DirectMap4k:      237504 kB
-DirectMap2M:     1859584 kB
+DirectMap4k:      276416 kB
+DirectMap2M:     1820672 kB
               total        used        free      shared  buff/cache   available
-Mem:        2035284     1208036      300072       72176      527176      602892
-Low:        2035284     1735212      300072
+Mem:        2035284      894156      580752       31228      560376      957432
+Low:        2035284     1454532      580752
 High:             0           0           0
-Swap:        752960      186112      566848
-Monday 23 November 2020 07:27:25 PM IST
+Swap:        752960      209408      543552
+Monday 23 November 2020 07:55:09 PM IST
 >>>>>ps -ef | grep -i vdb
-yogesh     17972    1959  0 16:50 ?        00:01:29 /usr/lib/firefox/firefox /home/yogesh/vdbench/vdbench/unencrypted002/summary.html
-root       51091   50883  0 19:27 pts/1    00:00:00 sudo ./vdbench -f compression_test.conf -o compressionTestOutput+
-root       51092   51091  0 19:27 pts/1    00:00:00 /bin/bash ./vdbench -f compression_test.conf -o compressionTestOutput+
-root       51097   51092 48 19:27 pts/1    00:00:01 java -client -Xmx512m -Xms64m -cp ./:./classes:./vdbench.jar Vdb.Vdbmain -f compression_test.conf -o compressionTestOutput+
-root       51141   51097  0 19:27 pts/1    00:00:00 /bin/bash /home/yogesh/vdbench/vdbench/vdbench SlaveJvm -m localhost -n localhost-10-201123-19.27.23.070 -l localhost-0 -p 5570
-root       51145   51141 74 19:27 pts/1    00:00:00 java -client -Xmx1024m -Xms128m -cp /home/yogesh/vdbench/vdbench/:/home/yogesh/vdbench/vdbench/classes:/home/yogesh/vdbench/vdbench/vdbench.jar Vdb.SlaveJvm SlaveJvm -m localhost -n localhost-10-201123-19.27.23.070 -l localhost-0 -p 5570
-root       51192   51097  0 19:27 pts/1    00:00:00 /bin/bash /home/yogesh/vdbench/vdbench/linux/config.sh -o /home/yogesh/vdbench/vdbench/compressionTestOutput001 localhost
-root       51208   51192  0 19:27 pts/1    00:00:00 grep -i vdb
+root       58385   58149  0 19:55 pts/0    00:00:00 sudo ./vdbench -f compression_test.conf -o compressionTestOutput+
+root       58387   58385  0 19:55 pts/0    00:00:00 /bin/bash ./vdbench -f compression_test.conf -o compressionTestOutput+
+root       58389   58387 54 19:55 pts/0    00:00:01 java -client -Xmx512m -Xms64m -cp ./:./classes:./vdbench.jar Vdb.Vdbmain -f compression_test.conf -o compressionTestOutput+
+root       58413   58389  0 19:55 pts/0    00:00:00 /bin/bash /home/yogesh/vdbench/vdbench/vdbench SlaveJvm -m localhost -n localhost-10-201123-19.55.07.634 -l localhost-0 -p 5570
+root       58417   58413 71 19:55 pts/0    00:00:00 java -client -Xmx1024m -Xms128m -cp /home/yogesh/vdbench/vdbench/:/home/yogesh/vdbench/vdbench/classes:/home/yogesh/vdbench/vdbench/vdbench.jar Vdb.SlaveJvm SlaveJvm -m localhost -n localhost-10-201123-19.55.07.634 -l localhost-0 -p 5570
+root       58461   58389  0 19:55 pts/0    00:00:00 /bin/bash /home/yogesh/vdbench/vdbench/linux/config.sh -o /home/yogesh/vdbench/vdbench/compressionTestOutput005 localhost
+root       58477   58461  0 19:55 pts/0    00:00:00 grep -i vdb
 
