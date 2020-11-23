@@ -42,17 +42,24 @@ compratio=2.5
 fsd=fsd1,anchor=/zfs_compress,depth=2,width=2,files=2,size=8M		#Create the directory structure with depth=2 and width=2
 fsd=fsd2,anchor=/zfs_nocompress,depth=2,width=2,files=2,size=8M		#and Create 2 files(8 MB each) into each directory.
 
-#For each virtual disks creates a disk read workload which read files from the disk in chunks of 256KB
+#For each virtual disks creates a disk write workload and a disk read workload
 
 #Workload for compression enabled virtual disk
-fwd=fwd1,fsd=fsd1,operation=read,xfersize=256k,fileio=sequential,fileselect=random,threads=2
+fwd=fwd1_1,fsd=fsd1,operation=write,xfersize=256k,fileio=sequential,fileselect=random,threads=2
+fwd=fwd1_2,fsd=fsd1,operation=read,xfersize=256k,fileio=sequential,fileselect=random,threads=2
 
 #Workload for compression disabled virtual disk
-fwd=fwd2,fsd=fsd2,operation=read,xfersize=256k,fileio=sequential,fileselect=random,threads=2
+fwd=fwd2_1,fsd=fsd2,operation=write,xfersize=256k,fileio=sequential,fileselect=random,threads=2
+fwd=fwd2_2,fsd=fsd2,operation=read,xfersize=256k,fileio=sequential,fileselect=random,threads=2
 
 #Run each workload for 10 secs at rate of 100
-rd=rd1,fwd=fwd1,fwdrate=100,format=yes,elapsed=10,interval=1	#Testing on virtual disk images with compression enabled
-rd=rd2,fwd=fwd2,fwdrate=100,format=yes,elapsed=10,interval=1	#Testing on virtual disk images with compression disabled
+#Testing on virtual disk images with compression enabled
+rd=write_compressed,fwd=fwd1_1,fwdrate=100,format=yes,elapsed=10,interval=1
+rd=read_compressed,fwd=fwd1_2,fwdrate=100,format=no,elapsed=10,interval=1
+
+#Testing on virtual disk images with compression disabled
+rd=write_uncompressed,fwd=fwd2_1,fwdrate=100,format=yes,elapsed=10,interval=1
+rd=read_uncompressed,fwd=fwd2_2,fwdrate=100,format=no,elapsed=10,interval=1
 ```
 <u>The following benefits of compression were observed in `ZFS`</u> - 
 
@@ -148,10 +155,10 @@ fwd=fwd2_1,fsd=fsd2,operation=write,xfersize=256k,fileio=sequential,fileselect=r
 fwd=fwd2_2,fsd=fsd2,operation=read,xfersize=256k,fileio=sequential,fileselect=random,threads=2
 
 #Run each workload for 10 secs at rate of 100
-rd=rd1_1,fwd=fwd1_1,fwdrate=100,format=yes,elapsed=10,interval=1	
-rd=rd1_2,fwd=fwd1_2,fwdrate=100,format=no,elapsed=10,interval=1
-rd=rd2_1,fwd=fwd2_1,fwdrate=100,format=yes,elapsed=10,interval=1
-rd=rd2_2,fwd=fwd2_2,fwdrate=100,format=no,elapsed=10,interval=1
+rd=write_encrypted,fwd=fwd1_1,fwdrate=100,format=yes,elapsed=10,interval=1
+rd=read_encrypted,fwd=fwd1_2,fwdrate=100,format=no,elapsed=10,interval=1
+rd=write_unencrypted,fwd=fwd2_1,fwdrate=100,format=yes,elapsed=10,interval=1
+rd=read_unencrypted,fwd=fwd2_2,fwdrate=100,format=no,elapsed=10,interval=1
 ```
 <u>The following benefits of encryption were observed in `ZFS`</u> - 
 
