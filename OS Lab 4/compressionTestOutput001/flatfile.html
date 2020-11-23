@@ -1,0 +1,128 @@
+<title>Vdbench compressionTestOutput001/flatfile.html</title><pre>
+*
+* 'flatfile.html' contains Vdbench generated information in a column by column ASCII format. 
+* The first line in the file contains a one word 'column header name'; the rest of the file 
+* contains data that belongs to each column. The objective of this file format is to allow 
+* easy transfer of information to a spreadsheet and therefore the creation of performance 
+* charts different from the performance charts that can be created by Sun StorageTek Workload 
+* Analysis Tool (Swat) available for download from Sun.
+* See also 'Selective flatfile parsing' in the documentation. 
+*
+* Run             : Name of run from RD=
+* Interval        : Reporting interval number
+* Xfersize        : data transfer size requested
+* Threads         : number of threads requested
+* Reqrate         : Requested FWD rate
+* Rate            : Requested operations per second
+* Rate_std        : Requested operations per second standard deviation
+* Rate_max        : Requested operations per second max
+* Resp            : Requested response time
+* Resp_std        : Requested response time standard deviation
+* Resp_max        : Requested response time max
+* MB/sec          : Megabytes per second (MB=1024*1024)
+* MB_read         : Megabytes read per second
+* MB_write        : Megabytes written per second
+* Read_rate       : Reads per second
+* Read_rate_std   : Reads per second stddev
+* Read_rate_max   : Reads per second max
+* Read_resp       : Read response time
+* Read_resp_std   : Read response time stddev
+* Read_resp_max   : Read response time max
+* Write_rate      : Writes per second
+* Write_rate_std  : Writes per second stddev
+* Write_rate_max  : Writes per second max
+* Write_resp      : Write response time
+* Write_resp_std  : Write response time stddev
+* Write_resp_max  : Write response time max
+* Mkdir_rate      : Mkdirs per second
+* Mkdir_rate_std  : Mkdirs per second stddev
+* Mkdir_rate_max  : Mkdirs per second max
+* Mkdir_resp      : Mkdir response time
+* Mkdir_resp_std  : Mkdir response time stddev
+* Mkdir_resp_max  : Mkdir response time max
+* Rmdir_rate      : Rmdirs per second
+* Rmdir_rate_std  : Rmdirs per second stddev
+* Rmdir_rate_max  : Rmdirs per second max
+* Rmdir_resp      : Rmdir response time
+* Rmdir_resp_std  : Rmdir response time stddev
+* Rmdir_resp_max  : Rmdir response time max
+* Create_rate     : Creates per second
+* Create_rate_std : Creates per second stddev
+* Create_rate_max : Creates per second max
+* Create_resp     : Create response time
+* Create_resp_std : Create response time stddev
+* Create_resp_max : Create response time max
+* Open_rate       : Opens per second
+* Open_rate_std   : Opens per second stddev
+* Open_rate_max   : Opens per second max
+* Open_resp       : Open response time
+* Open_resp_std   : Open response time stddev
+* Open_resp_max   : Open response time max
+* Close_rate      : Closes per second
+* Close_rate_std  : Closes per second stddev
+* Close_rate_max  : Closes per second max
+* Close_resp      : Close response time
+* Close_resp_std  : Close response time stddev
+* Close_resp_max  : Close response time max
+* Delete_rate     : Deletes per second
+* Delete_rate_std : Deletes per second stddev
+* Delete_rate_max : Deletes per second max
+* Delete_resp     : Delete response time
+* Delete_resp_std : Delete response time stddev
+* Delete_resp_max : Delete response time max
+* Getattr_rate    : Getattrs per second
+* Getattr_rate_std: Getattrs per second stddev
+* Getattr_rate_max: Getattrs per second max
+* Getattr_resp    : Getattr response time
+* Getattr_resp_std: Getattr response time stddev
+* Getattr_resp_max: Getattr response time max
+* Setattr_rate    : Setattrs per second
+* Setattr_rate_std: Setattrs per second stddev
+* Setattr_rate_max: Setattrs per second max
+* Setattr_resp    : Setattr response time
+* Setattr_resp_std: Setattr response time stddev
+* Setattr_resp_max: Setattr response time max
+* Access_rate     : Accesses per second
+* Access_rate_std : Accesses per second stddev
+* Access_rate_max : Accesses per second max
+* Access_resp     : Access response time
+* Access_resp_std : Access response time stddev
+* Access_resp_max : Access response time max
+* Compratio       : Requested compression ratio
+* Dedupratio      : Requested dedup ratio
+* cpu_used        : kstat: cpu% user+sys
+* cpu_user        : kstat: cpu% user
+* cpu_kernel      : kstat: cpu% sys 
+* cpu_wait        : kstat: cpu% wait
+* cpu_idle        : kstat: cpu% idle
+* 'n/a'           : Data not available, or conflicting data. eg. multiple different xfersize parameters used.
+* 
+         tod               timestamp Run Interval Xfersize Threads Reqrate Rate Rate_std Rate_max Resp Resp_std Resp_max MB/sec MB_read MB_write Read_rate Read_rate_std Read_rate_max Read_resp Read_resp_std Read_resp_max Write_rate Write_rate_std Write_rate_max Write_resp Write_resp_std Write_resp_max Mkdir_rate Mkdir_rate_std Mkdir_rate_max Mkdir_resp Mkdir_resp_std Mkdir_resp_max Rmdir_rate Rmdir_rate_std Rmdir_rate_max Rmdir_resp Rmdir_resp_std Rmdir_resp_max Create_rate Create_rate_std Create_rate_max Create_resp Create_resp_std Create_resp_max Open_rate Open_rate_std Open_rate_max Open_resp Open_resp_std Open_resp_max Close_rate Close_rate_std Close_rate_max Close_resp Close_resp_std Close_resp_max Delete_rate Delete_rate_std Delete_rate_max Delete_resp Delete_resp_std Delete_resp_max Getattr_rate Getattr_rate_std Getattr_rate_max Getattr_resp Getattr_resp_std Getattr_resp_max Setattr_rate Setattr_rate_std Setattr_rate_max Setattr_resp Setattr_resp_std Setattr_resp_max Access_rate Access_rate_std Access_rate_max Access_resp Access_resp_std Access_resp_max Compratio Dedupratio cpu_used cpu_user cpu_kernel cpu_wait cpu_idle 
+19:27:28.360 11/23/2020-19:27:28-IST format_for_rd1 1 131072 n/a 9999988 486 0 0 8.2707 32.0976 256.275 60.75 0 60.75 0 0 0 0 0 0 486 0 0 8.2707 32.0976 256.275 6 0 0 1.166 1.4664 3.209 0 0 0 0 0 0 5 0 0 549.9834 159.4056 657.727 8 0 0 100.2099 63.2451 143.269 5 0 0 0.0402 0.0364 0.105 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 2.5 n/a 77.668 49.0119 28.6561 0 0 
+19:27:29.143 11/23/2020-19:27:29-IST format_for_rd1 2 131072 n/a 9999988 26 0 0 25.4508 61.5729 256.275 3.25 0 3.25 0 0 0 0 0 0 26 0 0 25.4508 61.5729 256.275 0 0 0 0 0 3.209 0 0 0 0 0 0 3 0 0 951.2247 119.9756 1089.758 0 0 0 0 0 143.269 3 0 0 0.028 0.001 0.105 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 2.5 n/a 75 53.2609 21.7391 0 0 
+19:27:29.295 11/23/2020-19:27:29-IST format_for_rd1  avg_2-2 131072 n/a 9999988 26 0 26 25.4508 61.5729 256.275 3.25 0 3.25 0 0 0 0 0 0 26 0 26 25.4508 61.5729 256.275 0 0 0 0 0 3.209 0 0 0 0 0 0 3 0 3 951.2247 119.9756 1089.758 0 0 0 0 0 143.269 3 0 3 0.028 0.001 0.105 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 2.5 n/a 75 53.2609 21.7391 0 0 
+19:27:31.111 11/23/2020-19:27:31-IST rd1 1 262144 n/a 9999988 665 0 0 1.74 4.132 41.039 166.25 166.25 0 665 0 0 1.74 4.132 41.039 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 22 0 0 0.3826 0.3236 1.432 20 0 0 0.0395 0.0348 0.183 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 2.5 n/a 87.3711 55.1546 32.2165 0 0 
+19:27:32.336 11/23/2020-19:27:32-IST rd1 2 262144 n/a 9999988 1180 0 0 1.1579 3.5325 71.284 295 295 0 1180 0 0 1.1579 3.5325 71.284 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 37 0 0 2.1284 5.0255 20.573 37 0 0 0.0805 0.1954 1.077 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 2.5 n/a 99.4949 52.0202 47.4747 0 0 
+19:27:33.072 11/23/2020-19:27:33-IST rd1 3 262144 n/a 9999988 849 0 0 1.6455 4.6603 71.284 212.25 212.25 0 849 0 0 1.6455 4.6603 71.284 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 26 0 0 0.5095 0.6796 20.573 26 0 0 0.0309 0.0082 1.077 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 2.5 n/a 100 55.2632 44.7368 0 0 
+19:27:34.064 11/23/2020-19:27:34-IST rd1 4 262144 n/a 9999988 1086 0 0 1.2073 3.5231 71.284 271.5 271.5 0 1086 0 0 1.2073 3.5231 71.284 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 34 0 0 1.0827 3.3909 20.573 35 0 0 0.0303 0.0146 1.077 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 2.5 n/a 99.5 56.5 43 0 0 
+19:27:35.021 11/23/2020-19:27:35-IST rd1 5 262144 n/a 9999988 1249 0 0 1.1195 2.8048 71.284 312.25 312.25 0 1249 0 0 1.1195 2.8048 71.284 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 39 0 0 0.2237 0.2164 20.573 39 0 0 0.0265 0.0054 1.077 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 2.5 n/a 100 58 42 0 0 
+19:27:36.035 11/23/2020-19:27:36-IST rd1 6 262144 n/a 9999988 1313 0 0 0.9641 2.6125 71.284 328.25 328.25 0 1313 0 0 0.9641 2.6125 71.284 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 41 0 0 1.6443 4.4367 23.785 40 0 0 0.0271 0.0084 1.077 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 2.5 n/a 100 52.5253 47.4747 0 0 
+19:27:37.057 11/23/2020-19:27:37-IST rd1 7 262144 n/a 9999988 1386 0 0 1.0059 2.7697 71.284 346.5 346.5 0 1386 0 0 1.0059 2.7697 71.284 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 44 0 0 0.3348 0.6884 23.785 44 0 0 0.0337 0.0376 1.077 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 2.5 n/a 98.5 55.5 43 0 0 
+19:27:38.034 11/23/2020-19:27:38-IST rd1 8 262144 n/a 9999988 1810 0 0 0.7876 1.9708 71.284 452.5 452.5 0 1810 0 0 0.7876 1.9708 71.284 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 56 0 0 0.2625 0.4351 23.785 56 0 0 0.2283 1.2939 9.596 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 2.5 n/a 100 40.5128 59.4872 0 0 
+19:27:39.038 11/23/2020-19:27:39-IST rd1 9 262144 n/a 9999988 1834 0 0 0.7765 1.7362 71.284 458.5 458.5 0 1834 0 0 0.7765 1.7362 71.284 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 58 0 0 0.3963 0.9709 23.785 58 0 0 0.0288 0.018 9.596 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 2.5 n/a 100 36.3636 63.6364 0 0 
+19:27:40.074 11/23/2020-19:27:40-IST rd1 10 262144 n/a 9999988 1719 0 0 0.8188 2.063 71.284 429.75 429.75 0 1719 0 0 0.8188 2.063 71.284 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 53 0 0 1.1155 2.6668 23.785 53 0 0 0.1338 0.5656 9.596 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 2.5 n/a 100 42.3469 57.6531 0 0 
+19:27:40.234 11/23/2020-19:27:40-IST rd1  avg_2-10 262144 n/a 9999988 1380.6667 342.0556 1834 0.9971 2.7874 71.284 345.1667 345.1667 0 1380.6667 342.0556 1834 0.9971 2.7874 71.284 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 43.1111 10.729 58 0.8157 2.6396 23.785 43.1111 10.6589 58 0.0773 0.5384 9.596 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 2.5 n/a 99.7183 49.9155 49.8028 0 0 
+19:27:42.033 11/23/2020-19:27:42-IST format_for_rd2 1 131072 n/a 9999988 408 0 0 9.5023 37.5252 252.355 51 0 51 0 0 0 0 0 0 408 0 0 9.5023 37.5252 252.355 6 0 0 0.0753 0.0343 0.141 0 0 0 0 0 0 2 0 0 607.937 91.0768 672.338 8 0 0 123.4267 122.5355 348.234 2 0 0 0.0265 0.0035 0.029 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 2.5 n/a 83 47.75 35.25 0 0 
+19:27:43.021 11/23/2020-19:27:43-IST format_for_rd2 2 131072 n/a 9999988 104 0 0 23.749 75.3785 519.068 13 0 13 0 0 0 0 0 0 104 0 0 23.749 75.3785 519.068 0 0 0 0 0 0.141 0 0 0 0 0 0 6 0 0 1020.5717 114.1183 1203.518 0 0 0 0 0 348.234 6 0 0 0.031 0.0043 0.038 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 2.5 n/a 75.8454 42.029 33.8164 0 0 
+19:27:43.225 11/23/2020-19:27:43-IST format_for_rd2  avg_2-2 131072 n/a 9999988 104 0 104 23.749 75.3785 519.068 13 0 13 0 0 0 0 0 0 104 0 104 23.749 75.3785 519.068 0 0 0 0 0 0.141 0 0 0 0 0 0 6 0 6 1020.5717 114.1183 1203.518 0 0 0 0 0 348.234 6 0 6 0.031 0.0043 0.038 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 2.5 n/a 75.8454 42.029 33.8164 0 0 
+19:27:46.228 11/23/2020-19:27:46-IST rd2 1 262144 n/a 9999988 3194 0 0 0.3697 1.6271 24.255 798.5 798.5 0 3194 0 0 0.3697 1.6271 24.255 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 101 0 0 0.3989 1.1374 8.893 99 0 0 0.0235 0.015 0.113 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 2.5 n/a 84.8229 58.3474 26.4755 0 0 
+19:27:47.023 11/23/2020-19:27:47-IST rd2 2 262144 n/a 9999988 826 0 0 1.5487 7.8362 123.486 206.5 206.5 0 826 0 0 1.5487 7.8362 123.486 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 25 0 0 2.7996 8.5092 41.194 25 0 0 0.0295 0.0327 0.185 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 2.5 n/a 94.7917 60.9375 33.8542 0 0 
+19:27:48.039 11/23/2020-19:27:48-IST rd2 3 262144 n/a 9999988 3096 0 0 0.4428 2.0339 123.486 774 774 0 3096 0 0 0.4428 2.0339 123.486 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 97 0 0 0.4183 1.4878 41.194 98 0 0 0.0309 0.1059 1.066 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 2.5 n/a 99.505 54.9505 44.5545 0 0 
+19:27:49.020 11/23/2020-19:27:49-IST rd2 4 262144 n/a 9999988 2667 0 0 0.4034 2.1274 123.486 666.75 666.75 0 2667 0 0 0.4034 2.1274 123.486 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 84 0 0 0.4035 1.8853 41.194 83 0 0 0.0252 0.025 1.066 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 2.5 n/a 100 60.2041 39.7959 0 0 
+19:27:50.043 11/23/2020-19:27:50-IST rd2 5 262144 n/a 9999988 5069 0 0 0.2424 0.9165 123.486 1267.25 1267.25 0 5069 0 0 0.2424 0.9165 123.486 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 159 0 0 0.1893 0.4876 41.194 159 0 0 0.0885 0.4898 4.772 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 2.5 n/a 100 40 60 0 0 
+19:27:51.032 11/23/2020-19:27:51-IST rd2 6 262144 n/a 9999988 4570 0 0 0.2948 1.2745 123.486 1142.5 1142.5 0 4570 0 0 0.2948 1.2745 123.486 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 142 0 0 0.2532 1.6693 41.194 142 0 0 0.0805 0.6861 8.196 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 2.5 n/a 97.4874 45.7286 51.7588 0 0 
+19:27:52.024 11/23/2020-19:27:52-IST rd2 7 262144 n/a 9999988 6100 0 0 0.2367 0.8515 123.486 1525 1525 0 6100 0 0 0.2367 0.8515 123.486 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 191 0 0 0.3228 1.766 41.194 191 0 0 0.0684 0.6062 8.399 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 2.5 n/a 99.4872 32.3077 67.1795 0 0 
+19:27:53.012 11/23/2020-19:27:53-IST rd2 8 262144 n/a 9999988 7407 0 0 0.2127 0.6903 123.486 1851.75 1851.75 0 7407 0 0 0.2127 0.6903 123.486 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 231 0 0 0.181 0.5599 41.194 232 0 0 0.0831 0.8313 12.673 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 2.5 n/a 98.995 17.5879 81.407 0 0 
+19:27:54.060 11/23/2020-19:27:54-IST rd2 9 262184 n/a 9999988 6547 0 0 0.225 0.6622 123.486 1637 1637 0 6547 0 0 0.225 0.6622 123.486 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 205 0 0 0.203 0.2847 41.194 204 0 0 0.0343 0.0695 12.673 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 2.5 n/a 98.4925 22.1106 76.3819 0 0 
+19:27:55.096 11/23/2020-19:27:55-IST rd2 10 262144 n/a 9999988 6758 0 0 0.2244 0.6346 123.486 1689.5 1689.5 0 6758 0 0 0.2244 0.6346 123.486 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 211 0 0 0.2332 0.7195 41.194 211 0 0 0.135 1.4459 20.992 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 2.5 n/a 97.4747 16.6667 80.8081 0 0 
+19:27:55.198 11/23/2020-19:27:55-IST rd2  avg_2-10 262150 n/a 9999988 4782.2222 2200.5857 7407 0.286 1.5417 123.486 1195.5833 1195.5833 0 4782.2222 2200.5857 7407 0.286 1.5417 123.486 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 149.4444 68.8479 231 0.301 1.644 41.194 149.4444 68.9223 232 0.0737 0.7601 20.992 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 2.5 n/a 98.4831 38.8764 59.6067 0 0 

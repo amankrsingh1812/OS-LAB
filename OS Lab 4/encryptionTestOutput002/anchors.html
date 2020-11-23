@@ -1,0 +1,44 @@
+<title>Vdbench encryptionTestOutput002/anchors.html</title><pre>
+Anchor status report
+
+(This report will not contain useful info when the 'shared=yes' FSD parameter is used)
+
+                          ......Anchor size....    ......Total size.....    ......Workingset.....    ....Existing ........    ...Opened...             
+                          files     dirs  bytes    files     dirs  bytes    files     dirs  bytes    files     dirs  bytes    files  bytes
+
+
+Link to Run Definitions:         <A HREF="#_1973538135">format_for_rd1_1 For loops: None</A>
+                                 <A HREF="#_1023487453">rd1_1 For loops: None</A>
+                                 <A HREF="#_1865127310">rd1_2 For loops: None</A>
+                                 <A HREF="#_515132998">format_for_rd2_1 For loops: None</A>
+                                 <A HREF="#_1694819250">rd2_1 For loops: None</A>
+                                 <A HREF="#_1365202186">rd2_2 For loops: None</A>
+
+/zfs_encrypt/encrypted        8        1  64.0m        0        0      0        0        0      0        0        0      0        0      0
+
+<a name="_1973538135"></a><i><b>19:19:40.003 Starting RD=format_for_rd1_1</b></i>
+
+/zfs_encrypt/encrypted        8        1  64.0m        0        0      0        0        0      0        8        1  64.0m        8  64.0m
+/zfs_encrypt/encrypted        8        1  64.0m        0        0      0        0        0      0        8        1  64.0m        0      0
+
+<a name="_1023487453"></a><i><b>19:19:43.001 Starting RD=rd1_1; elapsed=10; fwdrate=100; For loops: None</b></i>
+
+/zfs_encrypt/encrypted        8        1  64.0m        0        0      0        0        0      0        8        1  64.0m        8  64.0m
+
+<a name="_1865127310"></a><i><b>19:19:54.002 Starting RD=rd1_2; elapsed=10; fwdrate=100; For loops: None</b></i>
+
+/zfs_encrypt/encrypted        8        1  64.0m        0        0      0        0        0      0        8        1  64.0m        8  64.0m
+/zfs_noencrypt                8        1  64.0m        0        0      0        0        0      0        0        0      0        0      0
+
+<a name="_515132998"></a><i><b>19:20:05.001 Starting RD=format_for_rd2_1</b></i>
+
+/zfs_noencrypt                8        1  64.0m        0        0      0        0        0      0        8        1  64.0m        8  64.0m
+/zfs_noencrypt                8        1  64.0m        0        0      0        0        0      0        8        1  64.0m        0      0
+
+<a name="_1694819250"></a><i><b>19:20:08.001 Starting RD=rd2_1; elapsed=10; fwdrate=100; For loops: None</b></i>
+
+/zfs_noencrypt                8        1  64.0m        0        0      0        0        0      0        8        1  64.0m        7  56.0m
+
+<a name="_1365202186"></a><i><b>19:20:19.000 Starting RD=rd2_2; elapsed=10; fwdrate=100; For loops: None</b></i>
+
+/zfs_noencrypt                8        1  64.0m        0        0      0        0        0      0        8        1  64.0m        8  64.0m

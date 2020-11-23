@@ -106,7 +106,7 @@ The algorithm gives 2 output -
 - `Cipher Text` - This is the encrypted text that the algorithm output
 
 
-The data is considered as a series of blocks of size 128 bits. Blocks are numbered sequentially, and then this block number is combined with an initialization vector and encrypted with the `secret key`. The cipher-text blocks are considered coefficients of a polynomial which is evaluated at key-dependent points, using finite field arithmetic. The result is then XORed with the unencrypted text, to produce the final cypher text. A random/arbitrary `IV` is required for each encryption or else it would result in a less secure cipher-text adn the Message Authentication Code. 
+The data is considered as a series of blocks of size 128 bits. Blocks are numbered sequentially, and then this block number is combined with an initialization vector and encrypted with the `secret key`. The cipher-text blocks are considered coefficients of a polynomial which is evaluated at key-dependent points, using finite field arithmetic. The result is then XORed with the unencrypted text, to produce the final cypher text and the Message Authentication Code. A random/arbitrary `IV` is required for each encryption or else it would result in a less secure cipher-text. 
 
 ### Analysing the Benefits of Encryption
 

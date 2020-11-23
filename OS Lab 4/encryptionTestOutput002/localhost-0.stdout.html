@@ -1,0 +1,262 @@
+<title>Vdbench encryptionTestOutput002/localhost-0.stdout.html</title><pre>
+stdout/stderr for slave=localhost-0
+
+19:19:38.182 19:19:38.179 SlaveJvm execution parameter:  '-m localhost'
+19:19:38.183 19:19:38.183 SlaveJvm execution parameter:  '-n localhost-10-201123-19.19.37.432'
+19:19:38.184 19:19:38.183 SlaveJvm execution parameter:  '-l localhost-0'
+19:19:38.185 19:19:38.185 SlaveJvm execution parameter:  '-p 5570'
+19:19:38.194 19:19:38.185 SlaveJvm positional parameter: 'SlaveJvm'
+19:19:38.395 19:19:38.393 successfully connected to master localhost
+19:19:38.395 19:19:38.395 Connection to localhost using port 5570 successful
+19:19:38.580 19:19:38.579 ticks_per_second: 100
+19:19:38.627 19:19:38.627 execute(): ls -l /zfs_encrypt/encrypted
+19:19:38.634 19:19:38.631 execute(): ls -l /zfs_noencrypt
+19:19:38.648 19:19:38.648 Configuration interpretation took 0.07 seconds
+
+Link to Run Definitions:         <A HREF="#_1973538135">format_for_rd1_1 For loops: None</A>
+                                 <A HREF="#_1023487453">rd1_1 For loops: None</A>
+                                 <A HREF="#_1865127310">rd1_2 For loops: None</A>
+                                 <A HREF="#_515132998">format_for_rd2_1 For loops: None</A>
+                                 <A HREF="#_1694819250">rd2_1 For loops: None</A>
+                                 <A HREF="#_1365202186">rd2_2 For loops: None</A>
+
+19:19:38.959 19:19:38.958 File '/var/log/messages' does not exist. Monitoring bypassed
+19:19:38.960 19:19:38.959 File '/var/log/messages.1' does not exist. Monitoring bypassed
+19:19:38.960 19:19:38.959 Beginning of run setup
+19:19:38.960 19:19:38.959 **********************
+19:19:38.960 
+19:19:38.960 
+19:19:39.037 19:19:39.037 Deleting old file structure.
+19:19:39.039 19:19:39.038 Starting initializeFileAnchor for rd=format_for_rd1_1 For loops: None anchor=fsd1
+19:19:39.042 19:19:39.042 Completed the creation of the directory list for /zfs_encrypt/encrypted: 1 directories.
+19:19:39.044 19:19:39.043 Generated 8 file names; total anchor size: 64m (67,108,864)
+19:19:39.044 19:19:39.043 Writing control file for anchor=/zfs_encrypt/encrypted at start of run.
+19:19:39.076 19:19:39.075 Completed control file for anchor=/zfs_encrypt/encrypted at start of run.  dirs: 1/0 files: 8/0 sizes: 64m/0/0/0
+19:19:39.085 19:19:39.080 Completed initializeFileAnchor for fsd1: 0.04
+19:19:39.108 19:19:39.108 Started 8 threads for fwd=format,fsd=fsd1
+19:19:39.108 19:19:39.108 Started 8 FwgThreads for rd=format_for_rd1_1 For loops: None
+19:19:39.108 19:19:39.108 Waiting for task synchronization
+19:19:39.108 19:19:39.108 task_wait_start_complete: FwgThread OpFormat /zfs_encrypt/encrypted 1
+19:19:39.317 19:19:39.316 Requesting full garbage collection
+19:19:39.318 19:19:39.318 GcTracker: cum:   1 intv:  1 ms:       9 mss:  0.00% Heap_MB max:   911 curr:   123 used:    20 free:   103 
+19:19:39.344 19:19:39.343 GcTracker: cum:   3 intv:  2 ms:      24 mss:  0.00% Heap_MB max:   911 curr:   123 used:    17 free:   106 
+19:19:39.344 19:19:39.343 task_wait_start_complete() end
+
+<a name="_1973538135"></a><i><b>19:19:40.003 Starting RD=format_for_rd1_1</b></i>
+
+19:19:40.005 19:19:40.005 task_run_all(): 9 tasks
+19:19:40.109 19:19:40.109 Message to master: anchor=/zfs_encrypt/encrypted mkdir complete.
+19:19:41.018 19:19:41.018 Message to master: anchor=/zfs_encrypt/encrypted create complete.
+19:19:41.126 19:19:41.125 
+19:19:41.126 19:19:41.125 Miscellaneous statistics:
+19:19:41.126 19:19:41.126 FILE_CREATES        Files created:                                    8
+19:19:41.126 19:19:41.126 DIRECTORY_CREATES   Directories created:                              1
+19:19:41.127 19:19:41.126 WRITE_OPENS         Files opened for write activity:                  8
+19:19:41.127 19:19:41.127 DIR_EXISTS          Directory may not exist (yet):                    4
+19:19:41.127 19:19:41.127 FILE_CLOSES         Close requests:                                   8
+19:19:41.127 19:19:41.127 
+19:19:41.128 19:19:41.128 Java Heap in MB. max:  910.500; current:  123.000; used:   19.908; free:  103.092
+19:19:41.129 19:19:41.128 Maximum native memory allocation:    1,048,576; Current allocation:    1,048,576
+19:19:42.188 19:19:42.188 Writing control file for anchor=/zfs_encrypt/encrypted at end of run.
+19:19:42.229 19:19:42.226 Completed control file for anchor=/zfs_encrypt/encrypted at end of run.  dirs: 1/1 files: 8/8 sizes: 64m/64m/8/64m
+19:19:42.230 19:19:42.228 End of run
+19:19:42.230 19:19:42.228 **********
+19:19:42.230 
+19:19:42.230 
+19:19:42.426 19:19:42.419 Beginning of run setup
+19:19:42.426 19:19:42.419 **********************
+19:19:42.426 
+19:19:42.426 
+19:19:42.502 19:19:42.502 Starting initializeFileAnchor for rd=rd1_1 For loops: None anchor=fsd1
+19:19:42.504 19:19:42.503 Reading control file for anchor=/zfs_encrypt/encrypted
+19:19:42.505 19:19:42.505 Completed reading control file.
+19:19:42.506 19:19:42.506 Completed the creation of the directory list for /zfs_encrypt/encrypted: 1 directories.
+19:19:42.508 19:19:42.507 Generated 8 file names; total anchor size: 64m (67,108,864)
+19:19:42.509 19:19:42.508 Writing control file for anchor=/zfs_encrypt/encrypted at start of run.
+19:19:42.535 19:19:42.534 Completed control file for anchor=/zfs_encrypt/encrypted at start of run.  dirs: 1/1 files: 8/8 sizes: 64m/64m/0/0
+19:19:42.535 19:19:42.534 During anchor creation for anchor=/zfs_encrypt/encrypted there were 1 directories and 8 files
+19:19:42.535 19:19:42.535 Completed initializeFileAnchor for fsd1: 0.03
+19:19:42.540 19:19:42.540 Started 2 threads for fwd=fwd1_1,fsd=fsd1,operation=write
+19:19:42.540 19:19:42.540 Started 2 FwgThreads for rd=rd1_1 For loops: None
+19:19:42.540 19:19:42.540 Waiting for task synchronization
+19:19:42.540 19:19:42.540 task_wait_start_complete: FwgWaiter 1
+19:19:42.743 19:19:42.743 Requesting full garbage collection
+19:19:42.744 19:19:42.744 GcTracker: cum:   3 intv:  0 ms:       0 mss:  0.00% Heap_MB max:   911 curr:   123 used:    24 free:    99 
+19:19:42.771 19:19:42.770 GcTracker: cum:   5 intv:  2 ms:      25 mss:  0.00% Heap_MB max:   911 curr:   123 used:    17 free:   106 
+19:19:42.771 19:19:42.770 task_wait_start_complete() end
+
+<a name="_1023487453"></a><i><b>19:19:43.001 Starting RD=rd1_1; elapsed=10; fwdrate=100; For loops: None</b></i>
+
+19:19:43.004 19:19:43.002 task_run_all(): 3 tasks
+19:19:53.223 19:19:53.221 
+19:19:53.223 19:19:53.221 Miscellaneous statistics:
+19:19:53.223 19:19:53.221 WRITE_OPENS         Files opened for write activity:                 31
+19:19:53.223 19:19:53.221 FILE_BUSY           File busy:                                        7
+19:19:53.223 19:19:53.221 FILE_CLOSES         Close requests:                                  31
+19:19:53.223 19:19:53.221 
+19:19:53.223 19:19:53.222 Java Heap in MB. max:  910.500; current:  123.000; used:   20.604; free:  102.396
+19:19:53.223 19:19:53.222 Maximum native memory allocation:    2,097,152; Current allocation:    1,048,576
+19:19:53.223 19:19:53.222 Writing control file for anchor=/zfs_encrypt/encrypted at end of run.
+19:19:53.240 19:19:53.239 Completed control file for anchor=/zfs_encrypt/encrypted at end of run.  dirs: 1/1 files: 8/8 sizes: 64m/64m/8/64m
+19:19:53.240 19:19:53.239 End of run
+19:19:53.240 19:19:53.239 **********
+19:19:53.240 
+19:19:53.240 
+19:19:53.430 19:19:53.430 Beginning of run setup
+19:19:53.430 19:19:53.430 **********************
+19:19:53.430 
+19:19:53.430 
+19:19:53.474 19:19:53.474 Starting initializeFileAnchor for rd=rd1_2 For loops: None anchor=fsd1
+19:19:53.475 19:19:53.475 Reading control file for anchor=/zfs_encrypt/encrypted
+19:19:53.476 19:19:53.476 Completed reading control file.
+19:19:53.479 19:19:53.478 Completed the creation of the directory list for /zfs_encrypt/encrypted: 1 directories.
+19:19:53.479 19:19:53.479 Generated 8 file names; total anchor size: 64m (67,108,864)
+19:19:53.480 19:19:53.479 No deletes and creates. Control file not cleared.
+19:19:53.480 19:19:53.480 During anchor creation for anchor=/zfs_encrypt/encrypted there were 1 directories and 8 files
+19:19:53.483 19:19:53.482 Completed initializeFileAnchor for fsd1: 0.01
+19:19:53.486 19:19:53.485 Started 2 threads for fwd=fwd1_2,fsd=fsd1,operation=read
+19:19:53.486 19:19:53.486 Started 2 FwgThreads for rd=rd1_2 For loops: None
+19:19:53.486 19:19:53.486 Waiting for task synchronization
+19:19:53.486 19:19:53.486 task_wait_start_complete: FwgThread read /zfs_encrypt/encrypted 1
+19:19:53.689 19:19:53.686 Requesting full garbage collection
+19:19:53.689 19:19:53.689 GcTracker: cum:   5 intv:  0 ms:       0 mss:  0.00% Heap_MB max:   911 curr:   123 used:    24 free:    99 
+19:19:53.732 19:19:53.731 GcTracker: cum:   7 intv:  2 ms:      40 mss:  0.00% Heap_MB max:   911 curr:   123 used:    16 free:   107 
+19:19:53.732 19:19:53.731 task_wait_start_complete() end
+
+<a name="_1865127310"></a><i><b>19:19:54.002 Starting RD=rd1_2; elapsed=10; fwdrate=100; For loops: None</b></i>
+
+19:19:54.003 19:19:54.003 task_run_all(): 3 tasks
+19:20:04.167 19:20:04.165 
+19:20:04.167 19:20:04.166 Miscellaneous statistics:
+19:20:04.167 19:20:04.166 READ_OPENS          Files opened for read activity:                  31
+19:20:04.167 19:20:04.166 FILE_BUSY           File busy:                                        9
+19:20:04.167 19:20:04.167 FILE_CLOSES         Close requests:                                  31
+19:20:04.167 19:20:04.167 
+19:20:04.167 19:20:04.167 Java Heap in MB. max:  910.500; current:  123.000; used:   19.717; free:  103.283
+19:20:04.167 19:20:04.167 Maximum native memory allocation:    1,572,864; Current allocation:      524,288
+19:20:04.169 19:20:04.167 Writing control file for anchor=/zfs_encrypt/encrypted at end of run.
+19:20:04.194 19:20:04.193 Completed control file for anchor=/zfs_encrypt/encrypted at end of run.  dirs: 1/1 files: 8/8 sizes: 64m/64m/8/64m
+19:20:04.194 19:20:04.194 End of run
+19:20:04.194 19:20:04.194 **********
+19:20:04.194 
+19:20:04.194 
+19:20:04.330 19:20:04.330 Beginning of run setup
+19:20:04.330 19:20:04.330 **********************
+19:20:04.330 
+19:20:04.331 
+19:20:04.387 19:20:04.386 Deleting old file structure.
+19:20:04.388 19:20:04.387 Starting initializeFileAnchor for rd=format_for_rd2_1 For loops: None anchor=fsd2
+19:20:04.391 19:20:04.391 Completed the creation of the directory list for /zfs_noencrypt: 1 directories.
+19:20:04.391 19:20:04.391 Generated 8 file names; total anchor size: 64m (67,108,864)
+19:20:04.392 19:20:04.391 Writing control file for anchor=/zfs_noencrypt at start of run.
+19:20:04.417 19:20:04.411 Completed control file for anchor=/zfs_noencrypt at start of run.  dirs: 1/0 files: 8/0 sizes: 64m/0/0/0
+19:20:04.417 19:20:04.412 Completed initializeFileAnchor for fsd2: 0.03
+19:20:04.430 19:20:04.429 Started 8 threads for fwd=format,fsd=fsd2
+19:20:04.430 19:20:04.430 Started 8 FwgThreads for rd=format_for_rd2_1 For loops: None
+19:20:04.430 19:20:04.430 Waiting for task synchronization
+19:20:04.430 19:20:04.430 task_wait_start_complete: FwgThread OpFormat /zfs_noencrypt 1
+19:20:04.631 19:20:04.631 Requesting full garbage collection
+19:20:04.632 19:20:04.631 GcTracker: cum:   7 intv:  0 ms:       0 mss:  0.00% Heap_MB max:   911 curr:   123 used:    25 free:    98 
+19:20:04.660 19:20:04.659 GcTracker: cum:   9 intv:  2 ms:      27 mss:  0.00% Heap_MB max:   911 curr:   123 used:    16 free:   107 
+19:20:04.660 19:20:04.660 task_wait_start_complete() end
+
+<a name="_515132998"></a><i><b>19:20:05.001 Starting RD=format_for_rd2_1</b></i>
+
+19:20:05.003 19:20:05.002 task_run_all(): 9 tasks
+19:20:05.432 19:20:05.432 Message to master: anchor=/zfs_noencrypt mkdir complete.
+19:20:06.408 19:20:06.408 Message to master: anchor=/zfs_noencrypt create complete.
+19:20:06.531 19:20:06.530 
+19:20:06.531 19:20:06.530 Miscellaneous statistics:
+19:20:06.531 19:20:06.530 FILE_CREATES        Files created:                                    8
+19:20:06.531 19:20:06.530 DIRECTORY_CREATES   Directories created:                              1
+19:20:06.531 19:20:06.530 WRITE_OPENS         Files opened for write activity:                  8
+19:20:06.531 19:20:06.530 DIR_EXISTS          Directory may not exist (yet):                    4
+19:20:06.531 19:20:06.530 FILE_CLOSES         Close requests:                                   8
+19:20:06.531 19:20:06.530 
+19:20:06.531 19:20:06.530 Java Heap in MB. max:  910.500; current:  123.000; used:   20.232; free:  102.768
+19:20:06.531 19:20:06.531 Maximum native memory allocation:    1,572,864; Current allocation:    1,048,576
+19:20:07.029 19:20:07.028 Writing control file for anchor=/zfs_noencrypt at end of run.
+19:20:07.087 19:20:07.086 Completed control file for anchor=/zfs_noencrypt at end of run.  dirs: 1/1 files: 8/8 sizes: 64m/64m/8/64m
+19:20:07.089 19:20:07.089 End of run
+19:20:07.091 19:20:07.090 **********
+19:20:07.091 
+19:20:07.091 
+19:20:07.167 19:20:07.166 Beginning of run setup
+19:20:07.167 19:20:07.167 **********************
+19:20:07.167 
+19:20:07.167 
+19:20:07.226 19:20:07.226 Starting initializeFileAnchor for rd=rd2_1 For loops: None anchor=fsd2
+19:20:07.227 19:20:07.227 Reading control file for anchor=/zfs_noencrypt
+19:20:07.228 19:20:07.228 Completed reading control file.
+19:20:07.229 19:20:07.228 Completed the creation of the directory list for /zfs_noencrypt: 1 directories.
+19:20:07.229 19:20:07.229 Generated 8 file names; total anchor size: 64m (67,108,864)
+19:20:07.229 19:20:07.229 Writing control file for anchor=/zfs_noencrypt at start of run.
+19:20:07.250 19:20:07.244 Completed control file for anchor=/zfs_noencrypt at start of run.  dirs: 1/1 files: 8/8 sizes: 64m/64m/0/0
+19:20:07.250 19:20:07.245 During anchor creation for anchor=/zfs_noencrypt there were 1 directories and 8 files
+19:20:07.250 19:20:07.245 Completed initializeFileAnchor for fsd2: 0.02
+19:20:07.255 19:20:07.255 Started 2 threads for fwd=fwd2_1,fsd=fsd2,operation=write
+19:20:07.256 19:20:07.255 Started 2 FwgThreads for rd=rd2_1 For loops: None
+19:20:07.257 19:20:07.256 Waiting for task synchronization
+19:20:07.257 19:20:07.256 task_wait_start_complete: FwgThread write /zfs_noencrypt 1
+19:20:07.457 19:20:07.457 Requesting full garbage collection
+19:20:07.459 19:20:07.457 GcTracker: cum:   9 intv:  0 ms:       0 mss:  0.00% Heap_MB max:   911 curr:   123 used:    25 free:    98 
+19:20:07.480 19:20:07.479 GcTracker: cum:  11 intv:  2 ms:      20 mss:  0.00% Heap_MB max:   911 curr:   123 used:    16 free:   107 
+19:20:07.480 19:20:07.479 task_wait_start_complete() end
+
+<a name="_1694819250"></a><i><b>19:20:08.001 Starting RD=rd2_1; elapsed=10; fwdrate=100; For loops: None</b></i>
+
+19:20:08.004 19:20:08.003 task_run_all(): 3 tasks
+19:20:18.131 19:20:18.130 
+19:20:18.131 19:20:18.130 Miscellaneous statistics:
+19:20:18.131 19:20:18.130 WRITE_OPENS         Files opened for write activity:                 31
+19:20:18.131 19:20:18.130 FILE_BUSY           File busy:                                        6
+19:20:18.131 19:20:18.131 FILE_CLOSES         Close requests:                                  31
+19:20:18.131 19:20:18.131 
+19:20:18.131 19:20:18.131 Java Heap in MB. max:  910.500; current:  123.000; used:   19.429; free:  103.571
+19:20:18.131 19:20:18.131 Maximum native memory allocation:    2,097,152; Current allocation:    1,048,576
+19:20:18.131 19:20:18.131 Writing control file for anchor=/zfs_noencrypt at end of run.
+19:20:18.169 19:20:18.166 Completed control file for anchor=/zfs_noencrypt at end of run.  dirs: 1/1 files: 8/8 sizes: 64m/64m/7/56m
+19:20:18.170 19:20:18.166 End of run
+19:20:18.170 19:20:18.166 **********
+19:20:18.170 
+19:20:18.170 
+19:20:18.286 19:20:18.285 Beginning of run setup
+19:20:18.288 19:20:18.287 **********************
+19:20:18.288 
+19:20:18.288 
+19:20:18.337 19:20:18.334 Starting initializeFileAnchor for rd=rd2_2 For loops: None anchor=fsd2
+19:20:18.337 19:20:18.334 Reading control file for anchor=/zfs_noencrypt
+19:20:18.337 19:20:18.335 Completed reading control file.
+19:20:18.337 19:20:18.335 Completed the creation of the directory list for /zfs_noencrypt: 1 directories.
+19:20:18.340 19:20:18.340 Generated 8 file names; total anchor size: 64m (67,108,864)
+19:20:18.340 19:20:18.340 No deletes and creates. Control file not cleared.
+19:20:18.340 19:20:18.340 During anchor creation for anchor=/zfs_noencrypt there were 1 directories and 8 files
+19:20:18.340 19:20:18.340 Completed initializeFileAnchor for fsd2: 0.01
+19:20:18.347 19:20:18.342 Started 2 threads for fwd=fwd2_2,fsd=fsd2,operation=read
+19:20:18.347 19:20:18.342 Started 2 FwgThreads for rd=rd2_2 For loops: None
+19:20:18.347 19:20:18.343 Waiting for task synchronization
+19:20:18.347 19:20:18.343 task_wait_start_complete: FwgThread read /zfs_noencrypt 1
+19:20:18.550 19:20:18.549 Requesting full garbage collection
+19:20:18.552 19:20:18.550 GcTracker: cum:  11 intv:  0 ms:       0 mss:  0.00% Heap_MB max:   911 curr:   123 used:    23 free:   100 
+19:20:18.580 19:20:18.580 GcTracker: cum:  13 intv:  2 ms:      29 mss:  0.00% Heap_MB max:   911 curr:   123 used:    16 free:   107 
+19:20:18.580 19:20:18.580 task_wait_start_complete() end
+
+<a name="_1365202186"></a><i><b>19:20:19.000 Starting RD=rd2_2; elapsed=10; fwdrate=100; For loops: None</b></i>
+
+19:20:19.002 19:20:19.001 task_run_all(): 3 tasks
+19:20:29.127 19:20:29.126 
+19:20:29.127 19:20:29.126 Miscellaneous statistics:
+19:20:29.127 19:20:29.127 READ_OPENS          Files opened for read activity:                  33
+19:20:29.127 19:20:29.127 FILE_BUSY           File busy:                                        4
+19:20:29.127 19:20:29.127 FILE_CLOSES         Close requests:                                  33
+19:20:29.127 19:20:29.127 
+19:20:29.127 19:20:29.127 Java Heap in MB. max:  910.500; current:  123.000; used:   19.202; free:  103.798
+19:20:29.127 19:20:29.127 Maximum native memory allocation:    1,572,864; Current allocation:      524,288
+19:20:29.128 19:20:29.127 Writing control file for anchor=/zfs_noencrypt at end of run.
+19:20:29.148 19:20:29.148 Completed control file for anchor=/zfs_noencrypt at end of run.  dirs: 1/1 files: 8/8 sizes: 64m/64m/8/64m
+19:20:29.150 19:20:29.148 End of run
+19:20:29.150 19:20:29.148 **********
+19:20:29.150 
+19:20:29.150 
+19:20:29.929 19:20:29.929 Master is requesting slave shutdown
+19:20:29.930 19:20:29.929 Java Heap in MB. max:  910.500; current:  123.000; used:   20.318; free:  102.682
