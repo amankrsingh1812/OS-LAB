@@ -1,6 +1,6 @@
 **Important Note -** Imitation of the following experiments requires an environment with *JRE* support and preferably the latest updated and upgraded kernel support for *ZFS* installation.
 
-## Feature 1
+## Feature 1 - Compression
 
 The first feature that we have chosen is `compression`. It compresses your files on the fly and therefore lets you store more data using limited storage.
 
@@ -59,15 +59,38 @@ Then for same workload is run again, but with compression ON.
 
 <!-- Insert screenshot here -->
 
+**Important Note -** Imitation of the following experiments requires an environment with *JRE* support and preferably the latest updated and upgraded kernel support for *ZFS* installation.
+
+## Feature 2 - Encryption
+
+The first feature that we have chosen is `compression`. It compresses your files on the fly and therefore lets you store more data using limited storage.
+
+And we have chosen 2 instances of `ZFS` file system for evaluation:
+- *with* Encryption
+- *without* Encryption 
+
+### Implementation of Encryption
+In ZFS uses the `AES-GCM 256 bit` authenticated encryption algorithm.
+
+`AES-GCM` or Advanced Encryption Standard with Galois Counter Mode is a block cipher mode of operation that provides high speed authenticated encryption and data integrity. It provides high throughput rates for state-of-the-art, high-speed data transfer without any expensive hardware requirements.
+
+The algorithm takes 4 inputs - 
+- `Secret key` - Secret key is the cipher key of length 256 bit.  
+- `Initialization vector (IV)` - A randomly generated number that is used along with a secret key for data encryption 
+- `Unencrypted text` - This is the plain-text that has to be encrypted
+- `Additional Authenticated Data (AAD)` - It is a string that can be used later on to decrypt the encrypted data. It is like a password which when later given, can decrypt the data
+
+The algorithm gives 2 output - 
+- `Message Authentication Code (MAC or Tag)` - The code is a short piece of information used to authenticate a message. It can be used later on for authentication of the user
+- `Cipher Text` - This is the encrypted text that the algorithm output
 
 
+The data is considered as a series of blocks of size 128 bits. Blocks are numbered sequentially, and then this block number is combined with an Initialization vector and encrypted with the `secret key`. The ciphertext blocks are considered coefficients of a polynomial which is evaluated at key-dependent points, using finite field arithmetic. The result is then XORed with the unencrypted text, to produce the final cypher text. A random/arbitrary `IV` is required for each encryption or else it would result in a less secure cypher-text adn the Message Authentication Code. 
 
 
+### Analysing the Benefits of Encryption
 
-
-
-
-
+### Disadvantages of Encryption
 
 
 
