@@ -102,6 +102,9 @@ rd=read_uncompressed,fwd=fwd2_2,fwdrate=100,format=no,elapsed=10,interval=1
 | Compression - OFF | 65 MB      | 0.261 ms           | 13.5%          | 9.037 ms            | 32.6%           |
 
 
+![](c_du.png)
+![](c_rt.png)
+![](c_cu.png)
 
 
 
@@ -201,3 +204,5 @@ rd=read_unencrypted,fwd=fwd2_2,fwdrate=100,format=no,elapsed=10,interval=1
 | Encryption - ON  | 0.616 ms           | 40.2 %         | 17.522 ms           | 79.2 %          |
 | Encryption - OFF | 0.228 ms           | 8.8 %          | 8.958 ms            | 27.9 %          |
 
+![](e_rt.png)
+![](e_cu.png)
