@@ -37,16 +37,17 @@ The following benefits of compression were observed in `ZFS` -
 ### Disadvantages of compression
 
 - *More CPU usage* - Higher CPU usage was observed during reading and writing with compression ON. This is because 
-- While writing, the data has to be compressed by the ... compression algorithm. This requires more computation power than write without compression
-- While Reading, the data has to be uncompressed. This requires computation power than read without compression
- This can be seen by this metric ... 
+    - While writing, the data has to be compressed by the ... compression algorithm. This requires more computation power than write without compression
+    - While Reading, the data has to be uncompressed. This requires computation power than read without compression
+    This can be seen by this metric ... 
 
-<!-- Insert screenshot here -->
+Insert screenshot here
+
 
 - *More Time* - It takes more time to read and write with compression ON. This is because 
-- While writing, the data has to be compressed by the ... compression algorithm. Some additional time gets utilized for running the algorithm
-- While Reading, the data has to be uncompressed. Some additional time gets utilized for running the algorithm 
- This can be seen by this metric ... 
+    - While writing, the data has to be compressed by the ... compression algorithm. Some additional time gets utilized for running the algorithm
+    - While Reading, the data has to be uncompressed. Some additional time gets utilized for running the algorithm 
+    This can be seen by this metric ... 
 
 <!-- Insert screenshot here -->
 
