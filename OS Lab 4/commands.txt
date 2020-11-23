@@ -1,0 +1,27 @@
+sudo apt install btrfs-progs
+dd if=/dev/zero of=~/fs.img bs=1M count=200
+mkfs.btrfs ./fs.img
+sudo mkdir /mnt/fs
+sudo mount fs.img /mnt/fs
+sudo chown yogesh:yogesh /mnt/fs
+
+head -c 50M < /dev/urandom > file.txt
+cp --reflink file.txt file2.txt
+btrfs filesystem df -h /mnt/fs
+
+
+sudo apt install zfsutils-linux
+truncate -s 64M ~/test.img
+zpool create test ~/test.img
+sudo zfs set compression=lz4 test
+sudo zfs set compression=off test
+sudo zfs set dedup=on test
+sudo zfs set dedup=off test
+
+
+
+truncate -s 256M ~/test.img
+zpool create test ~/test.img
+echo "12345678" | sudo zfs create -o encryption=on -o keyformat=passphrase test/encrypted
+
+// use test/encrypted in anchor in config file
