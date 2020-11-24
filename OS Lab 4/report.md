@@ -180,19 +180,19 @@ rd=read_unencrypted,fwd=fwd2_2,fwdrate=100,format=no,elapsed=10,interval=1
 
 - **Risk of losing data** - If the user forgets his password, data can not be recovered by any means.
 
-- **More CPU usage** - Much higher CPU usage was observed during reading and writing with encryption ON. This is because 
+- **More CPU usage** - With encryption *ON*, CPU usage observed was much higher while reading and writing. This is because 
   
-    - While writing, the data has to be encrypted by the AES-GCM encryption algorithm. This requires much more computation power than write without encryption.
-    - While reading, the data has to be decrypted. This requires much more computation power than read without decryption.
+    - Everytime the data is written, it has to be encrypted by the AES-GCM encryption algorithm. This requires much more computation power than writing without encryption.
+    - Everytime the data is read, it has to be decrypted by the algorithm. This requires much more computation power than reading without encryption.
     
     These effects can be observed in `Read CPU Usage` and `Write CPU usage` in table below.
     
 
 
-- **More Time** - It takes more time to read and write with encryption ON. This is because 
+- **More Time** - With encryption *ON*, running time observed was much higher while reading and writing. This is because 
   
-    - While writing, the data has to be encrypted by the AES-GCM encryption algorithm. Some additional time gets utilised for running the computationally heavy algorithm.
-    - While reading, the data has to be decrypted. Some additional time gets utilised for running the decryption algorithm.
+    - Everytime the data is written, it has to be encrypted by the AES-GCM encryption algorithm. Some additional time gets utilised for running the computationally heavy Encryption algorithm.
+    - Everytime the data is read, it has to be decrypted by the algorithm. Some additional time gets utilised for decrypting the cypher-text.
     
     These  effects can be observed in `Read Response Time` and `Write Response Time` in table below.
 
