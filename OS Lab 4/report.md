@@ -1,5 +1,25 @@
 **Important Note -** Imitation of the following experiments requires an environment with *JRE* support and preferably the latest updated and upgraded kernel support for *ZFS* installation.
 
+
+
+# ZFS
+
+ZFS combines a file system with a volume manager. It began as part of the Sun Microsystems Solaris operating system in 2001 and later acquired by Oracle. However we have used OpenZFS for this lab. In 2013 OpenZFS was founded to coordinate the development of open source ZFS. OpenZFS maintains and manages the core ZFS code, while organizations using ZFS maintain the specific code and validation processes required for ZFS to integrate within their systems. OpenZFS is widely used in Unix-like systems.
+
+ZFS comes with a lot of features like - 
+
+- Pooled storage
+- Copy-on-write
+- Snapshots
+- Data integrity verification and automatic repair
+- RAID-Z
+- Maximum 16 Exabyte file size
+- Maximum 256 Quadrillion Zettabytes storage
+- Compression
+- Encryption
+
+<img src="img/zfs.png" width="600px" />
+
 ## Feature 1 - Compression
 
 The first feature that we have chosen is `compression`. It compresses files on the fly and therefore allowing us to store more data with limited storage.
