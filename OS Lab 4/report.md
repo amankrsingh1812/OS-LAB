@@ -71,7 +71,7 @@ rd=read_uncompressed,fwd=fwd2_2,fwdrate=100,format=no,elapsed=10,interval=1
 
   
 
-  <img src="./Compression_Output.png">
+  <img src="img/./Compression_Output.png">
 
   
 
@@ -98,11 +98,11 @@ rd=read_uncompressed,fwd=fwd2_2,fwdrate=100,format=no,elapsed=10,interval=1
 | Compression - ON  | 26 MB      | 0.576 ms           | 49.3%          | 10.616 ms           | 75.8%           |
 | Compression - OFF | 65 MB      | 0.261 ms           | 13.5%          | 9.037 ms            | 32.6%           |
 
-<img src="c_du.png" width="600px" />
+<img src="img/c_du.png" width="600px" />
 
 <p float="left">
-<img src="c_rt.png" width="600px" />
-<img src="c_cu.png" width="600px" />
+<img src="img/c_rt.png" width="600px" />
+<img src="img/c_cu.png" width="600px" />
 </p>
 
 
@@ -204,7 +204,7 @@ rd=read_unencrypted,fwd=fwd2_2,fwdrate=100,format=no,elapsed=10,interval=1
 | Encryption - OFF | 0.228 ms           | 8.8 %          | 8.958 ms            | 27.9 %          |
 
 <p float="left">
-<img src="e_rt.png" width="600px" />
-<img src="e_cu.png" width="600px" />
+<img src="img/e_rt.png" width="600px" />
+<img src="img/e_cu.png" width="600px" />
 </p>
 
