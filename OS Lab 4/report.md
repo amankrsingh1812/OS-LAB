@@ -1,7 +1,5 @@
 **Important Note -** Imitation of the following experiments requires an environment with *JRE* support and preferably the latest updated and upgraded kernel support for *ZFS* installation.
 
-
-
 # ZFS
 
 ZFS combines a file system with a volume manager. It began as part of the Sun Microsystems Solaris operating system in 2001 and later acquired by Oracle. However we have used OpenZFS for this lab. In 2013 OpenZFS was founded to coordinate the development of open source ZFS. OpenZFS maintains and manages the core ZFS code, while organizations using ZFS maintain the specific code and validation processes required for ZFS to integrate within their systems. OpenZFS is widely used in Unix-like systems.
@@ -89,12 +87,9 @@ rd=read_uncompressed,fwd=fwd2_2,fwdrate=100,format=no,elapsed=10,interval=1
 
 - **Less Data Transmission Time** - Space occupied is inversely proportional to the file transfer time. Hence, compression leads to faster file transfers.
 
-  
+<img src="img/./Compression_Output.png">
 
-  <img src="img/./Compression_Output.png">
-
-  
-
+<div style="page-break-after: always;"></div>
 
 ### Disadvantages of Compression
 
@@ -223,8 +218,9 @@ rd=read_unencrypted,fwd=fwd2_2,fwdrate=100,format=no,elapsed=10,interval=1
 | Encryption - ON  | 0.616 ms           | 40.2 %         | 17.522 ms           | 79.2 %          |
 | Encryption - OFF | 0.228 ms           | 8.8 %          | 8.958 ms            | 27.9 %          |
 
-<p float="left">
+
 <img src="img/e_rt.png" width="600px" />
+
+
 <img src="img/e_cu.png" width="600px" />
-</p>
 
