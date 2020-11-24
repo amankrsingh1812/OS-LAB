@@ -2,27 +2,27 @@
 
 ## Feature 1 - Compression
 
-The first feature that we have chosen is `compression`. It compresses your files on the fly and therefore lets you store more data using limited storage.
+The first feature that we have chosen is `compression`. It compresses files on the fly and therefore allowing us to store more data with limited storage.
 
 And we have chosen 2 instances of `ZFS` file system for evaluation:
-- *with* Compression
-- *without* Compression 
+- with Compression *ON*
+- with Compression *OFF*
 
 ### Implementation of Compression
-ZFS uses the `LZ4` compression algorithm.
+ZFS uses the **LZ4** compression algorithm.
 
-LZ4 is lossless compression algorithm, providing compression speed greater than 500 MB/s per core  (>0.15 Bytes/cycle).  It features an extremely fast decoder, with speed in multiple GB/s per core (~1 Byte/cycle).      
+LZ4 is a lossless compression algorithm, providing compression speed greater than 500 MB/s per core  (>0.15 Bytes/cycle).  It features an extremely fast decoder, with speed in multiple GB/s per core (~1 Byte/cycle).      
 
-- The LZ4 algorithm represents the data as a series of sequences. Each  sequence begins with a one-byte token that is broken into two 4-bit  fields.
-- The first field represents the number of literal bytes that are  to be copied to the output. The second field represents the number of  bytes to copy from the already decoded output buffer (with 0  representing the minimum match length of 4 bytes). 
-- A value of 15 in  either of the bit-fields indicates that the length is larger and there is an extra byte of data that is to be added to the length. 
+- The LZ4 algorithm represents the data as a series of sequences. Each sequence begins with a one-byte token that is broken into two 4-bit fields.
+- The first field represents the number of literal bytes that are to be copied to the output. The second field represents the number of bytes to copy from the already decoded output buffer (with 0 representing the minimum match length of 4 bytes). 
+- A value of 15 in either of the bit-fields indicates that the length is larger and there is an extra byte of data that is to be added to the length. 
 - A value of 255 in these extra bytes indicates that yet another byte to be added. 
-- Hence arbitrary lengths are represented by a series of extra bytes containing the value 255. The string of literals comes after the token and any  extra bytes needed to indicate string length. 
+- Hence arbitrary lengths are represented by a series of extra bytes containing the value 255. The string of literals comes after the token and any extra bytes needed to indicate string length. 
 - This is followed by an  offset that indicates how far back in the output buffer to begin  copying. The extra bytes (if any) of the match-length come at the end of the sequence.
 
-### Analysing the Benefits of Compression
+### Workload for analyzing Compression
 
-**Note -** To run the testing code, use the bash script `test.sh`. This will automatically install the file systems with the appropriate parameters, run `vdbench` on them, and also provide the respective outputs for each instance
+**Note -** Refer to file `README.txt` for instructions describing how to run test code. 
 
 Given script was used to create two virtual disk images (one with compression enabled and one with disabled)
 
@@ -61,13 +61,13 @@ rd=read_compressed,fwd=fwd1_2,fwdrate=100,format=no,elapsed=10,interval=1
 rd=write_uncompressed,fwd=fwd2_1,fwdrate=100,format=yes,elapsed=10,interval=1
 rd=read_uncompressed,fwd=fwd2_2,fwdrate=100,format=no,elapsed=10,interval=1
 ```
-<u>The following benefits of compression were observed in `ZFS`</u> - 
+### Advantages of Compression
 
-- The space utilised for the same amount of information is less. This can be seen by `Disk Usage` column in table and the terminal output below.
+- **Less Space Utilization** - The space utilised for the same amount of data is less. This can be seen by `Disk Usage` column in table and the terminal output below.
 
-- Space occupied is inversely proportional to the cost of storage. Hence, compression leads to lower costs of storage.
+- **Less Cost of Storage** - Space occupied is inversely proportional to the cost of storage. Hence, compression leads to lower costs of storage.
 
-- Space occupied is inversely proportional to the file transfer time. Hence, compression leads to faster file transfers.
+- **Less Data Transmission Time** - Space occupied is inversely proportional to the file transfer time. Hence, compression leads to faster file transfers.
 
   
 
@@ -78,22 +78,19 @@ rd=read_uncompressed,fwd=fwd2_2,fwdrate=100,format=no,elapsed=10,interval=1
 
 ### Disadvantages of Compression
 
-- *More CPU usage* - Higher CPU usage was observed during reading and writing with compression ON. This is because 
+- **More CPU usage** - Higher CPU usage was observed during reading and writing with compression ON. This is because 
+  
     - While writing, the data has to be compressed by the LZ4 compression algorithm. This requires more computation power than write without compression.
     - While reading, the data has to be uncompressed. This requires more computation power than read without compression.
     
     These effects can be observed in `Read CPU Usage` and `Write CPU usage` in table below.
 
-
-
-- *More Time* - It takes more time to read and write with compression ON. This is because 
+- **More Time** - It takes more time to read and write with compression ON. This is because 
 
     - While writing, the data has to be compressed by the LZ4 compression algorithm. Some additional time gets utilised for running the algorithm.
     - While reading, the data has to be uncompressed. Some additional time gets utilised for running the algorithm.
 
     These  effects can be observed in `Read Response Time` and `Write Response Time` in table below.
-
-
 
 
 |                   | Disk Usage | Read Response Time | Read CPU Usage | Write Response Time | Write CPU usage |
@@ -109,18 +106,17 @@ rd=read_uncompressed,fwd=fwd2_2,fwdrate=100,format=no,elapsed=10,interval=1
 </p>
 
 
-**Important Note -** Imitation of the following experiments requires an environment with *JRE* support and preferably the latest updated and upgraded kernel support for *ZFS* installation.
-
 ## Feature 2 - Encryption
 
-The first feature that we have chosen is `compression`. It compresses your files on the fly and therefore lets you store more data using limited storage.
+The second feature that we have chosen is encryption. It enables files to be transparently encrypted to protect confidential data from attackers with physical access to the computer.
 
-And we have chosen 2 instances of `ZFS` file system for evaluation:
-- *with* Encryption
-- *without* Encryption 
+We have chosen 2 instances of `ZFS` file system for evaluation:
+
+- with Encryption *ON*
+- with Encryption *OFF* 
 
 ### Implementation of Encryption
-ZFS uses the `AES-GCM 256 bit` authenticated encryption algorithm.
+ZFS uses the **AES-GCM 256 bit** authenticated encryption algorithm.
 
 `AES-GCM` or Advanced Encryption Standard with Galois Counter Mode is a block cipher mode of operation that provides high speed authenticated encryption and data integrity. It provides high throughput rates for state-of-the-art, high-speed data transfer without any expensive hardware requirements.
 
@@ -135,9 +131,11 @@ The algorithm gives 2 output -
 - `Cipher Text` - This is the encrypted text that the algorithm output
 
 
-The data is considered as a series of blocks of size 128 bits. Blocks are numbered sequentially, and then this block number is combined with an initialization vector and encrypted with the `secret key`. The cipher-text blocks are considered coefficients of a polynomial which is evaluated at key-dependent points, using finite field arithmetic. The result is then XORed with the unencrypted text, to produce the final cypher text and the Message Authentication Code. A random/arbitrary `IV` is required for each encryption or else it would result in a less secure cipher-text. 
+The data is considered as a series of blocks of size 128 bits. Blocks are numbered sequentially, and then this block number is combined with an initialization vector and encrypted with the `Secret key`. The cipher-text blocks are considered coefficients of a polynomial which is evaluated at key-dependent points, using finite field arithmetic. The result is then XORed with the unencrypted text, to produce the final cypher text and the Message Authentication Code. A random or arbitrary `Initialization vector` is required for each encryption or else it would result in a less secure cipher-text. 
 
-### Analysing the Benefits of Encryption
+### Workload for analysing Encryption
+
+**Note -** Refer to file `README.txt` for instructions describing how to run test code. 
 
 Given script was used to create two virtual disk images (one with encryption enabled and one with disabled)
 
@@ -173,25 +171,25 @@ rd=read_encrypted,fwd=fwd1_2,fwdrate=100,format=no,elapsed=10,interval=1
 rd=write_unencrypted,fwd=fwd2_1,fwdrate=100,format=yes,elapsed=10,interval=1
 rd=read_unencrypted,fwd=fwd2_2,fwdrate=100,format=no,elapsed=10,interval=1
 ```
-<u>The following benefits of encryption were observed in `ZFS`</u> - 
+### Advantages of Encryption
 
-- It provides the ability to prevent unauthorized users from accessing certain files  on networks or shared computers.
-- This happens without barring those users from accessing other files on the disk.
-
+- **Prevents Unauthorized Access** - It provides the ability to prevent unauthorized users from accessing certain files on networks or shared computers. This happens without barring those users from accessing other files on the disk.
+- **Enhances Data Integrity** -  Encryption keeps your data safe from alterations, and recipients of the data will be able to see if it has been tampered with.
 
 ### Disadvantages of Encryption
 
-- *More CPU usage* - Much higher CPU usage was observed during reading and writing with encryption ON. This is because 
+- **Risk of losing data** - If the user forgets his password, data can not be recovered by any means.
+
+- **More CPU usage** - Much higher CPU usage was observed during reading and writing with encryption ON. This is because 
   
     - While writing, the data has to be encrypted by the AES-GCM encryption algorithm. This requires much more computation power than write without encryption.
     - While reading, the data has to be decrypted. This requires much more computation power than read without decryption.
     
     These effects can be observed in `Read CPU Usage` and `Write CPU usage` in table below.
     
-    
 
 
-- *More Time* - It takes more time to read and write with encryption ON. This is because 
+- **More Time** - It takes more time to read and write with encryption ON. This is because 
   
     - While writing, the data has to be encrypted by the AES-GCM encryption algorithm. Some additional time gets utilised for running the computationally heavy algorithm.
     - While reading, the data has to be decrypted. Some additional time gets utilised for running the decryption algorithm.
