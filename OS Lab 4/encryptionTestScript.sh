@@ -1,5 +1,3 @@
-sudo apt install zfsutils-linux
-
 truncate -s 256M ~/zfs_encrypt.img
 truncate -s 256M ~/zfs_noencrypt.img
 
