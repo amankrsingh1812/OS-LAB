@@ -113,12 +113,13 @@ rd=read_uncompressed,fwd=fwd2_2,fwdrate=100,format=no,elapsed=10,interval=1
 | Compression - ON  | 26 MB      | 0.576 ms           | 49.3%          | 10.616 ms           | 75.8%           |
 | Compression - OFF | 65 MB      | 0.261 ms           | 13.5%          | 9.037 ms            | 32.6%           |
 
-<img src="img/c_du.png" width="600px" />
+<img src="img/c_du.png" width="550px" />
 
 <p float="left">
-<img src="img/c_rt.png" width="600px" />
-<img src="img/c_cu.png" width="600px" />
+<img src="img/c_rt.png" width="550px" />
+<img src="img/c_cu.png" width="550px" />
 </p>
+
 
 
 ## Feature 2 - Encryption
@@ -218,9 +219,6 @@ rd=read_unencrypted,fwd=fwd2_2,fwdrate=100,format=no,elapsed=10,interval=1
 | Encryption - ON  | 0.616 ms           | 40.2 %         | 17.522 ms           | 79.2 %          |
 | Encryption - OFF | 0.228 ms           | 8.8 %          | 8.958 ms            | 27.9 %          |
 
+<img src="img/e_rt.png" width="550px" />
 
-<img src="img/e_rt.png" width="600px" />
-
-
-<img src="img/e_cu.png" width="600px" />
-
+<img src="img/e_cu.png" width="550px" />

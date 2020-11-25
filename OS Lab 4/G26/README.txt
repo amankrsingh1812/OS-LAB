@@ -11,7 +11,7 @@ Given scripts require zfsutils-linux for running. The installation instructions 
       sudo apt-get install zfsutils-linux
 
 STEPS TO RUN (Provide root user password whenever prompted):
-1. Copy all the .sh and .conf files in vdbench directory
+1. Copy all the .sh and .conf files from code folder in vdbench directory
 2. To install ZFS(with appropriate parameters) and test Compression Feature, Run the command:- 
       bash compressionTestScript.sh
 3. To install ZFS(with appropriate parameters) and test Encryption Feature, Run the command:- 
