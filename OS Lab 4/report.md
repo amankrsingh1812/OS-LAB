@@ -42,7 +42,7 @@ LZ4 is a lossless compression algorithm, providing compression speed greater tha
 
 **Note -** Refer to file `README.txt` for instructions describing how to run test code. 
 
-Given script was used to create two virtual disk images and installs zfs on each of them, one with compression enabled and one with disabled resp.
+Given script was used to create two virtual disk images and installs `ZFS` on each of them, one with compression enabled and one with disabled resp.
 
 ```sh
 truncate -s 256M ~/zfs_compress.img
@@ -152,7 +152,7 @@ The data is considered as a series of blocks of size 128 bits. Blocks are number
 
 **Note -** Refer to file `README.txt` for instructions describing how to run test code. 
 
-Given script was used to create two virtual disk images and install zfs on each of them, one with encryption enabled and one with disabled resp.
+Given script was used to create two virtual disk images and install `ZFS` on each of them, one with encryption enabled and one with disabled resp.
 
 ```sh
 truncate -s 256M ~/zfs_encrypt.img
