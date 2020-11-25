@@ -10,11 +10,14 @@ Given scripts require zfsutils-linux for running. The installation instructions 
 5. Run the command to install zfsutils-linux :- 
       sudo apt-get install zfsutils-linux
 
+For running all the tests, we are creating virtual disks and installing zfs on it. 
+This is to ensure that real machine remains intact during the entire process.
+
 STEPS TO RUN (Provide root user password whenever prompted):
 1. Copy all the .sh and .conf files from "Code" folder to the vdbench directory
-2. To install ZFS(with appropriate parameters) and test Compression Feature, Run the command:- 
+2. To install ZFS(with appropriate parameters) on virtual disk and test Compression Feature, Run the command:- 
       bash compressionTestScript.sh
-3. To install ZFS(with appropriate parameters) and test Encryption Feature, Run the command:- 
+3. To install ZFS(with appropriate parameters) on virtual disk and test Encryption Feature, Run the command:- 
       bash encryptionTestScript.sh
 4. For removing all virtual disks and image files which were created during the test, Run the command:- 
       bash cleanScript.sh
